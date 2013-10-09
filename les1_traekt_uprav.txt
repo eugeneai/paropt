@@ -1,0 +1,291 @@
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251581D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.650309929D+25из них  p= 0.650309929D+25
+   РАЗНОСТЬ=-0.202615082D+15
+ Functionals on           1  iteration
+
+                    vsego fln= 0.162577482D+25из них  p= 0.162577482D+25
+   РАЗНОСТЬ=-0.101307810D+15
+ Functionals on           1  iteration
+
+                    vsego fln= 0.406443704D+24из них  p= 0.406443704D+24
+   РАЗНОСТЬ=-0.506540390D+14
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101610926D+24из них  p= 0.101610926D+24
+   РАЗНОСТЬ=-0.253271369D+14
+ Functionals on           1  iteration
+
+                    vsego fln= 0.254027313D+23из них  p= 0.254027313D+23
+   РАЗНОСТЬ=-0.126636901D+14
+ Functionals on           1  iteration
+
+                    vsego fln= 0.635068274D+22из них  p= 0.635068274D+22
+   РАЗНОСТЬ=-0.633196144D+13
+ Functionals on           1  iteration
+
+                    vsego fln= 0.158767064D+22из них  p= 0.158767065D+22
+   РАЗНОСТЬ=-0.316609869D+13
+ Functionals on           1  iteration
+
+                    vsego fln= 0.396917640D+21из них  p= 0.396917642D+21
+   РАЗНОСТЬ=-0.158316691D+13
+ Functionals on           1  iteration
+
+                    vsego fln= 0.992293997D+20из них  p= 0.992294005D+20
+   РАЗНОСТЬ=-0.791701094D+12
+ Functionals on           1  iteration
+
+                    vsego fln= 0.248073448D+20из них  p= 0.248073452D+20
+   РАЗНОСТЬ=-0.395968172D+12
+ Functionals on           1  iteration
+
+                    vsego fln= 0.620183364D+19из них  p= 0.620183383D+19
+   РАЗНОСТЬ=-0.198101711D+12
+ Functionals on           1  iteration
+
+                    vsego fln= 0.155045713D+19из них  p= 0.155045723D+19
+   РАЗНОСТЬ=-0.991684813D+11
+ Functionals on           1  iteration
+
+                    vsego fln= 0.387613654D+18из них  p= 0.387613703D+18
+   РАЗНОСТЬ=-0.497018664D+11
+ Functionals on           1  iteration
+
+                    vsego fln= 0.969031056D+17из них  p= 0.969031306D+17
+   РАЗНОСТЬ=-0.249685590D+11
+ Functionals on           1  iteration
+
+                    vsego fln= 0.242256296D+17из них  p= 0.242256422D+17
+   РАЗНОСТЬ=-0.126019053D+11
+ Functionals on           1  iteration
+
+                    vsego fln= 0.605634110D+16из них  p= 0.605634752D+16
+   РАЗНОСТЬ=-0.641857844D+10
+ Functionals on           1  iteration
+
+                    vsego fln= 0.151405826D+16из них  p= 0.151406159D+16
+   РАЗНОСТЬ=-0.332691501D+10
+ Functionals on           1  iteration
+
+                    vsego fln= 0.378505796D+15из них  p= 0.378507578D+15
+   РАЗНОСТЬ=-0.178108329D+10
+ Functionals on           1  iteration
+
+                    vsego fln= 0.946251861D+14из них  p= 0.946261943D+14
+   РАЗНОСТЬ=-0.100816744D+10
+ Functionals on           1  iteration
+
+                    vsego fln= 0.236571378D+14из них  p= 0.236577595D+14
+   РАЗНОСТЬ=-0.621709510D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.591536501D+13из них  p= 0.591579349D+13
+   РАЗНОСТЬ=-0.428480545D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.147981245D+13из них  p= 0.148014431D+13
+   РАЗНОСТЬ=-0.331866063D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.370823748D+12из них  p= 0.371107307D+12
+   РАЗНОСТЬ=-0.283558822D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.935213578D+11из них  p= 0.937807630D+11
+   РАЗНОСТЬ=-0.259405202D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.241671627D+11из них  p= 0.244144911D+11
+   РАЗНОСТЬ=-0.247328392D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.681429875D+10из них  p= 0.705558874D+10
+   РАЗНОСТЬ=-0.241289986D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.246892514D+10из них  p= 0.270719592D+10
+   РАЗНОСТЬ=-0.238270784D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.137900293D+10из них  p= 0.161576411D+10
+   РАЗНОСТЬ=-0.236761183D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.110473297D+10из них  p= 0.134073936D+10
+   РАЗНОСТЬ=-0.236006382D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.103527078D+10из них  p= 0.127089977D+10
+   РАЗНОСТЬ=-0.235628982D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101745789D+10из них  p= 0.125289817D+10
+   РАЗНОСТЬ=-0.235440281D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101278099D+10из них  p= 0.124812692D+10
+   РАЗНОСТЬ=-0.235345931D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101149992D+10из них  p= 0.124679868D+10
+   РАЗНОСТЬ=-0.235298756D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101112374D+10из них  p= 0.124639891D+10
+   РАЗНОСТЬ=-0.235275169D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101100173D+10из них  p= 0.124626511D+10
+   РАЗНОСТЬ=-0.235263375D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101095725D+10из них  p= 0.124621473D+10
+   РАЗНОСТЬ=-0.235257478D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101093914D+10из них  p= 0.124619367D+10
+   РАЗНОСТЬ=-0.235254530D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101093112D+10из них  p= 0.124618417D+10
+   РАЗНОСТЬ=-0.235253055D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092737D+10из них  p= 0.124617968D+10
+   РАЗНОСТЬ=-0.235252318D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092555D+10из них  p= 0.124617750D+10
+   РАЗНОСТЬ=-0.235251950D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092466D+10из них  p= 0.124617643D+10
+   РАЗНОСТЬ=-0.235251766D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092422D+10из них  p= 0.124617590D+10
+   РАЗНОСТЬ=-0.235251673D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092400D+10из них  p= 0.124617563D+10
+   РАЗНОСТЬ=-0.235251627D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092389D+10из них  p= 0.124617550D+10
+   РАЗНОСТЬ=-0.235251604D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092384D+10из них  p= 0.124617543D+10
+   РАЗНОСТЬ=-0.235251593D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092381D+10из них  p= 0.124617540D+10
+   РАЗНОСТЬ=-0.235251587D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092380D+10из них  p= 0.124617538D+10
+   РАЗНОСТЬ=-0.235251584D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251583D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251582D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251582D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251581D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251581D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251581D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251581D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251581D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251581D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251581D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251581D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251581D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251581D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251581D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251581D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251581D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251581D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251581D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251581D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251581D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251581D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251581D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251581D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251581D+09
+ Functionals on           1  iteration
+
+                    vsego fln= 0.101092379D+10из них  p= 0.124617537D+10
+   РАЗНОСТЬ=-0.235251581D+09

@@ -79,7 +79,7 @@ C
 C		ВЫЧИСЛЕНИЕ ОЧЕРЕДНОГО ПРИБЛИЖЕНИЯ ФАЗОВОЙ ТРАЕКТОРИИ (vx,sx)
 C	     С НОВЫМ УПРАВЛЕНИЕМ (un1,un2,un3,vn1)
 C        И ОЧЕРЕДНОГО ПРИБЛИЖЕНИЯ МИНИМИЗИРУЕМОГО ФУНКЦИОНАЛА (fln)
-		write(77,*)'ФУНКЦИОНАЛЫ НА', iter,' ИТЕРАЦИИ'
+		write(77,*)'Functionals on', iter,' iteration'
 
 	    call traekt_les(tn,nn,n,n1,m,h1,vx,sx,n2,
      *un3,A,B1,un1,B2,un2,d,l,vn1,gamma,delta,b,c,sf0,fl,fln,rk,p,w1)
@@ -205,5 +205,3 @@ C	ВЫЧИСЛЕНИЕ H_U В МОМЕНТ (N1)
 
 	return
 	end
-
-
