@@ -11,8 +11,28 @@ CCCCCC ПРОЦЕДУРА НАХОЖДЕНИЯ ТРАЕКТОРИИ ПЛОЩАД
      *f(m,1),f1,
      *u1(n1,n),u2(n1,n),v1(n1,n),
      *u3t,u2t(n,1),u1t(n,1),w1(n)
+        integer chk(m,m)
+        real*8 tmp1, tmp2                    ! ,l(m,m)
 CC%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CCC ЗАДАЮТСЯ НАЧАЛЬНЫЕ ДАННЫЕ
+
+        do 123 lki=1,m
+           do 122 lkj=1,m
+              chk(lki,lkj)=0
+              ! l(i,j)=0
+              tmp1=A(lki,lkj)
+              tmp2=A(lkj,lki)
+              if (A(lki,lkj) .ne. -A(lkj,lki)) then
+                 PRINT *,'- C A :',lki,' ', lkj, tmp1, tmp2
+              else
+                 if ((tmp1 .ne. 0.0) .or. (tmp2 .ne. 0.0)) then
+                    PRINT *,'+ C A :',lki,' ', lkj, tmp1, tmp2
+                 endif
+              endif
+ 122       continue
+ 123       continue
+
+
 CC     НАЧАЛЬНОЕ СОСТОЯНИЕ v_0 - мощность Бирюсинского ЛПХ (м3/год)
 	v(1)=2465170.D0
 CC     НАЧАЛЬНОЕ СОСТОЯНИЕ s_0 - площади разных типов и видов леса (га)
