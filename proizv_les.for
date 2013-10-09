@@ -1,10 +1,10 @@
 CC%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	subroutine h_v(t,vt,st,psi1,psi2,n,m,h1,v1t,
-	*c,d,sf0,n2,hv1y,alf,rk)
+     *c,d,sf0,n2,hv1y,alf,rk)
 	real*8 vt,st(m,1),psi1(m,1),psi2,hv1y,alf,h1,t,v1t(n),
-	*d(m,m),c,sf0(n2),r(1,m),r1(1,1),psit(1,m),pr,rk
+     *d(m,m),c,sf0(n2),r(1,m),r1(1,1),psit(1,m),pr,rk
 CCCCCC ЯВНАЯ ПРОИЗВОДНАЯ ГАМИЛЬТОНИАНА с АЛЬФА ПО v(t) - скаляр
-	
+
        call transpon(psi1,m,1,psit)
 
        call umn_matrits(psit,1,m,d,m,r) !PSI'*D=R
@@ -21,10 +21,10 @@ c rk
 	end
 CC%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	subroutine h_s(t,vt,st,psi1,psi2,n,m,h1,u3t,A,l,
- 	*d,sf0,n2,hs1y,alf,rk)
+     *d,sf0,n2,hs1y,alf,rk)
 	real*8 A(m,m),vt,st(m,1),psi1(m,1),psi2,hs1y(m,1),
-	*alf,h1,t,u3t,l(m,m),e(m,m),dv(m,m),lu3(m,m),
-	*d(m,m),sf0(n2),r(m,1),r2(m,m),pr(m,1),r2t(m,m),rk
+     *alf,h1,t,u3t,l(m,m),e(m,m),dv(m,m),lu3(m,m),
+     *d(m,m),sf0(n2),r(m,1),r2(m,m),pr(m,1),r2t(m,m),rk
 CCCCCC ЯВНАЯ ПРОИЗВОДНАЯ ГАМИЛЬТОНИАНА с АЛЬФА ПО st(t)
 	e(1:m,1:m)=0.D0
 	do 2 i=1,m
@@ -47,10 +47,10 @@ c rk
 	end
 CC%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	subroutine h_u1(t,vt,psi1,psi2,n,m,h1,B1,v1t,w1,
- 	*gamma,sf0,n2,hu1y,alf,rk)
+     *gamma,sf0,n2,hu1y,alf,rk)
 	real*8 B1(m,n),gamma(n),vt,psi1(m,1),psi2,hu1y(n,1),
-	*alf,h1,t,v1t(n),w1(n),rk,
-	*sf0(n2),B1t(n,m),r(n,1),r2(n,1),pr,r3(n,1),r4(n,1),pr1
+     *alf,h1,t,v1t(n),w1(n),rk,
+     *sf0(n2),B1t(n,m),r(n,1),r2(n,1),pr,r3(n,1),r4(n,1),pr1
 CCCCCC ЯВНАЯ ПРОИЗВОДНАЯ ГАМИЛЬТОНИАНА с АЛЬФА ПО u1(t)
       call transpon(B1,m,n,B1t)
 	call umn_matrits(B1t,n,m,psi1,1,r)
@@ -80,10 +80,10 @@ c rk
 	end
 CC%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	subroutine h_u3(t,st,psi1,psi2,n,m,h1,u3t,l,b,
- 	*sf0,n2,hu3y,alf,rk)
+     *sf0,n2,hu3y,alf,rk)
 	real*8 st(m,1),psi1(m,1),psi2,hu3y,b,
-	*alf,h1,t,u3t,l(m,m),
-	*sf0(n2),r(m,1),r1(1,1),pr,rt(1,m),rk
+     *alf,h1,t,u3t,l(m,m),
+     *sf0(n2),r(m,1),r1(1,1),pr,rt(1,m),rk
 CCCCCC ЯВНАЯ ПРОИЗВОДНАЯ ГАМИЛЬТОНИАНА с АЛЬФА ПО u3(t) - скаляр
 
 	call umn_matrits(l,m,m,st,1,r)
@@ -103,7 +103,7 @@ C	hu3y=h1*psi2-r1(1,1)-alf*h1*(b+rk*pr/2.D0)
 CC%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	subroutine h_u2(t,psi1,n,m,h1,delta,B2,hu2y,alf,rk)
 	real*8 psi1(m,1),hu2y(n,1),B2(m,n),
-	*alf,h1,t,delta,B2t(n,m),r1(n,1),del1(n,1),rk
+     *alf,h1,t,delta,B2t(n,m),r1(n,1),del1(n,1),rk
 CCCCCC ЯВНАЯ ПРОИЗВОДНАЯ ГАМИЛЬТОНИАНА с АЛЬФА ПО u2(t) - вектор
 
       call transpon(B2,m,n,B2t)

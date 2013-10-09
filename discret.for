@@ -1,16 +1,16 @@
 CC%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-	subroutine traekt_les(tn,nn,n,n1,m,h1,v,s,n2,
-	*u3,A,B1,u1,B2,u2,d,l,v1,gamma,delta,b,c,sf0,fl,fln,rk,p,w1)
+      subroutine traekt_les(tn,nn,n,n1,m,h1,v,s,n2,
+     *u3,A,B1,u1,B2,u2,d,l,v1,gamma,delta,b,c,sf0,fl,fln,rk,p,w1)
 CCCCCC ПРОЦЕДУРА НАХОЖДЕНИЯ ТРАЕКТОРИИ ПЛОЩАДЕЙ ЛЕСА НА {t0,t0+1,...,t1}
 	implicit real*8 (a-h,o-z)
 	real*8 v(n1),s(n1,m),u3(n1),fln,tn,
-	*h1,t,sf0(n2),gamma(n),
-	*vt,st(m,1),fl,
-	*B1(m,n),A(m,m),B2(m,n),d(m,m),l(m,m),rk,p,
-	*f(m,1),f1,
+     *h1,t,sf0(n2),gamma(n),
+     *vt,st(m,1),fl,
+     *B1(m,n),A(m,m),B2(m,n),d(m,m),l(m,m),rk,p,
+     *f(m,1),f1,
      *u1(n1,n),u2(n1,n),v1(n1,n),
-	*u3t,u2t(n,1),u1t(n,1),w1(n)
+     *u3t,u2t(n,1),u1t(n,1),w1(n)
 CC%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CCC ЗАДАЮТСЯ НАЧАЛЬНЫЕ ДАННЫЕ
 CC     НАЧАЛЬНОЕ СОСТОЯНИЕ v_0 - мощность Бирюсинского ЛПХ (м3/год)
@@ -68,7 +68,7 @@ C	  ЦИКЛ ПО УПРАВЛЕНИЮ
 	  do 6 i=1,n
 	  u2t(i,1)=u2(nt,i)	! ЛЕСОПОСАДКИ В ГОД (T)
 6	  u1t(i,1)=u1(nt,i)	! ВЫРУБКИ В ГОД (T)
-C	  КОНЕЦ ЦИКЛА ПО УПРАВЛЕНИЮ	
+C	  КОНЕЦ ЦИКЛА ПО УПРАВЛЕНИЮ
 
 CCCCC   ПРАВАЯ ЧАСТЬ В ГОД (T)
 	  call fp(n,m,vt,st,h1,u3t,A,B1,u1t,B2,u2t,d,l,f1,f)
@@ -84,12 +84,12 @@ CCC ПЕЧАТЬ ТРАЕКТОРИЙ
 CCCCC ПОДСЧЕТ ФУНКЦИОНАЛА
 	call v1_podschet(u1,w1,n1,n,v1)
 	call sfunk(tn,nn,n,m,n1,n2,v,s,h1,u3,u2,
-	*v1,gamma,delta,b,c,sf0,fl,fln,rk,p)
+     *v1,gamma,delta,b,c,sf0,fl,fln,rk,p)
 	return
 	end
 CC%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	subroutine sfunk(tn,nn,n,m,n1,n2,v,s,h1,u3,u2,v1,
- 	*gamma,delta,b,c,sf0,fl,fln,rk,p)
+     *gamma,delta,b,c,sf0,fl,fln,rk,p)
 	implicit real*8 (a-h,o-z)
 
 CCCCCC ПРОЦЕДУРА ПОСЧЕТА ФУНКЦИОНАЛА
@@ -98,8 +98,8 @@ C      fl - штрафной
 	integer n2
 	real*8 t,h1,vt,st(m,1),u3t,gamma(n),delta,b,c,
      *sf0(n2),v1t(n),u2t(n,1),fln,v(n1),s(n1,m),u3(n1),
-	*tn,fl,f0,f0s,g(n2),rk,p,razn,
-	*u2(n1,n),v1(n1,n)
+     *tn,fl,f0,f0s,g(n2),rk,p,razn,
+     *u2(n1,n),v1(n1,n)
 
 	t=tn
 	fln=0.D0
@@ -120,7 +120,7 @@ C задаем управление
 	   call f0p(n,vt,h1,u3t,u2t,v1t,gamma,delta,b,c,f0)
 	   call f0ss(n,m,h1,g,n2,vt,st,v1t,sf0,f0s)
 c	  print *,'f0s',f0s
-C ЗНАЧЕНИЕ ФУНКЦИОНАЛА	
+C ЗНАЧЕНИЕ ФУНКЦИОНАЛА
 	 fln=fln+f0 ! FLN -ОБЫЧНЫЙ ФУНКЦИОНАЛ
 	 fl=fl+f0s ! FL - ШТРАФНОЙ ФУНКЦИОНАЛ
 3	 t=t+h1
@@ -149,9 +149,9 @@ C	integer nn
 CC невязки
 
 C	real*8 h,tn,tk,vt,st(m,1),u3t,v1(n),
-C	*g(n2),v(n1),s(n1,m),u3(n1),t,s0f(n2),
-C	*pnev,sr
- 
+C     *g(n2),v(n1),s(n1,m),u3(n1),t,s0f(n2),
+C     *pnev,sr
+
 C	h=(tk-tn)/dfloat(n1-1)
 C	pnev=0.D0
 C	t=tn

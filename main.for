@@ -1,18 +1,18 @@
 	subroutine main1(tn,tk,n,m,n1,n2,eps,h1,s0,s0f,
-  	*s,v,A,B1,u1,B2,u2,d,l,u3,v1,gamma,delta,b,c,
+     *s,v,A,B1,u1,B2,u2,d,l,u3,v1,gamma,delta,b,c,
      *ffl,nf,alff,alf,fl,fln,iterm,ch)
 
 	implicit real*8 (a-h,o-z)
 C   основная процедура
-	common /sch/s0f(40)
-	common /mfl/sg,beta,imm
-	common /lagran/lag
-	common /chut/hut(201,20)
+C	common /sch/s0f(40)
+C	common /mfl/sg,beta,imm
+C	common /lagran/lag
+C	common /chut/hut(201,20)
 
 	real*8 fl,fln,v(n1),u3(n1),s(n1,m),gamma(n),w(m),w1(n),
      *ffl(nf),alff(nf),B1(m,n),A(m,m),B2(m,n),s0,alf,uu1(201,20),
      *v1(n),u2(n,1),u1(n,1),d(m,m),l(m,m),sf0(n2),pnev0,tn,tk,g(n2),
-	*delta
+     *delta
 	integer it,ch,k,k1
 
 c в теле основной процедуры
@@ -30,12 +30,13 @@ c в теле основной процедуры
 
 ccc пересчет исходной системы
 	call sin101(tn,tk,n,n1,m,h1,v,s,n2,
- 	*u3,A,B1,u1,B2,u2,d,l,v1,gamma,delta,b,c,s0,sf0,fl,fln)
+     *u3,A,B1,u1,B2,u2,d,l,v1,gamma,delta,b,c,s0,sf0,fl,fln)
 	if(iflag.eq.1) goto 99999
 
 c	stop
 CCCC ВЫВОД В ФАЙЛ НАЧАЛЬНОЙ ТРАКТОРИИ И ЗНАЧЕНИЯ ФУНКЦИОНАЛА
-116	format(/,15x,'НАЧАЛЬНАЯ ТРАЕКТОРИЯ УПРАВЛЕНИЕ функционал',/)
+116	format(/,15x,'Start Trajectory Control Functional',/)
+C116	format(/,15x,/)
 	write (77,116)
 	call pechat_x_u_fl(s,v,m,n1,alf,fl,fln)
 
@@ -47,14 +48,14 @@ c	stop
 
 CCCCC ВСПОМОГАТЕЛЬНАЯ СИСТЕМА
 	write (77,104)
-104	format (/,'------------------------------------------------',/)	
+104	format (/,'------------------------------------------------',/)
 
 	call new(pnev0,n2,tn,tk,n1,n,m,v,s,u3,v1)
 	call kowri(sf0,n2,pnev0)
 	mmc=0
 	it=0
 	if(imm.eq.11) write(51,17)
-17	format(10x,'модифицированнная функция Лагранжа')
+17	format(10x,'modified Lagrange function')
 	iflag=0
 	bx=alh
 	af1=0.5D0*bx
@@ -72,8 +73,8 @@ ccc сохранение направления спуска
 60	uu1(i,j)=hut(i,j)
 
 	call sin201(tn,tk,n,n1,m,h1,v,s,n2,
-	*u3,A,B1,B2,u2,d,l,v1,w1,gamma,delta,b,c,s0,sf0,				
-	*psi1alf,psi2alf,alf)
+     *u3,A,B1,B2,u2,d,l,v1,w1,gamma,delta,b,c,s0,sf0,
+     *psi1alf,psi2alf,alf)
 
 c	if(ihgr.ne.1) goto 57
 
@@ -94,19 +95,19 @@ c	if(ihgr.ne.1) goto 57
 	end
 
 	subroutine sin201(tn,tk,n,n1,m,h1,v,s,n2,
-	*u3,A,B1,B2,u2,d,l,v1,w1,gamma,delta,b,c,s0,sf0,				
-	*psi1alf,psi2alf,alf)
+     *u3,A,B1,B2,u2,d,l,v1,w1,gamma,delta,b,c,s0,sf0,
+     *psi1alf,psi2alf,alf)
 CCCCCC ПОДСЧЕТ СОПРЯЖЕННОЙ СИСТЕМЫ PSI И SIGMA
-CC  !!!!!!!!!!!!! НА ВЫХОД - H_uu,f_u,f'_u,H_u,transpon H_xu	
-CCC				
+CC  !!!!!!!!!!!!! НА ВЫХОД - H_uu,f_u,f'_u,H_u,transpon H_xu
+CCC
       IMPLICIT REAL*8 (a-h,o-z)
 	real*8 v(n1),s(n1,m),u3(n1),fln,tn,tk,
-	*h1,t,sf0(n2),v1(n),gamma(n),s0,
-	*vt,st(m,1),u3t,u2(n,1),u1(n,1),fl,
-	*B1(m,n),A(m,m),B2(m,n),d(m,m),l(m,m),
+     *h1,t,sf0(n2),v1(n),gamma(n),s0,
+     *vt,st(m,1),u3t,u2(n,1),u1(n,1),fl,
+     *B1(m,n),A(m,m),B2(m,n),d(m,m),l(m,m),
      *psi1alf(n1,m),psi2alf(n1),w1(n,1),
      *alf,psi1(m,1),psi2,delta,
-	*hu1y(n,1),hu3y,hs1y(m,1),hv1y,hu2y(n,1)
+     *hu1y(n,1),hu3y,hs1y(m,1),hv1y,hu2y(n,1)
 CC МАТРИЦЫ ВСПОМОГАТЕЛЬНЫЕ ПРИ СЧЕТЕ
 	integer k0,ch,h2,nn
 
@@ -142,11 +143,11 @@ C задаем управление
 
 CC ПОДСЧЕТ ПРОИЗВОДНой H_u в момент (t)
 	call hu1p1_yavn(t,vt,psi1,psi2,n,m,h1,B1,v1,w1,
-  	*gamma,sf0,n2,hu1y,alf,s0)
+     *gamma,sf0,n2,hu1y,alf,s0)
 	call hu3p1_yavn(t,st,psi1,psi2,n,m,h1,u3t,l,b,
-  	*sf0,n2,hu3y,alf,s0)
+     *sf0,n2,hu3y,alf,s0)
 	call hu2p1_yavn(t,psi1,psi2,n,m,h1,delta,B2,
- 	*sf0,n2,hu2y,alf,s0)
+     *sf0,n2,hu2y,alf,s0)
 
 	do 11 i=1,n
 11	hut(nt,i)=hu1y(i,1)
@@ -154,12 +155,12 @@ CC ПОДСЧЕТ ПРОИЗВОДНой H_u в момент (t)
 12	hut(nt,i)=hu2y(i-n,1)
 	hut(nt,15)=hu3y
 
-	
+
 ccc подсчет H_x
 	call hvp1_yavn(t,vt,st,psi1,psi2,n,m,h1,v1,
- 	*c,d,sf0,n2,hv1y,alf,s0)
+     *c,d,sf0,n2,hv1y,alf,s0)
 	call hsp1_yavn(t,vt,st,psi1,psi2,n,m,h1,u3t,A,l,
-  	*d,sf0,n2,hs1y,alf,s0)
+     *d,sf0,n2,hs1y,alf,s0)
 
 	psi2=hv1y
 	psi1=hs1y
@@ -173,6 +174,6 @@ C PSI И SIGMA В МОМЕНТ nt
 ccc подсчет  H_u в  конце интервала
 	do 3 i=1,n
 3	hut(n1,i)=hut(n1-1,i)
- 
+
 	return
 	end

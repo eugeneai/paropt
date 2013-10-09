@@ -1,9 +1,9 @@
 	subroutine pechat_func(p,fln)
 CCCC	 ПЕЧАТЬ ФУНКЦИОНАЛОВ
 	real*8 fln,p
-102	format(/,20x,'Значение функционала FLN, p - штрафного')
+102	format(/,20x,'Functional value FLN, p - penalty')
 115	format(2D16.9)
-	write (77,102) 
+	write (77,102)
 	write (77,115) fln,p
 	return
 	end
@@ -53,7 +53,7 @@ C     *Y(I,18),Y(I,19),Y(I,20),Y(I,21)
 CCCCCCC%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	subroutine pechat_soprsys(n,n1,hu1,hu2,hu3,iter)
 	REAL*8 hu1(n1,n),hu2(n1,n),hu3(n1),
-	*hu1tr(n,n1),hu2tr(n,n1)
+     *hu1tr(n,n1),hu2tr(n,n1)
 
 C	ПЕЧАТЬ СОПРЯЖЕННОЙ СИСТЕМЫ
 106    FORMAT(8(D16.9,' '))
@@ -71,8 +71,8 @@ C	ПЕЧАТЬ СОПРЯЖЕННОЙ СИСТЕМЫ
 CCCCCCC%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	subroutine pechat_nachsys(n,m,n1,s,v,u1,u2,u3,v1)
 	real*8	v(n1),u3(n1),s(n1,m),
-	*u1(n1,n),u2(n1,n),v1(n1,n),stt(m,n1),
- 	*u1tr(n,n1),u2tr(n,n1),v1tr(n,n1)
+     *u1(n1,n),u2(n1,n),v1(n1,n),stt(m,n1),
+     *u1tr(n,n1),u2tr(n,n1),v1tr(n,n1)
 
 C ПЕЧАТЬ НАЧАЛЬНОЙ СИСТЕМЫ
 	   call transpon(s,n1,m,stt)
@@ -91,7 +91,7 @@ C ПЕЧАТЬ НАЧАЛЬНОЙ СИСТЕМЫ
 	 write(52,'(A20)')'НАЧАЛЬНОЕ U2'
 	  call PECHATnach(u2tr,n,n1)
 	 write(52,'(A20)')'НАЧАЛЬНОЕ V1'
-	  call PECHATnach(v1tr,n,n1) 
+	  call PECHATnach(v1tr,n,n1)
 	 WRITE (52,'(A20)')'НАЧАЛЬНОЕ U3'
 	  WRITE (52,106) u3(1),u3(2),u3(3),
      *u3(4),u3(5),u3(6),u3(7),u3(8)
@@ -102,8 +102,8 @@ CCCCCCC%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CCCCCCC%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	subroutine pechat_promsys(n,m,n1,s,v,u1,u2,u3,v1,iter)
 	real*8	v(n1),u3(n1),s(n1,m),
-	*u1(n1,n),u2(n1,n),v1(n1,n),stt(m,n1),
- 	*u1tr(n,n1),u2tr(n,n1),v1tr(n,n1)
+     *u1(n1,n),u2(n1,n),v1(n1,n),stt(m,n1),
+     *u1tr(n,n1),u2tr(n,n1),v1tr(n,n1)
 C ПЕЧАТЬ ПРОМЕЖУТОЧНОЙ СИСТЕМЫ
 106   FORMAT(8(D16.9,' '))
 CC ПЕЧАТЬ ТРАЕКТОРИИ
@@ -125,7 +125,7 @@ CC ПЕЧАТЬ УПРАВЛЕНИЙ
 	 write(50,'(A20)')'U2'
 	  call PECHAT11(u2tr,n,n1)
 	 write(50,'(A20)')'V1'
-	  call PECHAT11(v1tr,n,n1) 
+	  call PECHAT11(v1tr,n,n1)
 	 WRITE (50,'(A20,i2)')'U3',iter
 	  WRITE (50, 106) u3(1),u3(2),u3(3),
      *u3(4),u3(5),u3(6),u3(7),u3(8)
