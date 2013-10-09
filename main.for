@@ -3,7 +3,7 @@
      *ffl,nf,alff,alf,fl,fln,iterm,ch)
 
 	implicit real*8 (a-h,o-z)
-C   основная процедура
+C   РѕСЃРЅРѕРІРЅР°СЏ РїСЂРѕС†РµРґСѓСЂР°
 	common /sch/s0f(40)
 	common /mfl/sg,beta,imm
 	common /lagran/lag
@@ -15,7 +15,7 @@ C   основная процедура
 	*delta
 	integer it,ch,k,k1
 
-c в теле основной процедуры
+c РІ С‚РµР»Рµ РѕСЃРЅРѕРІРЅРѕР№ РїСЂРѕС†РµРґСѓСЂС‹
 	beta=0.9D0
 	imm=0
 	if(lag.eq.1) imm=11
@@ -28,14 +28,14 @@ c в теле основной процедуры
 	do 555 i=1,n2
 555	sf0(i)=s0f(i)
 
-ccc пересчет исходной системы
+ccc РїРµСЂРµСЃС‡РµС‚ РёСЃС…РѕРґРЅРѕР№ СЃРёСЃС‚РµРјС‹
 	call sin101(tn,tk,n,n1,m,h1,v,s,n2,
  	*u3,A,B1,u1,B2,u2,d,l,v1,gamma,delta,b,c,s0,sf0,fl,fln)
 	if(iflag.eq.1) goto 99999
 
 c	stop
-CCCC ВЫВОД В ФАЙЛ НАЧАЛЬНОЙ ТРАКТОРИИ И ЗНАЧЕНИЯ ФУНКЦИОНАЛА
-116	format(/,15x,'НАЧАЛЬНАЯ ТРАЕКТОРИЯ УПРАВЛЕНИЕ функционал',/)
+CCCC Р’Р«Р’РћР” Р’ Р¤РђР™Р› РќРђР§РђР›Р¬РќРћР™ РўР РђРљРўРћР РР Р Р—РќРђР§Р•РќРРЇ Р¤РЈРќРљР¦РРћРќРђР›Рђ
+116	format(/,15x,'РќРђР§РђР›Р¬РќРђРЇ РўР РђР•РљРўРћР РРЇ РЈРџР РђР’Р›Р•РќРР• С„СѓРЅРєС†РёРѕРЅР°Р»',/)
 	write (77,116)
 	call pechat_x_u_fl(s,v,m,n1,alf,fl,fln)
 
@@ -45,7 +45,7 @@ c	stop
 	alff(1)=alf
 11	flr=fln
 
-CCCCC ВСПОМОГАТЕЛЬНАЯ СИСТЕМА
+CCCCC Р’РЎРџРћРњРћР“РђРўР•Р›Р¬РќРђРЇ РЎРРЎРўР•РњРђ
 	write (77,104)
 104	format (/,'------------------------------------------------',/)	
 
@@ -54,7 +54,7 @@ CCCCC ВСПОМОГАТЕЛЬНАЯ СИСТЕМА
 	mmc=0
 	it=0
 	if(imm.eq.11) write(51,17)
-17	format(10x,'модифицированнная функция Лагранжа')
+17	format(10x,'РјРѕРґРёС„РёС†РёСЂРѕРІР°РЅРЅРЅР°СЏ С„СѓРЅРєС†РёСЏ Р›Р°РіСЂР°РЅР¶Р°')
 	iflag=0
 	bx=alh
 	af1=0.5D0*bx
@@ -66,7 +66,7 @@ CCCCC ВСПОМОГАТЕЛЬНАЯ СИСТЕМА
 	it=1
 	fp1=1.
 	fp2=fp1
-ccc сохранение направления спуска
+ccc СЃРѕС…СЂР°РЅРµРЅРёРµ РЅР°РїСЂР°РІР»РµРЅРёСЏ СЃРїСѓСЃРєР°
 	do 60 i=1,n1
 	do 60 j=1,15
 60	uu1(i,j)=hut(i,j)
@@ -96,8 +96,8 @@ c	if(ihgr.ne.1) goto 57
 	subroutine sin201(tn,tk,n,n1,m,h1,v,s,n2,
 	*u3,A,B1,B2,u2,d,l,v1,w1,gamma,delta,b,c,s0,sf0,				
 	*psi1alf,psi2alf,alf)
-CCCCCC ПОДСЧЕТ СОПРЯЖЕННОЙ СИСТЕМЫ PSI И SIGMA
-CC  !!!!!!!!!!!!! НА ВЫХОД - H_uu,f_u,f'_u,H_u,transpon H_xu	
+CCCCCC РџРћР”РЎР§Р•Рў РЎРћРџР РЇР–Р•РќРќРћР™ РЎРРЎРўР•РњР« PSI Р SIGMA
+CC  !!!!!!!!!!!!! РќРђ Р’Р«РҐРћР” - H_uu,f_u,f'_u,H_u,transpon H_xu	
 CCC				
       IMPLICIT REAL*8 (a-h,o-z)
 	real*8 v(n1),s(n1,m),u3(n1),fln,tn,tk,
@@ -107,7 +107,7 @@ CCC
      *psi1alf(n1,m),psi2alf(n1),w1(n,1),
      *alf,psi1(m,1),psi2,delta,
 	*hu1y(n,1),hu3y,hs1y(m,1),hv1y,hu2y(n,1)
-CC МАТРИЦЫ ВСПОМОГАТЕЛЬНЫЕ ПРИ СЧЕТЕ
+CC РњРђРўР РР¦Р« Р’РЎРџРћРњРћР“РђРўР•Р›Р¬РќР«Р• РџР Р РЎР§Р•РўР•
 	integer k0,ch,h2,nn
 
 	common /chut/hut(201,20)
@@ -126,21 +126,21 @@ c	q=(tn-tk)/q
 
 
 	t=tk
-CCCCC ЦЕПОЧКА НА {t1,t1-1,...,t0}
+CCCCC Р¦Р•РџРћР§РљРђ РќРђ {t1,t1-1,...,t0}
 	k0=0
 	do 1 nt=nn,1,h2
 	t=t-q
 
-CCCCC ЦЕПОЧКА НА {t,t-h}
+CCCCC Р¦Р•РџРћР§РљРђ РќРђ {t,t-h}
 	vt=v(nt)
 	do 33 i=1,m
 	psi1(i,1)=psi1alf(nt+1,i)
 33	st(i,1)=s(nt,i)
-C задаем управление
+C Р·Р°РґР°РµРј СѓРїСЂР°РІР»РµРЅРёРµ
 	u3t=u3(nt)
 	psi2=psi2alf(nt+1)
 
-CC ПОДСЧЕТ ПРОИЗВОДНой H_u в момент (t)
+CC РџРћР”РЎР§Р•Рў РџР РћРР—Р’РћР”РќРѕР№ H_u РІ РјРѕРјРµРЅС‚ (t)
 	call hu1p1_yavn(t,vt,psi1,psi2,n,m,h1,B1,v1,w1,
   	*gamma,sf0,n2,hu1y,alf,s0)
 	call hu3p1_yavn(t,st,psi1,psi2,n,m,h1,u3t,l,b,
@@ -155,7 +155,7 @@ CC ПОДСЧЕТ ПРОИЗВОДНой H_u в момент (t)
 	hut(nt,15)=hu3y
 
 	
-ccc подсчет H_x
+ccc РїРѕРґСЃС‡РµС‚ H_x
 	call hvp1_yavn(t,vt,st,psi1,psi2,n,m,h1,v1,
  	*c,d,sf0,n2,hv1y,alf,s0)
 	call hsp1_yavn(t,vt,st,psi1,psi2,n,m,h1,u3t,A,l,
@@ -164,13 +164,13 @@ ccc подсчет H_x
 	psi2=hv1y
 	psi1=hs1y
 
-C PSI И SIGMA В МОМЕНТ nt
+C PSI Р SIGMA Р’ РњРћРњР•РќРў nt
 	do 5 i=1,m
 5	 psi1alf(nt,i)=psi1(i,1)
 	psi2alf(nt)=psi2
 
 1	continue
-ccc подсчет  H_u в  конце интервала
+ccc РїРѕРґСЃС‡РµС‚  H_u РІ  РєРѕРЅС†Рµ РёРЅС‚РµСЂРІР°Р»Р°
 	do 3 i=1,n
 3	hut(n1,i)=hut(n1-1,i)
  
