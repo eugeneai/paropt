@@ -5,7 +5,9 @@ from functools import reduce
 from pprint import pprint
 import itertools
 
-DEBUG = 20
+#DEBUG = 20
+DEBUG = 5
+Ht = 0.001
 
 class ParOptModel(object):
     """
@@ -62,10 +64,14 @@ class ParOptModel(object):
         # rt.reverse()
         j=len(tt)-1
         p=psie
+
         while j>=0:
             i=tt[j]
-            p = dot(transpose(p), _dfdx[i]) - alpha*_df0dx[i]
-            psi.append(p)
+            pp=p
+            pt = transpose(p)
+            pn = dot(pt, _dfdx[i]) - alpha*_df0dx[i]
+            psi.append(pn)
+            p=pn
             j-=1
         # ----
 
@@ -87,7 +93,8 @@ class ParOptModel(object):
             print ("dfdu:", len(_dfdu))
             print ("psi:", len(p))
             print ("df0du", len(_df0du))
-        return dot(transpose(p),_dfdu) +_df0du # FIXME Check dot operation.
+        _s=[dot(transpose(Psi[i]),_dfdu[i]) for i in range(len(X))]
+        return array(_s) + _df0du # FIXME Check dot operation.
 
     def start_control(self):
         raise RuntimeError("should be implemented by subclass")
@@ -102,27 +109,28 @@ class ParOptProcess(object):
         """
         self.model=model
         self.alpha=1.0
-        self.beta=1.0
+        self.beta=0.1
 
-    def optimize(self, t, eps=0.001):
+    def optimize(self, t, eps=0.001, iters=1000):
         Up=self.model.start_control()
         Xp=self.trajectory(Up)
         Ip=self.model.I(Xp,Up)
 
-        k=1
+        #import pdb; pdb.set_trace()
+        it = 1
         while True:
-            (Xn, Un) = self.improve(t, Xp,Up)
-            #import pdb; pdb.set_trace()
+            (Xn, Un, Psi) = self.improve(t, Xp, Up)
             In = self.model.I(Xn, Un)
             dI = Ip-In
             print ("DI:", dI)
-            print ("Xn:", Xn)
-            print ("Un:", Un)
+            #print ("Xn:", Xn)
+            #print ("Un:", Un)
             if abs(dI)<eps:
-                return In
-            if k>10:
-                return In, "Nonoptimal"
-            k+=1
+                return In, Xn, Un, Psi, it, "Opt"
+            if iters<=0:
+                return In, Xn, Un, Psi, it, "Nonoptimal"
+            iters-=1
+            it+=1
             Xp, Up, Ip = Xn, Un, In
 
         raise RuntimeError("this should be not reached")
@@ -143,10 +151,12 @@ class ParOptProcess(object):
 
     def improve(self, t, X, U):
         Psi=self.model.Psi(t, X, U, self.alpha)
-        dHdu=self.model.dHdu(t, X, U, Psi)
-        Un = U + dHdu * self.beta
+        _dHdu=self.model.dHdu(t, X, U, Psi)
+        Un = U + _dHdu * self.beta
 
-        return self.model.f(t, X[0], Un), Un
+        #import pdb; pdb.set_trace()
+
+        return self.trajectory(Un), Un, Psi
 
 
 
@@ -212,9 +222,10 @@ class LinModel1(ParOptModel):
     """
     def __init__(self):
         X0=array([1.0])
+        self.h = Ht
         # self.h = 0.001
-        self.h = 0.2
-        self.eps = 0.001
+        # self.h = 0.2
+        self.eps = 0.00001
         self.num = int((1.0-0.0) / self.h)
         self.T = linspace(
             start=0.0,
@@ -272,6 +283,25 @@ class LinModel1(ParOptModel):
         """
         return 2*self.h*U
 
+class LinModel2(LinModel1):
+    """
+    """
+
+    def f0(self, t, x, u, dt=1):
+        """ X ia a vector of the previous state
+        """
+        return self.h * (x*x) #reduce(lambda a, e: a+e[0]**2+e[1]**2, list(zip(X,U))[:-1], 0.0)
+
+    def dfdu(self, t, X, U, dt=1):
+        """ X ia a vector of the previous state
+        """
+        return array([array([0.0]) for t in self.t])
+
+    def start_control(self):
+        U = [array([0.1]) for t in self.t]
+        return array(U)
+
+
 def test1():
     m = TestModel1()
 
@@ -284,7 +314,11 @@ def test2():
 
     ip=ParOptProcess(m)
     print (ip.model.F)
-    print ("Result is:", ip.optimize(m.t, eps=m.eps))
+    I, X, U, Psi, it, _ = ip.optimize(m.t, eps=m.eps, iters=200)
+    print ("Result is:", I, "in", it, "iters")
+    print ("X,     U,    Psi")
+    for x,u,p in zip(X,U,Psi):
+        print (x,u,p)
 
 
 if __name__=="__main__":
