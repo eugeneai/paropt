@@ -7,7 +7,7 @@ import itertools
 
 #DEBUG = 20
 DEBUG = 5
-Ht = 0.001
+Ht = 0.01
 
 class ParOptModel(object):
     """
@@ -104,12 +104,12 @@ class ParOptProcess(object):
     """This calss corresponds to a optimizational model.
     """
 
-    def __init__(self, model):
+    def __init__(self, model, alpha=1.0, beta=1.0):
         """
         """
         self.model=model
-        self.alpha=1.0
-        self.beta=0.1
+        self.alpha=alpha
+        self.beta=beta
 
     def optimize(self, t, eps=0.001, iters=1000):
         Up=self.model.start_control()
@@ -119,19 +119,27 @@ class ParOptProcess(object):
         #import pdb; pdb.set_trace()
         it = 1
         while True:
-            (Xn, Un, Psi) = self.improve(t, Xp, Up)
-            In = self.model.I(Xn, Un)
-            dI = Ip-In
-            print ("DI:", dI)
-            #print ("Xn:", Xn)
-            #print ("Un:", Un)
-            if abs(dI)<eps:
-                return In, Xn, Un, Psi, it, "Opt"
-            if iters<=0:
-                return In, Xn, Un, Psi, it, "Nonoptimal"
-            iters-=1
-            it+=1
-            Xp, Up, Ip = Xn, Un, In
+            beta = self.beta
+            while True:
+                (Xn, Un, Psi) = self.improve(t, Xp, Up)
+                In = self.model.I(Xn, Un)
+                dI = Ip-In
+                print ("DI:", dI)
+                #print ("Xn:", Xn)
+                #print ("Un:", Un)
+                if abs(dI)<eps:
+                    return In, Xn, Un, Psi, it, "Opt"
+                if iters<=0:
+                    return In, Xn, Un, Psi, it, "Nonoptimal"
+                iters-=1
+                it+=1
+
+                if In>=Ip:
+                    beta/=2
+                    continue
+                else:
+                    Xp, Up, Ip = Xn, Un, In
+                    break
 
         raise RuntimeError("this should be not reached")
 
@@ -225,7 +233,7 @@ class LinModel1(ParOptModel):
         self.h = Ht
         # self.h = 0.001
         # self.h = 0.2
-        self.eps = 0.00001
+        self.eps = 0.001
         self.num = int((1.0-0.0) / self.h)
         self.T = linspace(
             start=0.0,
@@ -314,11 +322,12 @@ def test2():
 
     ip=ParOptProcess(m)
     print (ip.model.F)
-    I, X, U, Psi, it, _ = ip.optimize(m.t, eps=m.eps, iters=200)
-    print ("Result is:", I, "in", it, "iters")
+    I, X, U, Psi, it, _ = ip.optimize(m.t, eps=m.eps, iters=2000)
     print ("X,     U,    Psi")
     for x,u,p in zip(X,U,Psi):
         print (x,u,p)
+    print ("Result is:", I, "in", it, "iters")
+    print (_)
 
 
 if __name__=="__main__":
