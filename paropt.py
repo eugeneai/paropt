@@ -7,11 +7,10 @@ class ParOptModel(object):
     """
     """
 
-    def __init__(self, X0, A):
+    def __init__(self, X0):
         """
         """
         self.X0=X0
-        self.A=A
 
     def I(self, X, U):
         def _add(acc, t):
@@ -128,7 +127,7 @@ class TestModel1(ParOptModel):
     def __init__(self):
         X0=array([0.0, 0.0])
         A=array([0.0, 1.0])
-        ParOptModel.__init__(self, X0=X0, A=A)
+        ParOptModel.__init__(self, X0=X0)
 
     def start_control(self):
         return [
@@ -176,8 +175,77 @@ class TestModel1(ParOptModel):
         """
         return 0.0
 
+class LinModel1(ParOptModel):
+    """Possibly simple linear test model.
+    """
+    def __init__(self):
+        X0=array([1.0])
+        self.h = 0.001
+        self.eps = 0.001
+        self.num = int((1.0-0.0) / self.h)
+        self.T = linspace(
+            start=0.0,
+            stop=1.0,
+            num=self.num
+        )
+        self.t = arange(len(self.T))
+        ParOptModel.__init__(self, X0=X0)
+
+    def start_control(self):
+        return [array([0.0]) for t in self.t]
+
+    def F(self, x):
+        """ X and U are lists of vectors (arrays)
+        """
+        return 0.0
+
+    def f(self, t, x0, U, dt=1):
+        """ X ia a vector of the previous state
+        """
+        X=[x0]
+        for t in self.t[1:]:
+            X.append(X[t-1]+h*U[t-1])
+        return X
+
+    def f0(self, t, X, U, dt=1):
+        """ X ia a vector of the previous state
+        """
+        return self.h * reduce(lambda a, (x,u): a+x*x+u*u, zip(X,U)[:-1], 0.0)
+
+    def dFdx(self, x):
+        """ X and U are lists of vectors (arrays)
+        """ # [[1..],[.1.],[..1]] # FIXME
+        return 0.0
+
+    def dfdx(self, t, X, U, dt=1):
+        """ X ia a vector of the previous state
+        """
+        return [array([1.0]) for t in self.t]
+
+    def df0dx(self, t, X, U, dt=1):
+        """ X ia a vector of the previous state
+        """
+        return 2*self.h*X
+
+    def dfdu(self, t, X, U, dt=1):
+        """ X ia a vector of the previous state
+        """
+        return [array([self.h]) for t in self.t]
+
+    def df0du(self, t, X, U, dt=1):
+        """ X ia a vector of the previous state
+        """
+        return 2*self.h*U
+
 def test1():
     m = TestModel1()
+
+    ip=ParOptProcess(m)
+    print (ip.model.F)
+    print ("Result is:", ip.optimize())
+
+def test2():
+    m = LinModel1()
 
     ip=ParOptProcess(m)
     print (ip.model.F)
@@ -186,7 +254,7 @@ def test1():
 
 if __name__=="__main__":
     print ("")
-    test1()
+    test2()
     print ("ok")
     quit()
 else:
