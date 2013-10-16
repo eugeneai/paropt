@@ -66,7 +66,7 @@ class ParOptModel(object):
         _df0du=self.df0du(t, X, U)
         _dfdu =self.dfdu (t, X, U)
         p=Psi
-        return _dfdu.dot(p)+_df0du
+        return _dfdu.dot(p)+_df0du # FIXME Chack dot operation.
 
     def start_control(self):
         raise RuntimeError("should be implemented by subclass")
