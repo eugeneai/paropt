@@ -29,7 +29,7 @@ class ParOptModel(object):
     def f(self, t, x0, U, dt=1):
         raise RuntimeError("should be implemented by subclass")
 
-    def f0(self, t, X, U, dt=1):
+    def f0(self, t, x, u, dt=1):
         raise RuntimeError("should be implemented by subclass")
 
     def dFdx(self, xe):
@@ -50,6 +50,7 @@ class ParOptModel(object):
         raise RuntimeError("should be implemented by subclass")
 
     def Psi(self, t, X, U, alpha):
+
         psie = -self.dFdx(X[-1])
         psi=[psie]
         _df0dx=self.df0dx(t, X, U) # last element is useless
@@ -63,13 +64,20 @@ class ParOptModel(object):
         p=psie
         while j>=0:
             i=tt[j]
-            p = _dfdx[i].dot(p) - alpha*_df0dx[i]
+            p = dot(transpose(p), _dfdx[i]) - alpha*_df0dx[i]
             psi.append(p)
             j-=1
         # ----
 
-        psi.reverse()
-        return array(psi)
+
+        #import pdb; pdb.set_trace()
+        psi=array(psi)
+        #lp=len(psi)
+        #for i in range(len(psi) / 2 ):
+        #    p=psi[i]
+        #    psi[i]=psi[lp-i-1]
+        #    psi[lp-i-1]=p
+        return psi[::-1]
 
     def dHdu(self, t, X, U, Psi):
         _df0du=self.df0du(t, X, U)
@@ -100,12 +108,21 @@ class ParOptProcess(object):
         Up=self.model.start_control()
         Xp=self.trajectory(Up)
         Ip=self.model.I(Xp,Up)
+
+        k=1
         while True:
             (Xn, Un) = self.improve(t, Xp,Up)
+            #import pdb; pdb.set_trace()
             In = self.model.I(Xn, Un)
             dI = Ip-In
+            print ("DI:", dI)
+            print ("Xn:", Xn)
+            print ("Un:", Un)
             if abs(dI)<eps:
                 return In
+            if k>10:
+                return In, "Nonoptimal"
+            k+=1
             Xp, Up, Ip = Xn, Un, In
 
         raise RuntimeError("this should be not reached")
@@ -160,7 +177,7 @@ class TestModel1(ParOptModel):
         dwdad
         return [x0 for i in t]
 
-    def f0(self, t, X, U, dt=1):
+    def f0(self, t, x, u, dt=1):
         """ X ia a vector of the previous state
         """
         return 0.1
@@ -195,7 +212,8 @@ class LinModel1(ParOptModel):
     """
     def __init__(self):
         X0=array([1.0])
-        self.h = 0.001
+        # self.h = 0.001
+        self.h = 0.2
         self.eps = 0.001
         self.num = int((1.0-0.0) / self.h)
         self.T = linspace(
@@ -221,10 +239,10 @@ class LinModel1(ParOptModel):
         return x+self.h*u
 
 
-    def f0(self, t, X, U, dt=1):
+    def f0(self, t, x, u, dt=1):
         """ X ia a vector of the previous state
         """
-        return self.h * reduce(lambda a, e: a+e[0]**2+e[1]**2, list(zip(X,U))[:-1], 0.0)
+        return self.h * (x*x+u*u) #reduce(lambda a, e: a+e[0]**2+e[1]**2, list(zip(X,U))[:-1], 0.0)
 
     def dFdx(self, x):
         """ X and U are lists of vectors (arrays)
