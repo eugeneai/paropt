@@ -233,7 +233,6 @@ class LinModel1(ParOptModel):
         self.h = Ht
         # self.h = 0.001
         # self.h = 0.2
-        self.eps = 0.001
         self.num = int((1.0-0.0) / self.h)
         self.T = linspace(
             start=0.0,
@@ -322,7 +321,7 @@ def test2():
 
     ip=ParOptProcess(m)
     print (ip.model.F)
-    I, X, U, Psi, it, _ = ip.optimize(m.t, eps=m.eps, iters=2000)
+    I, X, U, Psi, it, _ = ip.optimize(m.t, eps=0.001, iters=2000)
     print ("X,     U,    Psi")
     for x,u,p in zip(X,U,Psi):
         print (x,u,p)
