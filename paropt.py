@@ -175,7 +175,7 @@ class TestModel1(ParOptModel):
     """
     def __init__(self):
         X0=array([0.0, 0.0])
-        A=array([0.0, 1.0])
+        self.t = arange(2)
         ParOptModel.__init__(self, X0=X0)
 
     def start_control(self):
@@ -192,8 +192,7 @@ class TestModel1(ParOptModel):
     def f(self, t, x0, U, dt=1):
         """ X ia a vector of the previous state
         """
-        dwdad
-        return [x0 for i in t]
+        return x0
 
     def f0(self, t, x, u, dt=1):
         """ X ia a vector of the previous state
@@ -208,22 +207,22 @@ class TestModel1(ParOptModel):
     def dfdx(self, t, X, U, dt=1):
         """ X ia a vector of the previous state
         """
-        return 0.0
+        return [0.0 for i in t]
 
     def df0dx(self, t, X, U, dt=1):
         """ X ia a vector of the previous state
         """
-        return 0.0
+        return [0.0 for i in t]
 
     def dfdu(self, t, X, U, dt=1):
         """ X ia a vector of the previous state
         """
-        return 0.0
+        return [0.0 for i in t]
 
     def df0du(self, t, X, U, dt=1):
         """ X ia a vector of the previous state
         """
-        return 0.0
+        return [0.0 for i in t]
 
 class LinModel1(ParOptModel):
     """Possibly simple linear test model.
@@ -314,7 +313,7 @@ def test1():
 
     ip=ParOptProcess(m)
     print (ip.model.F)
-    print ("Result is:", ip.optimize())
+    print ("Result is:", ip.optimize(m.t))
 
 def test2():
     m = LinModel1()
@@ -331,7 +330,7 @@ def test2():
 
 if __name__=="__main__":
     print ("")
-    test2()
+    test1()
     print ("ok")
     quit()
 else:
