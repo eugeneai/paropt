@@ -4,19 +4,37 @@ from numpy import *
 from functools import reduce
 from pprint import pprint
 import itertools
+import time
 
 #DEBUG = 20
 DEBUG = 5
-Ht = 0.01
+Ht = 0.001
+CACHING = True
+
+def constant(function):
+    if CACHING:
+        def wrapper(self, *args, **kwargs):
+            c=self.__cache__
+            if function in c:
+                return c[function]
+            else:
+                rv = function(self, *args, **kwargs)
+                c[function] = rv
+                return rv
+        return wrapper
+    else:
+        return function
 
 class ParOptModel(object):
-    """
+    """Parametric Optimised model class.
+    See docs for individual methods on usage ways.
     """
 
     def __init__(self, X0):
         """
         """
         self.X0=X0
+        self.__cache__={}
 
     def I(self, X, U):
         def _add(acc, t):
@@ -124,9 +142,11 @@ class ParOptProcess(object):
                 (Xn, Un, Psi) = self.improve(t, Xp, Up)
                 In = self.model.I(Xn, Un)
                 dI = Ip-In
-                print ("DI:", dI)
-                #print ("Xn:", Xn)
-                #print ("Un:", Un)
+                if DEBUG>5:
+                    print ("DI:", dI)
+                if DEBUG>6:
+                    print ("Xn:", Xn)
+                    print ("Un:", Un)
                 if abs(dI)<eps:
                     return In, Xn, Un, Psi, it, "Opt"
                 if iters<=0:
@@ -227,6 +247,7 @@ class TestModel1(ParOptModel):
 class LinModel1(ParOptModel):
     """Possibly simple linear test model.
     """
+
     def __init__(self):
         X0=array([1.0])
         self.h = Ht
@@ -266,6 +287,7 @@ class LinModel1(ParOptModel):
         """ # [[1..],[.1.],[..1]] # FIXME
         return 0.0
 
+    @constant
     def dfdx(self, t, X, U, dt=1):
         """ X ia a vector of the previous state
         """
@@ -274,11 +296,10 @@ class LinModel1(ParOptModel):
     def df0dx(self, t, X, U, dt=1):
         """ X ia a vector of the previous state
         """
-        if DEBUG:
-            print ("!!!")
         r = X*self.h*2.0
         return r
 
+    @constant
     def dfdu(self, t, X, U, dt=1):
         """ X ia a vector of the previous state
         """
@@ -319,7 +340,6 @@ def test2():
     m = LinModel1()
 
     ip=ParOptProcess(m)
-    print (ip.model.F)
     I, X, U, Psi, it, _ = ip.optimize(m.t, eps=0.001, iters=2000)
     print ("X,     U,    Psi")
     for x,u,p in zip(X,U,Psi):
@@ -329,9 +349,11 @@ def test2():
 
 
 if __name__=="__main__":
-    print ("")
-    test1()
-    print ("ok")
+    TEST='test2'
+    LOG='restats.log'
+
+    import cProfile, pstats
+    cProfile.run(TEST+"()", LOG)
+    p=pstats.Stats(LOG)
+    p.strip_dirs().sort_stats('time','cumulative').print_stats()
     quit()
-else:
-    pass
