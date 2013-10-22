@@ -76,7 +76,6 @@ class ParOptModel(object):
         # ----
 
 
-        #import pdb; pdb.set_trace()
         psi=array(psi)
         #lp=len(psi)
         #for i in range(len(psi) / 2 ):
@@ -116,12 +115,11 @@ class ParOptProcess(object):
         Xp=self.trajectory(Up)
         Ip=self.model.I(Xp,Up)
 
-        #import pdb; pdb.set_trace()
         it = 1
         while True:
             beta = self.beta
             while True:
-                (Xn, Un, Psi) = self.improve(t, Xp, Up)
+                (Xn, Un, Psi) = self.improve(t, Xp, Up, beta=beta)
                 In = self.model.I(Xn, Un)
                 dI = Ip-In
                 print ("DI:", dI)
@@ -157,14 +155,15 @@ class ParOptProcess(object):
 
         return array(X)
 
-    def improve(self, t, X, U):
+    def improve(self, t, X, U, **kwargs): # (a,b,c)
         Psi=self.model.Psi(t, X, U, self.alpha)
-        _dHdu=self.model.dHdu(t, X, U, Psi)
-        Un = U + _dHdu * self.beta
-
-        #import pdb; pdb.set_trace()
-
+        _dU=self.dU(t, X, U, Psi=Psi, beta=kwargs['beta'])
+        Un = U + _dU
         return self.trajectory(Un), Un, Psi
+
+    def dU(self, t, X, U, **kwargs):
+        _dHdu=self.model.dHdu(t, X, U, Psi=kwargs['Psi'])
+        return _dHdu * kwargs['beta']
 
 
 
@@ -331,6 +330,7 @@ def test2():
 
 if __name__=="__main__":
     print ("")
+    #import pudb; pu.db
     test2()
     print ("ok")
     quit()
