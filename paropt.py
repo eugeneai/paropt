@@ -126,9 +126,9 @@ class ParOptProcess(object):
                 #print ("Xn:", Xn)
                 #print ("Un:", Un)
                 if abs(dI)<eps:
-                    return In, Xn, Un, Psi, it, "Opt"
+                    return In, Xn, Un, it, "Opt"
                 if iters<=0:
-                    return In, Xn, Un, Psi, it, "Nonoptimal"
+                    return In, Xn, Un, it, "Nonoptimal"
                 iters-=1
                 it+=1
 
@@ -165,6 +165,44 @@ class ParOptProcess(object):
         _dHdu=self.model.dHdu(t, X, U, Psi=kwargs['Psi'])
         return _dHdu * kwargs['beta']
 
+class SeconOrderParOptProcess(ParOptProcess):
+    """A second order parametric optimization process
+    """
+
+    def __init__(self, model):
+        """
+        """
+        ParOptProcess.__init_(model)
+
+
+    def optimize(self, t, eps=0.001, iters=1000):
+        Up=self.model.start_control()
+        Xp=self.trajectory(Up)
+        Ip=self.model.I(Xp,Up)
+
+        it = 1
+        while True:
+            while True:
+                (Xn, Un, Psi) = self.improve(t, Xp, Up) #, alpha=)
+                In = self.model.I(Xn, Un)
+                dI = Ip-In
+                if DEBUG>5:
+                    print ("DI:", dI)
+                if abs(dI)<eps:
+                    return In, Xn, Un, it, "Opt"
+                if iters<=0:
+                    return In, Xn, Un, it, "Nonoptimal"
+                iters-=1
+                it+=1
+
+                if In>=Ip:
+                    beta/=2
+                    continue
+                else:
+                    Xp, Up, Ip = Xn, Un, In
+                    break
+
+        raise RuntimeError("this should be not reached")
 
 
 # -------------------- tests -------------------------------------------------
@@ -320,10 +358,10 @@ def test2():
 
     ip=ParOptProcess(m)
     print (ip.model.F)
-    I, X, U, Psi, it, _ = ip.optimize(m.t, eps=0.001, iters=2000)
-    print ("X,     U,    Psi")
-    for x,u,p in zip(X,U,Psi):
-        print (x,u,p)
+    I, X, U, it, _ = ip.optimize(m.t, eps=0.001, iters=2000)
+    print ("X,     U,   ")
+    for x,u in zip(X,U):
+        print (x,u)
     print ("Result is:", I, "in", it, "iters")
     print (_)
 
