@@ -25,12 +25,23 @@ def _comp(exp):
     return compile(str(exp), "<-%s->" % str(exp), "eval")
 
 def _eval(f, t, X, U):
-    rc = eval(f, {'t':t, 'x':X, 'u':U})
+    rc = eval(f, {'t':t, 'x':X, 'u':U, 'array':array})
     try:
         rc[0]
         return rc
     except TypeError:
         return [array([rc]) for _ in t]
+
+def _diff(f_col, v, num=1):
+    answer=[]
+    print (f_col, v)
+    for f in f_col:
+        f = f[0]
+        df=diff(f, v, num)
+        answer.append([df])
+    print ("D:", answer)
+    return str(answer)
+    #return "array("+str(answer)+")"
 
 class ParOptModel(object):
     """
@@ -45,20 +56,17 @@ class ParOptModel(object):
         self._f=self.f(t, x, u)
         self._f0=self.f0(t, x, u)
         self._F=self.F(x)
-        self._dfdx=_comp(diff(self._f, x))
-        self._df0dx=_comp(diff(self._f0, x))
-        self._dFdx=_comp(diff(self._F, x))
+        self._dfdx=_comp(_diff(self._f, x))
+        self._df0dx=_comp(_diff(self._f0, x))
+        self._dFdx=_comp(_diff(self._F, x))
 
-        self._dfdu=_comp(diff(self._f, u))
-        self._df0du=_comp(diff(self._f0, u))
+        self._dfdu=_comp(_diff(self._f, u))
+        self._df0du=_comp(_diff(self._f0, u))
         #self.dfdu=compile_method("dfdu", self._dfdu)
         if DEBUG>=5:
             print (self._f, self._f0, self._dfdx, self._df0dx, sep=", ")
             print (self._F, self._dFdx, sep=", ")
             print (self._f, self._f0, self._dfdu, self._df0du, sep=", ")
-
-
-
 
     def I(self, X, U):
         def _add(acc, t):
@@ -77,7 +85,7 @@ class ParOptModel(object):
         raise RuntimeError("should be implemented by subclass")
 
     def dFdx(self, xe):
-        return eval(self._dFdx, {'x':xe})
+        return eval(self._dFdx, {'x':xe, 'array':array})
 
     def dfdx(self, t, X, U, dt=1):
         return _eval(self._dfdx, t, X, U)
@@ -246,6 +254,8 @@ class ParOptProcess(object):
         raise RuntimeError("this should be not reached")
 
     def trajectory(self, U):
+
+        import pudb; pu.db
         x0=self.model.X0
         X = [x0]
 
@@ -256,6 +266,7 @@ class ParOptProcess(object):
         # print ("U:", U)
         # print ("X0:", self.model.X0)
         # print ("X:", X)
+        print ("X:", X)
         return array(X)
 
     def improve(self, t, X, U, **kwargs): # (a,b,c)
@@ -311,66 +322,11 @@ class SeconOrderParOptProcess(ParOptProcess):
 
 # -------------------- tests -------------------------------------------------
 
-class TestModel1(ParOptModel):
-    """
-    """
-    def __init__(self):
-        X0=array([0.0, 0.0])
-        A=array([0.0, 1.0])
-        ParOptModel.__init__(self, X0=X0)
-
-    def start_control(self):
-        return [
-            array([0.1, 0.0]),
-            array([0.2, 1.0])
-        ]
-
-    def F(self, x):
-        """ X and U are lists of vectors (arrays)
-        """
-        return 0.01
-
-    def f(self, t, x0, U, dt=1):
-        """ X ia a vector of the previous state
-        """
-        dwdad
-        return [x0 for i in t]
-
-    def f0(self, t, x, u, dt=1):
-        """ X ia a vector of the previous state
-        """
-        return 0.1
-
-    def dFdx(self, x):
-        """ X and U are lists of vectors (arrays)
-        """ # [[1..],[.1.],[..1]] # FIXME
-        return 1.0
-
-    def dfdx(self, t, X, U, dt=1):
-        """ X ia a vector of the previous state
-        """
-        return 0.0
-
-    def df0dx(self, t, X, U, dt=1):
-        """ X ia a vector of the previous state
-        """
-        return 0.0
-
-    def dfdu(self, t, X, U, dt=1):
-        """ X ia a vector of the previous state
-        """
-        return 0.0
-
-    def df0du(self, t, X, U, dt=1):
-        """ X ia a vector of the previous state
-        """
-        return 0.0
-
 class LinModel1(ParOptModel):
     """Possibly simple linear test model.
     """
     def __init__(self):
-        X0=array([1.0])
+        X0=array([[1.0]])
         self.h = Ht
         # self.h = 0.001
         # self.h = 0.2
@@ -390,48 +346,19 @@ class LinModel1(ParOptModel):
     def F(self, x):
         """ X and U are lists of vectors (arrays)
         """
-        return 0.0
+        return [[0.0]]
 
     def f(self, t, x, u, dt=1):
         """ X ia a vector of the previous state
         """
-        return x+self.h*u
+        return [[x+self.h*u]]
 
 
     def f0(self, t, x, u, dt=1):
         """ X ia a vector of the previous state
         """
-        return self.h * (x*x+u*u) #reduce(lambda a, e: a+e[0]**2+e[1]**2, list(zip(X,U))[:-1], 0.0)
+        return [[self.h * (x*x+u*u)]] #reduce(lambda a, e: a+e[0]**2+e[1]**2, list(zip(X,U))[:-1], 0.0)
 
-    '''
-    def dFdx(self, x):
-        """ X and U are lists of vectors (arrays)
-        """ # [[1..],[.1.],[..1]] # FIXME
-        return 0.0
-
-    def dfdx(self, t, X, U, dt=1):
-        """ X ia a vector of the previous state
-        """
-        return array([array([1.0]) for t in self.t])
-
-    def df0dx(self, t, X, U, dt=1):
-        """ X ia a vector of the previous state
-        """
-        if DEBUG:
-            print ("!!!")
-        r = X*self.h*2.0
-        return r
-
-    def dfdu(self, t, X, U, dt=1):
-        """ X ia a vector of the previous state
-        """
-        return array([array([self.h]) for t in self.t])
-
-    def df0du(self, t, X, U, dt=1):
-        """ X ia a vector of the previous state
-        """
-        return 2*self.h*U
-    '''
 
 class LinModel2(LinModel1):
     """
@@ -451,13 +378,6 @@ class LinModel2(LinModel1):
         U = [array([0.1]) for t in self.t]
         return array(U)
 
-
-def test1():
-    m = TestModel1()
-
-    ip=ParOptProcess(m)
-    print (ip.model.F)
-    print ("Result is:", ip.optimize())
 
 def test2():
     m = LinModel1()
