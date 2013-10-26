@@ -119,7 +119,7 @@ class ParOptProcess(object):
         while True:
             beta = self.beta
             while True:
-                (Xn, Un, Psi) = self.improve(t, Xp, Up, beta=beta)
+                (Xn, Un) = self.improve(t, Xp, Up, beta=beta)
                 In = self.model.I(Xn, Un)
                 dI = Ip-In
                 print ("DI:", dI)
@@ -159,7 +159,7 @@ class ParOptProcess(object):
         Psi=self.model.Psi(t, X, U, self.alpha)
         _dU=self.dU(t, X, U, Psi=Psi, beta=kwargs['beta'])
         Un = U + _dU
-        return self.trajectory(Un), Un, Psi
+        return self.trajectory(Un), Un
 
     def dU(self, t, X, U, **kwargs):
         _dHdu=self.model.dHdu(t, X, U, Psi=kwargs['Psi'])
@@ -182,6 +182,7 @@ class SeconOrderParOptProcess(ParOptProcess):
 
         it = 1
         while True:
+            # Something done with alphas and
             while True:
                 (Xn, Un, Psi) = self.improve(t, Xp, Up) #, alpha=)
                 In = self.model.I(Xn, Un)
