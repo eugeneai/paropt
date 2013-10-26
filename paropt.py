@@ -256,7 +256,6 @@ class ParOptProcess(object):
         # print ("U:", U)
         # print ("X0:", self.model.X0)
         # print ("X:", X)
-        print ("XXXX:", X, U)
         return array(X)
 
     def improve(self, t, X, U, **kwargs): # (a,b,c)
