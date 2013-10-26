@@ -1,13 +1,36 @@
 import math
-import numpy
+import numpy, sympy
 from numpy import *
 from functools import reduce
 from pprint import pprint
 import itertools
+from sympy import symbols, diff
 
 #DEBUG = 20
 DEBUG = 5
 Ht = 0.01
+
+def compile_method(name, f):
+    s="""
+def %s(self, t, x, u):
+    return %s
+    """ % (name, f)
+
+    f=compile(s, "<diffunctions>", 'exec')
+    f=exec(f)
+
+    print (s, f)
+
+def _comp(exp):
+    return compile(str(exp), "<-%s->" % str(exp), "eval")
+
+def _eval(f, t, X, U):
+    rc = eval(f, {'t':t, 'x':X, 'u':U})
+    try:
+        rc[0]
+        return rc
+    except TypeError:
+        return [array([rc]) for _ in t]
 
 class ParOptModel(object):
     """
@@ -17,6 +40,25 @@ class ParOptModel(object):
         """
         """
         self.X0=X0
+        t, x, u = symbols("t, x, u")
+        print (t, x, u)
+        self._f=self.f(t, x, u)
+        self._f0=self.f0(t, x, u)
+        self._F=self.F(x)
+        self._dfdx=_comp(diff(self._f, x))
+        self._df0dx=_comp(diff(self._f0, x))
+        self._dFdx=_comp(diff(self._F, x))
+
+        self._dfdu=_comp(diff(self._f, u))
+        self._df0du=_comp(diff(self._f0, u))
+        #self.dfdu=compile_method("dfdu", self._dfdu)
+        if DEBUG>=5:
+            print (self._f, self._f0, self._dfdx, self._df0dx, sep=", ")
+            print (self._F, self._dFdx, sep=", ")
+            print (self._f, self._f0, self._dfdu, self._df0du, sep=", ")
+
+
+
 
     def I(self, X, U):
         def _add(acc, t):
@@ -35,21 +77,19 @@ class ParOptModel(object):
         raise RuntimeError("should be implemented by subclass")
 
     def dFdx(self, xe):
-        """x - ending state of a trajectory
-        """
-        raise RuntimeError("should be implemented by subclass")
+        return eval(self._dFdx, {'x':xe})
 
     def dfdx(self, t, X, U, dt=1):
-        raise RuntimeError("should be implemented by subclass")
+        return _eval(self._dfdx, t, X, U)
 
     def df0dx(self, t, X, U, dt=1):
-        raise RuntimeError("should be implemented by subclass")
+        return _eval(self._df0dx, t, X, U)
 
     def dfdu(self, t, X, U, dt=1):
-        raise RuntimeError("should be implemented by subclass")
+        return _eval(self._dfdu, t, X, U)
 
     def df0du(self, t, X, U, dt=1):
-        raise RuntimeError("should be implemented by subclass")
+        return _eval(self._df0du, t, X, U)
 
     def Psi(self, t, X, U, alpha):
 
@@ -68,13 +108,14 @@ class ParOptModel(object):
         while j>=0:
             i=tt[j]
             pp=p
-            pt = transpose(p)
-            pn = dot(pt, _dfdx[i]) - alpha*_df0dx[i]
+            _dfdx_t = transpose(_dfdx[i])
+            _df0dx_t = transpose(_df0dx[i])
+            pn = dot(_dfdx_t, pp) - alpha*_df0dx_t
             psi.append(pn)
             p=pn
             j-=1
-        # ----
 
+        # ----
 
         psi=array(psi)
         #lp=len(psi)
@@ -97,6 +138,69 @@ class ParOptModel(object):
 
     def start_control(self):
         raise RuntimeError("should be implemented by subclass")
+
+    #------------ These functions must be defined for Second Order Improvement Process -----
+
+    def dPsidalpha(self, t, X, U):
+        psie = -self.dFdx(X[-1])
+        psi=[psie]
+        _df0dx=self.df0dx(t, X, U) # last element is useless
+        _dfdx =self.dfdx (t, X, U) # last element is useless
+
+        tt=t[:-1]
+
+        # -----
+        # rt.reverse()
+        j=len(tt)-1
+        p=psie
+
+        while j>=0:
+            i=tt[j]
+            pp=p
+            _dfdx_t = transpose(_dfdx[i])
+            _df0dx_t = transpose(_df0dx[i])
+            pn = dot(_dfdx_t, pp) - _df0dx_t
+            psi.append(pn)
+            p=pn
+            j-=1
+        # ----
+
+
+        psi=array(psi)
+
+        return psi[::-1] # Really it is dPsidalpha
+
+    def dSigmadalpha(self, t, X, U):
+        sige  = -self.dFdxdx(X[-1])
+        sig=[sige]
+
+        _df0dx=self.df0dx(t, X, U) # last element is useless
+        _dfdx =self.dfdx (t, X, U) # last element is useless
+
+        tt=t[:-1]
+
+        # -----
+        # rt.reverse()
+        j=len(tt)-1
+        s=sige
+
+        while j>=0:
+            i=tt[j]
+            sp=s
+            _dfdx_t = transpose(_dfdx[i])
+            _df0dx_t = transpose(_df0dx[i])
+            sn = dot(_dfdx_t, sp) - _df0dx_t
+            sig.append(sn)
+            s=sn
+            j-=1
+        # ----
+
+
+        sig=array(sig)
+
+        return sig[::-1] # Really it is dSigmadalpha
+
+
 
 
 class ParOptProcess(object):
@@ -152,7 +256,7 @@ class ParOptProcess(object):
         # print ("U:", U)
         # print ("X0:", self.model.X0)
         # print ("X:", X)
-
+        print ("XXXX:", X, U)
         return array(X)
 
     def improve(self, t, X, U, **kwargs): # (a,b,c)
@@ -300,6 +404,7 @@ class LinModel1(ParOptModel):
         """
         return self.h * (x*x+u*u) #reduce(lambda a, e: a+e[0]**2+e[1]**2, list(zip(X,U))[:-1], 0.0)
 
+    '''
     def dFdx(self, x):
         """ X and U are lists of vectors (arrays)
         """ # [[1..],[.1.],[..1]] # FIXME
@@ -327,6 +432,7 @@ class LinModel1(ParOptModel):
         """ X ia a vector of the previous state
         """
         return 2*self.h*U
+    '''
 
 class LinModel2(LinModel1):
     """
