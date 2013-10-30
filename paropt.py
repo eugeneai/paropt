@@ -8,13 +8,9 @@ from sympy import symbols, diff, Symbol
 
 #DEBUG = 20
 DEBUG = 0
+PROFILE = False
 Ht = 0.01
 import time
-
-#DEBUG = 20
-DEBUG = 5
-Ht = 0.001
-CACHING = True
 
 def constant(function):
     if CACHING:
@@ -62,6 +58,7 @@ def _eval(f, t, xc, uc, V):
         return rc
     except TypeError:
         return [array([rc]) for _ in t]
+    """
 
 def _vdiff(F, V, num=1):
     answer=[]
@@ -102,8 +99,6 @@ class ParOptModel(object):
     """
 
     def __init__(self, X0, N, M):
-        """
-        """
         self.N=N     # Dimention of x
         self.M=M     # Dimention of u
         self.X0=X0
@@ -520,9 +515,11 @@ if __name__=="__main__":
 
     TEST='test2'
     LOG='restats.log'
-
-    import cProfile, pstats
-    cProfile.run(TEST+"()", LOG)
-    p=pstats.Stats(LOG)
-    p.strip_dirs().sort_stats('time','cumulative').print_stats()
+    if PROFILE:
+        import cProfile, pstats
+        cProfile.run(TEST+"()", LOG)
+        p=pstats.Stats(LOG)
+        p.strip_dirs().sort_stats('time','cumulative').print_stats()
+    else:
+        eval(TEST+"()")
     quit()
