@@ -97,12 +97,12 @@ class ParOptModel(object):
         self.v.t=Symbol('t')
         a=[]
         for i in range(N):
-            a.append(Symbol('x%s' % i))
-        self.v.x=[a]
+            a.append([Symbol('x%s' % i)])
+        self.v.x=a
         a=[]
         for i in range(M):
-            a.append(Symbol('u%s' % i))
-        self.v.u=[a]
+            a.append([Symbol('u%s' % i)])
+        self.v.u=a
 
         t, x, u = self.v.t, self.v.x, self.v.u
 
@@ -427,23 +427,47 @@ class LinModel1(ParOptModel):
         return self.h * (x0*x0+u0*u0)
 
 
-class LinModel2(LinModel1):
+class LinModel2d2du(ParOptModel):
+    """Possibly not a simple linear test model.
     """
-    """
+    def __init__(self):
+        X0=array([[1.0],[1.0]])
+        self.h = Ht
+        self.num = int((1.0-0.0) / self.h)
+        self.T = linspace(
+            start=0.0,
+            stop=1.0,
+            num=self.num
+        )
+        self.t = arange(len(self.T))
+        ParOptModel.__init__(self, X0=X0, N=2, M=2)
+
+    def start_control(self):
+        U = [array([[0.0],[0.0]]) for t in self.t]
+        return array(U)
+
+    def F(self, x):
+        """ X and U are lists of vectors (arrays)
+        """
+        return 0.0
+
+    def f(self, t, x, u, dt=1):
+        """ X ia a vector of the previous state
+        """
+        print (x,u)
+        ((x0,),(x1,))=x
+        ((u0,),(u1,))=u
+
+        return [[x0+self.h*u0],[x1+self.h*u1]]
+
 
     def f0(self, t, x, u, dt=1):
         """ X ia a vector of the previous state
         """
-        return self.h * (x*x) #reduce(lambda a, e: a+e[0]**2+e[1]**2, list(zip(X,U))[:-1], 0.0)
+        ((x0,),(x1,))=x
+        ((u0,),(u1,))=u
 
-    def dfdu(self, t, X, U, dt=1):
-        """ X ia a vector of the previous state
-        """
-        return array([array([0.0]) for t in self.t])
-
-    def start_control(self):
-        U = [array([0.1]) for t in self.t]
-        return array(U)
+        return self.h * (x0*x0+x1*x1+u0*u0+u1*u1)
 
 
 def test2():
@@ -458,11 +482,23 @@ def test2():
     print ("Result is:", I, "in", it, "iters")
     print (_)
 
+def test2d():
+    m = LinModel2d2du()
+
+    ip=ParOptProcess(m)
+    print (ip.model.F)
+    I, X, U, it, _ = ip.optimize(m.t, eps=0.001, iters=2000)
+    print ("X,     U,   ")
+    for x,u in zip(X,U):
+        print (x,u)
+    print ("Result is:", I, "in", it, "iters")
+    print (_)
+
 
 if __name__=="__main__":
     print ("")
     #import pudb; pu.db
-    test2()
+    test2d()
     print ("ok")
     quit()
 else:
