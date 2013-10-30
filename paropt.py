@@ -62,7 +62,6 @@ def _eval(f, t, xc, uc, V):
         return rc
     except TypeError:
         return [array([rc]) for _ in t]
-    """
 
 def _vdiff(F, V, num=1):
     answer=[]
@@ -398,6 +397,10 @@ class SeconOrderParOptProcess(ParOptProcess):
         raise RuntimeError("this should be not reached")
 
 
+    def dU(self, t, X, U, **kwargs):
+        _dHdu=self.model.dHdu(t, X, U, Psi=kwargs['Psi'])
+        return _dHdu * kwargs['beta']
+
 # -------------------- tests -------------------------------------------------
 
 class LinModel1(ParOptModel):
@@ -443,6 +446,48 @@ class LinModel1(ParOptModel):
         ((u0,),)=u
 
         return self.h * (x0*x0+u0*u0)
+
+
+class LinModel2d2du(ParOptModel):
+    """Possibly not a simple linear test model.
+    """
+    def __init__(self):
+        X0=array([[1.0],[1.0]])
+        self.h = Ht
+        self.num = int((1.0-0.0) / self.h)
+        self.T = linspace(
+            start=0.0,
+            stop=1.0,
+            num=self.num
+        )
+        self.t = arange(len(self.T))
+        ParOptModel.__init__(self, X0=X0, N=2, M=2)
+
+    def start_control(self):
+        U = [array([[0.0],[0.0]]) for t in self.t]
+        return array(U)
+
+    def F(self, x):
+        """ X and U are lists of vectors (arrays)
+        """
+        return 0.0
+
+    def f(self, t, x, u, dt=1):
+        """ X ia a vector of the previous state
+        """
+        ((x0,),(x1,))=x
+        ((u0,),(u1,))=u
+
+        return [[x0+self.h*u0],[x1+self.h*u1]]
+
+
+    def f0(self, t, x, u, dt=1):
+        """ X ia a vector of the previous state
+        """
+        ((x0,),(x1,))=x
+        ((u0,),(u1,))=u
+
+        return self.h * (x0*x0+x1*x1+u0*u0+u1*u1)
 
 
 def test2():
