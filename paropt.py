@@ -9,6 +9,26 @@ from sympy import symbols, diff, Symbol
 #DEBUG = 20
 DEBUG = 0
 Ht = 0.01
+import time
+
+#DEBUG = 20
+DEBUG = 5
+Ht = 0.001
+CACHING = True
+
+def constant(function):
+    if CACHING:
+        def wrapper(self, *args, **kwargs):
+            c=self.__cache__
+            if function in c:
+                return c[function]
+            else:
+                rv = function(self, *args, **kwargs)
+                c[function] = rv
+                return rv
+        return wrapper
+    else:
+        return function
 
 def compile_method(name, f):
     s="""
@@ -78,7 +98,8 @@ class Helper():
     pass
 
 class ParOptModel(object):
-    """
+    """Parametric Optimised model class.
+    See docs for individual methods on usage ways.
     """
 
     def __init__(self, X0, N, M):
@@ -119,6 +140,7 @@ class ParOptModel(object):
         if DEBUG>=5:
             print (self._F, self._dFdx, sep=", ")
             print (self._f, self._f0, self._dfdu, self._df0du, sep=", ")
+        self.__cache__={}
 
     def I(self, X, U):
         def _add(acc, t):
@@ -289,6 +311,11 @@ class ParOptProcess(object):
                 In = self.model.I(Xn, Un)
 
                 dI = Ip-In
+                if DEBUG>5:
+                    print ("DI:", dI)
+                if DEBUG>6:
+                    print ("Xn:", Xn)
+                    print ("Un:", Un)
                 if abs(dI)<eps:
                     return In, Xn, Un, it, "Opt"
                 if iters<=0:
@@ -329,12 +356,16 @@ class ParOptProcess(object):
 class SeconOrderParOptProcess(ParOptProcess):
     """A second order parametric optimization process
     """
+    def __init__(self):
+        X0=array([0.0, 0.0])
+        self.t = arange(2)
+        ParOptModel.__init__(self, X0=X0)
 
-    def __init__(self, model):
-        """
-        """
-        ParOptProcess.__init_(model)
-
+    def start_control(self):
+        return [
+            array([0.1, 0.0]),
+            array([0.2, 1.0])
+        ]
 
     def optimize(self, t, eps=0.001, iters=1000):
         Up=self.model.start_control()
@@ -372,6 +403,7 @@ class SeconOrderParOptProcess(ParOptProcess):
 class LinModel1(ParOptModel):
     """Possibly simple linear test model.
     """
+
     def __init__(self):
         X0=array([[1.0]])
         self.h = Ht
@@ -413,48 +445,6 @@ class LinModel1(ParOptModel):
         return self.h * (x0*x0+u0*u0)
 
 
-class LinModel2d2du(ParOptModel):
-    """Possibly not a simple linear test model.
-    """
-    def __init__(self):
-        X0=array([[1.0],[1.0]])
-        self.h = Ht
-        self.num = int((1.0-0.0) / self.h)
-        self.T = linspace(
-            start=0.0,
-            stop=1.0,
-            num=self.num
-        )
-        self.t = arange(len(self.T))
-        ParOptModel.__init__(self, X0=X0, N=2, M=2)
-
-    def start_control(self):
-        U = [array([[0.0],[0.0]]) for t in self.t]
-        return array(U)
-
-    def F(self, x):
-        """ X and U are lists of vectors (arrays)
-        """
-        return 0.0
-
-    def f(self, t, x, u, dt=1):
-        """ X ia a vector of the previous state
-        """
-        ((x0,),(x1,))=x
-        ((u0,),(u1,))=u
-
-        return [[x0+self.h*u0],[x1+self.h*u1]]
-
-
-    def f0(self, t, x, u, dt=1):
-        """ X ia a vector of the previous state
-        """
-        ((x0,),(x1,))=x
-        ((u0,),(u1,))=u
-
-        return self.h * (x0*x0+x1*x1+u0*u0+u1*u1)
-
-
 def test2():
     m = LinModel1()
 
@@ -481,9 +471,13 @@ def test2d():
 
 
 if __name__=="__main__":
-    #import pudb; pu.db
-    test2d()
     print ("ok")
+
+    TEST='test2'
+    LOG='restats.log'
+
+    import cProfile, pstats
+    cProfile.run(TEST+"()", LOG)
+    p=pstats.Stats(LOG)
+    p.strip_dirs().sort_stats('time','cumulative').print_stats()
     quit()
-else:
-    pass
