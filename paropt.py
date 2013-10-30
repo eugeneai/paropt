@@ -52,13 +52,6 @@ def _eval(f, t, xc, uc, V):
 
     rc = eval(f, g)
     return rc
-    """
-    try:
-        rc[0]
-        return rc
-    except TypeError:
-        return [array([rc]) for _ in t]
-    """
 
 def _vdiff(F, V, num=1):
     answer=[]
