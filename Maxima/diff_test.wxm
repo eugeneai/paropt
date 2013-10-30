@@ -11,10 +11,20 @@ diff(f1,x1);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-diff(f1,x1);
+diff(f1,x1,2);
 diff(f2,x1);
 diff(f1,x2);
 diff(f2,x2);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+m: [2*x - (a - 1)*y, psi_t_0*(5*b, c + b*y + a*x)]$
+m;
+l: [x, y];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+diff(m, x, 1, y, 1);
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */

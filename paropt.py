@@ -7,7 +7,7 @@ import itertools
 from sympy import symbols, diff, Symbol
 
 #DEBUG = 20
-DEBUG = 5
+DEBUG = 0
 Ht = 0.01
 
 def compile_method(name, f):
@@ -18,8 +18,6 @@ def %s(self, t, x, u):
 
     f=compile(s, "<diffunctions>", 'exec')
     f=exec(f)
-
-    print (s, f)
 
 def _vcomp(exp):
     sexp="array(%s)" % str(exp)
@@ -48,7 +46,6 @@ def _eval(f, t, xc, uc, V):
 
 def _vdiff(F, V, num=1):
     answer=[]
-    print (F, V)
     DF=[]
 
     for f in F[0]:
@@ -57,12 +54,10 @@ def _vdiff(F, V, num=1):
             df=diff(f, v, num)
             dfs.append(df)
         DF.append(dfs)
-    print ("D:", DF)
     return DF
 
 def _diff(f, V, num=1):
     answer=[]
-    print (f, V)
     DF=[]
 
     dfs=[]
@@ -70,7 +65,6 @@ def _diff(f, V, num=1):
         df=diff(f, v, num)
         dfs.append(df)
     DF.append(dfs)
-    print ("D:", DF)
     return DF
 
 def _teval(d, T,X,U, V): # d is a code of function to be evaluated at all T time instance.
@@ -292,13 +286,9 @@ class ParOptProcess(object):
             beta = self.beta
             while True:
                 (Xn, Un) = self.improve(t, Xp, Up, beta=beta)
-#                import pdb; pdb.set_trace()
                 In = self.model.I(Xn, Un)
 
                 dI = Ip-In
-                print ("DI:", dI)
-                #print ("Xn:", Xn)
-                #print ("Un:", Un)
                 if abs(dI)<eps:
                     return In, Xn, Un, it, "Opt"
                 if iters<=0:
@@ -324,10 +314,6 @@ class ParOptProcess(object):
             xn=self.model.f(t, X[t], u)
             X.append(xn)
 
-        # print ("U:", U)
-        # print ("X0:", self.model.X0)
-        # print ("X:", X)
-        print ("X:", X)
         return array(X)
 
     def improve(self, t, X, U, **kwargs): # (a,b,c)
@@ -454,7 +440,6 @@ class LinModel2d2du(ParOptModel):
     def f(self, t, x, u, dt=1):
         """ X ia a vector of the previous state
         """
-        print (x,u)
         ((x0,),(x1,))=x
         ((u0,),(u1,))=u
 
@@ -474,8 +459,8 @@ def test2():
     m = LinModel1()
 
     ip=ParOptProcess(m)
-    print (ip.model.F)
     I, X, U, it, _ = ip.optimize(m.t, eps=0.001, iters=2000)
+    print ("")
     print ("X,     U,   ")
     for x,u in zip(X,U):
         print (x,u)
@@ -486,8 +471,8 @@ def test2d():
     m = LinModel2d2du()
 
     ip=ParOptProcess(m)
-    print (ip.model.F)
     I, X, U, it, _ = ip.optimize(m.t, eps=0.001, iters=2000)
+    print ("")
     print ("X,     U,   ")
     for x,u in zip(X,U):
         print (x,u)
@@ -496,7 +481,6 @@ def test2d():
 
 
 if __name__=="__main__":
-    print ("")
     #import pudb; pu.db
     test2d()
     print ("ok")
