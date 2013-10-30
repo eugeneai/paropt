@@ -513,7 +513,7 @@ def test2d():
 if __name__=="__main__":
     print ("ok")
 
-    TEST='test2'
+    TEST='test2d'
     LOG='restats.log'
     if PROFILE:
         import cProfile, pstats
