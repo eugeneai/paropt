@@ -9,7 +9,7 @@ from sympy import symbols, diff, Symbol
 #DEBUG = 20
 DEBUG = 0
 PROFILE = True
-Ht = 0.2
+Ht = 0.01
 import time
 
 def constant(function):
@@ -195,18 +195,19 @@ class ParOptModel(object):
         #    p=psi[i]
         #    psi[i]=psi[lp-i-1]
         #    psi[lp-i-1]=p
+        # so Psi[0] is Psi[t+1] at the start t
         return psi[::-1]
 
     def dHdu(self, t, X, U, Psi):
-        _df0du=self.df0du(t, X, U)
-        _dfdu =self.dfdu (t, X, U)
+        _df0du=self.df0du(t[:-1], X[:-1], U)
+        _dfdu =self.dfdu (t[:-1], X[:-1], U)
         p=Psi
         if DEBUG>10:
             print ("dfdu:", len(_dfdu))
             print ("psi:", len(p))
             print ("df0du", len(_df0du))
-        _s=[dot(transpose(Psi[i+1]),_dfdu[i]) for i in range(len(X)-1)]
-        return array(_s) + _df0du[:-1] # FIXME Check dot operation.
+        _s=[dot(transpose(Psi[i]),_dfdu[i]) for i in range(len(X)-1)] # Psi[i] is shifted left to 1 step.
+        return array(_s) + _df0du # FIXME Check dot operation.
 
     def start_control(self):
         raise RuntimeError("should be implemented by subclass")
@@ -332,10 +333,8 @@ class ParOptProcess(object):
 
     def improve(self, t, X, U, **kwargs): # (a,b,c)
         Psi=self.model.Psi(t, X, U, self.alpha)
-
-        import pudb; pu.db
         _dU=self.dU(t, X, U, Psi=Psi, beta=kwargs['beta'])
-        Un = U[:-1] + _dU
+        Un = U + _dU
         return self.trajectory(Un), Un
 
     def dU(self, t, X, U, **kwargs):
