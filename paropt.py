@@ -8,8 +8,8 @@ from sympy import symbols, diff, Symbol
 
 #DEBUG = 20
 DEBUG = 0
-PROFILE = False
-Ht = 0.01
+PROFILE = True
+Ht = 0.2
 import time
 
 def constant(function):
@@ -166,8 +166,9 @@ class ParOptModel(object):
 
         psi=[psie]
 
-        _df0dx=self.df0dx(t, X, U) # last element is useless
-        _dfdx =self.dfdx (t, X, U) # last element is useless
+        _df0dx=self.df0dx(t[:-1], X[:-1], U) # last element is useless
+        _dfdx =self.dfdx (t[:-1], X[:-1], U) # last element is useless
+
 
         tt=t[:-1]
 
@@ -176,7 +177,7 @@ class ParOptModel(object):
         j=len(tt)-1
         p=psie
 
-        while j>=0:
+        while j>=1:
             i=tt[j]
             pp=p
             _dfdx_t = transpose(_dfdx[i])
@@ -204,8 +205,8 @@ class ParOptModel(object):
             print ("dfdu:", len(_dfdu))
             print ("psi:", len(p))
             print ("df0du", len(_df0du))
-        _s=[dot(transpose(Psi[i]),_dfdu[i]) for i in range(len(X))]
-        return array(_s) + _df0du # FIXME Check dot operation.
+        _s=[dot(transpose(Psi[i+1]),_dfdu[i]) for i in range(len(X)-1)]
+        return array(_s) + _df0du[:-1] # FIXME Check dot operation.
 
     def start_control(self):
         raise RuntimeError("should be implemented by subclass")
@@ -320,11 +321,10 @@ class ParOptProcess(object):
         raise RuntimeError("this should be not reached")
 
     def trajectory(self, U):
-
         x0=self.model.X0
         X = [x0]
 
-        for t, u in enumerate(U[:-1]): # (0, u0), (1, u1)
+        for t, u in enumerate(U): # (0, u0), (1, u1)
             xn=self.model.f(t, X[t], u)
             X.append(xn)
 
@@ -332,8 +332,10 @@ class ParOptProcess(object):
 
     def improve(self, t, X, U, **kwargs): # (a,b,c)
         Psi=self.model.Psi(t, X, U, self.alpha)
+
+        import pudb; pu.db
         _dU=self.dU(t, X, U, Psi=Psi, beta=kwargs['beta'])
-        Un = U + _dU
+        Un = U[:-1] + _dU
         return self.trajectory(Un), Un
 
     def dU(self, t, X, U, **kwargs):
@@ -347,6 +349,7 @@ class SeconOrderParOptProcess(ParOptProcess):
         X0=array([0.0, 0.0])
         self.t = arange(2)
         ParOptModel.__init__(self, X0=X0)
+
 
     def start_control(self):
         return [
@@ -389,6 +392,10 @@ class SeconOrderParOptProcess(ParOptProcess):
         _dHdu=self.model.dHdu(t, X, U, Psi=kwargs['Psi'])
         return _dHdu * kwargs['beta']
 
+    def Ha(self, t, x, u, Psi, alpha):
+        pt=transpose(Psi)
+        return pt.dot(self.f(t,x,u))-alpha*self.f0(t,x,u)
+
 # -------------------- tests -------------------------------------------------
 
 class LinModel1(ParOptModel):
@@ -410,7 +417,7 @@ class LinModel1(ParOptModel):
         ParOptModel.__init__(self, X0=X0, N=1, M=1)
 
     def start_control(self):
-        U = [array([[0.0]]) for t in self.t]
+        U = [array([[0.0]]) for t in self.t[:-1]]
         return array(U)
 
     def F(self, x):
@@ -452,7 +459,7 @@ class LinModel2d2du(ParOptModel):
         ParOptModel.__init__(self, X0=X0, N=2, M=2)
 
     def start_control(self):
-        U = [array([[0.0],[0.0]]) for t in self.t]
+        U = [array([[0.0],[0.0]]) for t in self.t[:-1]]
         return array(U)
 
     def F(self, x):
