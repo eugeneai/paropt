@@ -8,7 +8,7 @@ from sympy import symbols, diff, Symbol
 
 #DEBUG = 20
 DEBUG = 0
-PROFILE = True
+PROFILE = False # True
 Ht = 0.01
 import time
 
@@ -113,20 +113,19 @@ class ParOptModel(object):
         self._F=self.F(x)
 
         # -----------------
-        self._dfdx=_vcomp(_vdiff(self._f, x))
-        self._df0dx=_vcomp(_diff(self._f0, x))
-        self._dFdx=_vcomp(_diff(self._F, x))
+        self._f_x=_vcomp(_vdiff(self._f, x))
+        self._f0_x=_vcomp(_diff(self._f0, x))
+        self._F_x=_vcomp(_diff(self._F, x))
 
-        self._dfdu=_vcomp(_vdiff(self._f, u))
-        self._df0du=_vcomp(_diff(self._f0, u))
+        self._f_u=_vcomp(_vdiff(self._f, u))
+        self._f0_u=_vcomp(_diff(self._f0, u))
 
         if DEBUG>=5:
-            print (self._f, self._f0, self._dfdx, self._df0dx, sep=", ")
+            print (self._f, self._f0, self._f_x, self._f0_x, sep=", ")
 
-        #self.dfdu=compile_method("dfdu", self._dfdu)
         if DEBUG>=5:
-            print (self._F, self._dFdx, sep=", ")
-            print (self._f, self._f0, self._dfdu, self._df0du, sep=", ")
+            print (self._F, self._F_x, sep=", ")
+            print (self._f, self._f0, self._f_u, self._f0_u, sep=", ")
         self.__cache__={}
 
     def I(self, X, U):
@@ -145,29 +144,29 @@ class ParOptModel(object):
     def f0(self, t, x, u, dt=1):
         raise RuntimeError("should be implemented by subclass")
 
-    def dFdx(self, xe):
-        return eval(self._dFdx, {'x':xe, 'array':array})
+    def F_x(self, xe):
+        return eval(self._F_x, {'x':xe, 'array':array})
 
-    def dfdx(self, T, X, U, dt=1):
-        return _teval(self._dfdx,  T,X,U, self.v)
+    def f_x(self, T, X, U, dt=1):
+        return _teval(self._f_x,  T,X,U, self.v)
 
-    def df0dx(self, T, X, U, dt=1):
-        return _teval(self._df0dx, T,X,U, self.v)
+    def f0_x(self, T, X, U, dt=1):
+        return _teval(self._f0_x, T,X,U, self.v)
 
-    def dfdu(self, T, X, U, dt=1):
-        return _teval(self._dfdu, T,X,U, self.v)
+    def f_u(self, T, X, U, dt=1):
+        return _teval(self._f_u, T,X,U, self.v)
 
-    def df0du(self, T, X, U, dt=1):
-        return _teval(self._df0du, T,X,U, self.v)
+    def f0_u(self, T, X, U, dt=1):
+        return _teval(self._f0_u, T,X,U, self.v)
 
     def Psi(self, t, X, U, alpha):
 
-        psie = -self.dFdx(X[-1])
+        psie = -self.F_x(X[-1])
 
         psi=[psie]
 
-        _df0dx=self.df0dx(t[:-1], X[:-1], U) # last element is useless
-        _dfdx =self.dfdx (t[:-1], X[:-1], U) # last element is useless
+        _f0_x=self.f0_x(t[:-1], X[:-1], U) # last element is useless
+        _f_x =self.f_x (t[:-1], X[:-1], U) # last element is useless
 
 
         tt=t[:-1]
@@ -180,9 +179,9 @@ class ParOptModel(object):
         while j>=1:
             i=tt[j]
             pp=p
-            _dfdx_t = transpose(_dfdx[i])
-            _df0dx_t = transpose(_df0dx[i])
-            pn = dot(_dfdx_t, pp) - alpha*_df0dx_t
+            _f_x_t = transpose(_f_x[i])
+            _f0_x_t = transpose(_f0_x[i])
+            pn = dot(_f_x_t, pp) - alpha*_f0_x_t
             psi.append(pn)
             p=pn
             j-=1
@@ -198,27 +197,27 @@ class ParOptModel(object):
         # so Psi[0] is Psi[t+1] at the start t
         return psi[::-1]
 
-    def dHdu(self, t, X, U, Psi):
-        _df0du=self.df0du(t[:-1], X[:-1], U)
-        _dfdu =self.dfdu (t[:-1], X[:-1], U)
+    def H_u(self, t, X, U, Psi):
+        _f0_u=self.f0_u(t[:-1], X[:-1], U)
+        _f_u =self.f_u (t[:-1], X[:-1], U)
         p=Psi
         if DEBUG>10:
-            print ("dfdu:", len(_dfdu))
+            print ("f_u:", len(_f_u))
             print ("psi:", len(p))
-            print ("df0du", len(_df0du))
-        _s=[dot(transpose(Psi[i]),_dfdu[i]) for i in range(len(X)-1)] # Psi[i] is shifted left to 1 step.
-        return array(_s) + _df0du # FIXME Check dot operation.
+            print ("f0_u", len(_f0_u))
+        _s=[dot(transpose(Psi[i]),_f_u[i]) for i in range(len(X)-1)] # Psi[i] is shifted left to 1 step.
+        return array(_s) + _f0_u # FIXME Check dot operation.
 
     def start_control(self):
         raise RuntimeError("should be implemented by subclass")
 
     #------------ These functions must be defined for Second Order Improvement Process -----
 
-    def dPsidalpha(self, t, X, U):
-        psie = -self.dFdx(X[-1])
+    def Psi_alpha(self, t, X, U):
+        psie = -self.F_x(X[-1])
         psi=[psie]
-        _df0dx=self.df0dx(t, X, U) # last element is useless
-        _dfdx =self.dfdx (t, X, U) # last element is useless
+        _f0_x=self.f0_x(t, X, U) # last element is useless
+        _f_x =self.f_x (t, X, U) # last element is useless
 
         tt=t[:-1]
 
@@ -230,9 +229,9 @@ class ParOptModel(object):
         while j>=0:
             i=tt[j]
             pp=p
-            _dfdx_t = transpose(_dfdx[i])
-            _df0dx_t = transpose(_df0dx[i])
-            pn = dot(_dfdx_t, pp) - _df0dx_t
+            _f_x_t = transpose(_f_x[i])
+            _f0_x_t = transpose(_f0_x[i])
+            pn = dot(_f_x_t, pp) - _f0_x_t
             psi.append(pn)
             p=pn
             j-=1
@@ -243,12 +242,12 @@ class ParOptModel(object):
 
         return psi[::-1] # Really it is dPsidalpha
 
-    def dSigmadalpha(self, t, X, U):
-        sige  = -self.dFdxdx(X[-1])
+    def Sigma_alpha(self, t, X, U):
+        sige  = -self.F_x_x(X[-1])
         sig=[sige]
 
-        _df0dx=self.df0dx(t, X, U) # last element is useless
-        _dfdx =self.dfdx (t, X, U) # last element is useless
+        _f0_x=self._f0_x(t, X, U) # last element is useless
+        _f_x =self._f_x (t, X, U) # last element is useless
 
         tt=t[:-1]
 
@@ -260,9 +259,9 @@ class ParOptModel(object):
         while j>=0:
             i=tt[j]
             sp=s
-            _dfdx_t = transpose(_dfdx[i])
-            _df0dx_t = transpose(_df0dx[i])
-            sn = dot(_dfdx_t, sp) - _df0dx_t
+            _f_x_t = transpose(_f_x[i])
+            _f0_x_t = transpose(_f0_x[i])
+            sn = dot(_f_x_t, sp) - _f0_x_t
             sig.append(sn)
             s=sn
             j-=1
@@ -338,8 +337,8 @@ class ParOptProcess(object):
         return self.trajectory(Un), Un
 
     def dU(self, t, X, U, **kwargs):
-        _dHdu=self.model.dHdu(t, X, U, Psi=kwargs['Psi'])
-        return _dHdu * kwargs['beta']
+        _H_u=self.model.H_u(t, X, U, Psi=kwargs['Psi'])
+        return _H_u * kwargs['beta']
 
 class SeconOrderParOptProcess(ParOptProcess):
     """A second order parametric optimization process
@@ -388,8 +387,8 @@ class SeconOrderParOptProcess(ParOptProcess):
 
 
     def dU(self, t, X, U, **kwargs):
-        _dHdu=self.model.dHdu(t, X, U, Psi=kwargs['Psi'])
-        return _dHdu * kwargs['beta']
+        _H_u=self.model.H_u(t, X, U, Psi=kwargs['Psi'])
+        return _H_u * kwargs['beta']
 
     def Ha(self, t, x, u, Psi, alpha):
         pt=transpose(Psi)
@@ -512,7 +511,7 @@ def test2d():
 if __name__=="__main__":
     print ("ok")
 
-    TEST='test2'
+    TEST='test2d'
     LOG='restats.log'
     if PROFILE:
         import cProfile, pstats
