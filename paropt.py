@@ -45,35 +45,39 @@ def _comp(exp):
 
 def _eval(f, t, xc, uc, V):
     g={'t':t, 'array':array}
-    for i, x in enumerate(V.x[0]):
-        g.setdefault(str(x),xc[0][i])
-    for i, u in enumerate(V.u[0]):
-        g.setdefault(str(u),uc[0][i])
+    for i, x in enumerate(V.x):
+        g.setdefault(str(x[0]),xc[i][0])
+    for i, u in enumerate(V.u):
+        g.setdefault(str(u[0]),uc[i][0])
 
     rc = eval(f, g)
     return rc
 
-def _vdiff(F, V, num=1):
-    answer=[]
+def _vdiff(F, V, num=1): # F is a column
+
     DF=[]
 
-    for f in F[0]:
+    for f in F:
         dfs=[]
-        for v in V[0]:
-            df=diff(f, v, num)
+        for v in V:
+            df=diff(f[0], v[0], num)
             dfs.append(df)
         DF.append(dfs)
     return DF
 
-def _diff(f, V, num=1):
-    answer=[]
-    DF=[]
+def _mdiff(F_v, V, num=1): # F is not transposed
+    F_v_v=[]
+    for row in F_v:
+        print (row)
+        F_v_v.append(_vdiff([[r] for r in row ], V))
+    return F_v_v
 
-    dfs=[]
-    for v in V[0]:
-        df=diff(f, v, num)
-        dfs.append(df)
-    DF.append(dfs)
+def _diff(f, V, num=1):
+
+    DF=[]
+    for v in V:
+        df=diff(f, v[0], num)
+        DF.append([df])
     return DF
 
 def _teval(d, T,X,U, V): # d is a code of function to be evaluated at all T time instance.
@@ -108,24 +112,41 @@ class ParOptModel(object):
 
         t, x, u = self.v.t, self.v.x, self.v.u
 
-        self._f=self.f(t, x, u)
-        self._f0=self.f0(t, x, u)
-        self._F=self.F(x)
+        self.v.f=self.f(t, x, u)
+        self.v.f0=self.f0(t, x, u)
+        self.v.F=self.F(x)
 
         # -----------------
-        self._f_x=_vcomp(_vdiff(self._f, x))
-        self._f0_x=_vcomp(_diff(self._f0, x))
-        self._F_x=_vcomp(_diff(self._F, x))
 
-        self._f_u=_vcomp(_vdiff(self._f, u))
-        self._f0_u=_vcomp(_diff(self._f0, u))
+        self.v.f_x=_vdiff(self.v.f, x)
+        self.v.f0_x=_diff(self.v.f0, x)
+
+        self.v.f_x_x=_mdiff(self.v.f_x, x)
+
+        print ("f:", self.v.f)
+        print ("f_x:", self.v.f_x)
+        print ("f_x_x:", self.v.f_x_x)
+
+        print ("f0:", self.v.f0)
+        print ("f0_x:", self.v.f0_x)
+
+        self._f_x=_vcomp(self.v.f_x)
+        self._f0_x=_vcomp(self.v.f0_x)
+
+        self.v.F_x=_diff(self.v.F, x)
+        print ("F:", self.v.F)
+        print ("F_x:", self.v.F_x)
+        self._F_x=_vcomp(self.v.F_x)
+
+        self._f_u=_vcomp(_vdiff(self.v.f, u))
+        self._f0_u=_vcomp(_diff(self.v.f0, u))
 
         if DEBUG>=5:
-            print (self._f, self._f0, self._f_x, self._f0_x, sep=", ")
+            print (self.v.f, self.v.f0, self._f_x, self._f0_x, sep=", ")
 
         if DEBUG>=5:
-            print (self._F, self._F_x, sep=", ")
-            print (self._f, self._f0, self._f_u, self._f0_u, sep=", ")
+            print (self.v.F, self._F_x, sep=", ")
+            print (self.v.f, self.v.f0, self._f_u, self._f0_u, sep=", ")
         self.__cache__={}
 
     def I(self, X, U):
@@ -165,6 +186,7 @@ class ParOptModel(object):
 
         psi=[psie]
 
+
         _f0_x=self.f0_x(t[:-1], X[:-1], U) # last element is useless
         _f_x =self.f_x (t[:-1], X[:-1], U) # last element is useless
 
@@ -181,6 +203,7 @@ class ParOptModel(object):
             pp=p
             _f_x_t = transpose(_f_x[i])
             _f0_x_t = transpose(_f0_x[i])
+
             pn = dot(_f_x_t, pp) - alpha*_f0_x_t
             psi.append(pn)
             p=pn
@@ -198,6 +221,8 @@ class ParOptModel(object):
         return psi[::-1]
 
     def H_u(self, t, X, U, Psi):
+
+        import pdb; pdb.set_trace()
         _f0_u=self.f0_u(t[:-1], X[:-1], U)
         _f_u =self.f_u (t[:-1], X[:-1], U)
         p=Psi
@@ -206,7 +231,8 @@ class ParOptModel(object):
             print ("psi:", len(p))
             print ("f0_u", len(_f0_u))
         _s=[dot(transpose(Psi[i]),_f_u[i]) for i in range(len(X)-1)] # Psi[i] is shifted left to 1 step.
-        return array(_s) + _f0_u # FIXME Check dot operation.
+        return _s + _f0_u # FIXME Check dot operation.
+        #return array(_s) + _f0_u # FIXME Check dot operation.
 
     def start_control(self):
         raise RuntimeError("should be implemented by subclass")
@@ -482,6 +508,47 @@ class LinModel2d2du(ParOptModel):
 
         return self.h * (x0*x0+x1*x1+u0*u0+u1*u1)
 
+class LinModel2d2du1(ParOptModel):
+    """Possibly not a simple linear test model.
+    """
+    def __init__(self):
+        X0=array([[1.0],[1.0]])
+        self.h = Ht
+        self.num = int((1.0-0.0) / self.h)
+        self.T = linspace(
+            start=0.0,
+            stop=1.0,
+            num=self.num
+        )
+        self.t = arange(len(self.T))
+        ParOptModel.__init__(self, X0=X0, N=2, M=2)
+
+    def start_control(self):
+        U = [array([[0.0],[0.0]]) for t in self.t[:-1]]
+        return array(U)
+
+    def F(self, x):
+        """ X and U are lists of vectors (arrays)
+        """
+        return 0.0
+
+    def f(self, t, x, u, dt=1):
+        """ X ia a vector of the previous state
+        """
+        ((x0,),(x1,))=x
+        ((u0,),(u1,))=u
+
+        return [[x0**5+self.h*u0],[x1**5+self.h*u1]]
+
+
+    def f0(self, t, x, u, dt=1):
+        """ X ia a vector of the previous state
+        """
+        ((x0,),(x1,))=x
+        ((u0,),(u1,))=u
+
+        return self.h * (x0*x0+x1*x1+u0*u0+u1*u1)
+
 
 def test2():
     m = LinModel1()
@@ -497,6 +564,19 @@ def test2():
 
 def test2d():
     m = LinModel2d2du()
+
+    ip=ParOptProcess(m)
+    I, X, U, it, _ = ip.optimize(m.t, eps=0.001, iters=2000)
+    print ("")
+    print ("X,     U,   ")
+    for x,u in zip(X,U):
+        print (x,u)
+    print ("Result is:", I, "in", it, "iters")
+    print (_)
+
+def test2d1():
+    m = LinModel2d2du1()
+    return
 
     ip=ParOptProcess(m)
     I, X, U, it, _ = ip.optimize(m.t, eps=0.001, iters=2000)
