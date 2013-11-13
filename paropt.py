@@ -333,7 +333,6 @@ class ParOptProcess(object):
     def improve(self, t, X, U, **kwargs): # (a,b,c)
         Psi=self.model.Psi(t, X, U, self.alpha)
 
-        import pudb; pu.db
         _dU=self.dU(t, X, U, Psi=Psi, beta=kwargs['beta'])
         Un = U[:-1] + _dU
         return self.trajectory(Un), Un
