@@ -68,7 +68,6 @@ def _vdiff(F, V, num=1): # F is a column
 def _mdiff(F_v, V, num=1): # F is not transposed
     F_v_v=[]
     for row in F_v:
-        print (row)
         F_v_v.append(_vdiff([[r] for r in row ], V))
     return F_v_v
 
@@ -84,7 +83,7 @@ def _teval(d, T,X,U, V): # d is a code of function to be evaluated at all T time
     rc=[]
     for t in T:
         rc.append(_eval(d, t, X[t], U[t], V))
-    return rc
+    return array(rc)
 
 
 class Helper():
@@ -123,19 +122,21 @@ class ParOptModel(object):
 
         self.v.f_x_x=_mdiff(self.v.f_x, x)
 
-        print ("f:", self.v.f)
-        print ("f_x:", self.v.f_x)
-        print ("f_x_x:", self.v.f_x_x)
+        if DEBUG>=5:
+            print ("f:", self.v.f)
+            print ("f_x:", self.v.f_x)
+            print ("f_x_x:", self.v.f_x_x)
 
-        print ("f0:", self.v.f0)
-        print ("f0_x:", self.v.f0_x)
+            print ("f0:", self.v.f0)
+            print ("f0_x:", self.v.f0_x)
 
         self._f_x=_vcomp(self.v.f_x)
         self._f0_x=_vcomp(self.v.f0_x)
 
         self.v.F_x=_diff(self.v.F, x)
-        print ("F:", self.v.F)
-        print ("F_x:", self.v.F_x)
+        if DEBUG>=5:
+            print ("F:", self.v.F)
+            print ("F_x:", self.v.F_x)
         self._F_x=_vcomp(self.v.F_x)
 
         self._f_u=_vcomp(_vdiff(self.v.f, u))
@@ -204,7 +205,7 @@ class ParOptModel(object):
             _f_x_t = transpose(_f_x[i])
             _f0_x_t = transpose(_f0_x[i])
 
-            pn = dot(_f_x_t, pp) - alpha*_f0_x_t
+            pn = dot(_f_x_t, pp) - alpha*_f0_x[i] # _t
             psi.append(pn)
             p=pn
             j-=1
@@ -218,11 +219,11 @@ class ParOptModel(object):
         #    psi[i]=psi[lp-i-1]
         #    psi[lp-i-1]=p
         # so Psi[0] is Psi[t+1] at the start t
+
         return psi[::-1]
 
     def H_u(self, t, X, U, Psi):
 
-        import pdb; pdb.set_trace()
         _f0_u=self.f0_u(t[:-1], X[:-1], U)
         _f_u =self.f_u (t[:-1], X[:-1], U)
         p=Psi
@@ -230,7 +231,7 @@ class ParOptModel(object):
             print ("f_u:", len(_f_u))
             print ("psi:", len(p))
             print ("f0_u", len(_f0_u))
-        _s=[dot(transpose(Psi[i]),_f_u[i]) for i in range(len(X)-1)] # Psi[i] is shifted left to 1 step.
+        _s=array([dot(_f_u[i], Psi[i]) for i in range(len(X)-1)]) # Psi[i] is shifted left to 1 step.
         return _s + _f0_u # FIXME Check dot operation.
         #return array(_s) + _f0_u # FIXME Check dot operation.
 
@@ -314,8 +315,10 @@ class ParOptProcess(object):
 
     def optimize(self, t, eps=0.001, iters=1000):
         Up=self.model.start_control()
+
         Xp=self.trajectory(Up)
         Ip=self.model.I(Xp,Up)
+
 
         it = 1
         while True:
@@ -349,7 +352,6 @@ class ParOptProcess(object):
     def trajectory(self, U):
         x0=self.model.X0
         X = [x0]
-
         for t, u in enumerate(U): # (0, u0), (1, u1)
             xn=self.model.f(t, X[t], u)
             X.append(xn)
