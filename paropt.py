@@ -150,6 +150,35 @@ class ParOptModel(object):
             print (self.v.f, self.v.f0, self._f_u, self._f0_u, sep=", ")
         self.__cache__={}
 
+    def find_second_order_diffs(self):
+        x=self.v.x
+        u=self.v.u
+        self.v.f_x_x=_mdiff(self.v.f_x, x)
+        self.v.F_x_x=_vdiff(self.v.F_x, x)
+        self.v.f0_x_x=_vdiff(self.v.f0_x, x)
+        if DEBUG>=6:
+            print ('f_x_x =', self.v.f_x_x)
+            print ('F_x_x =', self.v.f_x_x)
+            print ('f0_x_x=', self.v.f_x_x)
+        self._f_x_x=_vcomp(self.v.f_x_x)
+        self._F_x_x=_vcomp(self.v.F_x_x)
+        self._f0_x_x=_vcomp(self.v.f0_x_x)
+        # ---- f_u_u, f_u_x, ...
+        self.v.f_u_x=_mdiff(self.v.f_u, x)
+        self.v.f_u_u=_mdiff(self.v.f_u, u)
+        self.v.f0_u_x=_vdiff(self.v.f0_u, x)
+        self.v.f0_u_u=_vdiff(self.v.f0_u, u)
+        if DEBUG>=6:
+            print ('f_u_x =', self.v.f_u_x)
+            print ('f_u_u =', self.v.f_u_u)
+            print ('f0_u_x=', self.v.f0_u_x)
+            print ('f0_u_u=', self.v.f0_u_u)
+
+        self._f_u_x=_vcomp(self.v.f_u_x)
+        self._f_u_u=_vcomp(self.v.f_u_u)
+        self._f0_u_x=_vcomp(self.v.f0_u_x)
+        self._f0_u_u=_vcomp(self.v.f0_u_u)
+
     def I(self, X, U):
         def _add(acc, t):
             return acc + self.f0(t, X[t], U[t])
@@ -240,9 +269,12 @@ class ParOptModel(object):
 
     #------------ These functions must be defined for Second Order Improvement Process -----
 
-    def Psi_alpha(self, t, X, U):
+    def krot_d_dd(self, t, X, U):
         psie = -self.F_x(X[-1])
         psi=[psie]
+        sige  = -self.F_x_x(X[-1])
+        sig=[sige]
+
         _f0_x=self.f0_x(t, X, U) # last element is useless
         _f_x =self.f_x (t, X, U) # last element is useless
 
@@ -252,55 +284,53 @@ class ParOptModel(object):
         # rt.reverse()
         j=len(tt)-1
         p=psie
-
-        while j>=0:
-            i=tt[j]
-            pp=p
-            _f_x_t = transpose(_f_x[i])
-            _f0_x_t = transpose(_f0_x[i])
-            pn = dot(_f_x_t, pp) - _f0_x_t
-            psi.append(pn)
-            p=pn
-            j-=1
-        # ----
-
-
-        psi=array(psi)
-
-        return psi[::-1] # Really it is dPsidalpha
-
-    def Sigma_alpha(self, t, X, U):
-        sige  = -self.F_x_x(X[-1])
-        sig=[sige]
-
-        _f0_x=self._f0_x(t, X, U) # last element is useless
-        _f_x =self._f_x (t, X, U) # last element is useless
-
-        tt=t[:-1]
-
-        # -----
-        # rt.reverse()
-        j=len(tt)-1
         s=sige
 
         while j>=0:
             i=tt[j]
+            pp=p
             sp=s
             _f_x_t = transpose(_f_x[i])
             _f0_x_t = transpose(_f0_x[i])
-            sn = dot(_f_x_t, sp) - _f0_x_t
+            _f_x_i = _f_x[i]
+            _H_x_x_i = H_x_x[i]
+
+            pn = dot(_f_x_t, pp) - _f0_x_t
+            sn = dot(dot(_f_x_t, sp), _f_x_i) + _H_x_x_i
+
+            psi.append(pn)
             sig.append(sn)
+            p=pn
             s=sn
             j-=1
         # ----
 
-
+        psi=array(psi)
         sig=array(sig)
 
-        return sig[::-1] # Really it is dSigmadalpha
+        return psi[::-1], # Really it is dPsidalpha
+               sig[::-1] # Really it is dSigmadalpha
 
+    def f_x_x(self, T, X, U, dt=1):
+        return _teval(self._f_x_x, T,X,U, self.v)
 
+    def F_x_x(self, T, X, U, dt=1):
+        return _teval(self._F_x_x, T,X,U, self.v)
 
+    def f0_x_x(self, T, X, U, dt=1):
+        return _teval(self._f0_x_x, T,X,U, self.v)
+
+    def f_u_x(self, T, X, U, dt=1):
+        return _teval(self._f_u_x, T,X,U, self.v)
+
+    def f_u_u(self, T, X, U, dt=1):
+        return _teval(self._f_u_u, T,X,U, self.v)
+
+    def f0_u_x(self, T, X, U, dt=1):
+        return _teval(self._f0_u_x, T,X,U, self.v)
+
+    def f0_u_u(self, T, X, U, dt=1):
+        return _teval(self._f0_u_x, T,X,U, self.v)
 
 class ParOptProcess(object):
     """This calss corresponds to a optimizational model.
@@ -375,6 +405,7 @@ class SeconOrderParOptProcess(ParOptProcess):
         X0=array([0.0, 0.0])
         self.t = arange(2)
         ParOptModel.__init__(self, X0=X0)
+        self.find_second_order_diffs()
 
 
     def start_control(self):
