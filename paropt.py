@@ -308,8 +308,8 @@ class ParOptModel(object):
         psi=array(psi)
         sig=array(sig)
 
-        return psi[::-1], # Really it is dPsidalpha
-               sig[::-1] # Really it is dSigmadalpha
+        return psi[::-1], sig[::-1] # Really it is dPsidalpha
+                                    # Really it is dSigmadalpha
 
     def f_x_x(self, T, X, U, dt=1):
         return _teval(self._f_x_x, T,X,U, self.v)
@@ -349,12 +349,16 @@ class ParOptProcess(object):
         Xp=self.trajectory(Up)
         Ip=self.model.I(Xp,Up)
 
-
         it = 1
         while True:
             beta = self.beta
+            Psi=self.model.Psi(t, Xp, Up, self.alpha)
+            _H_u=self.model.H_u(t, Xp, Up, Psi=Psi)
             while True:
-                (Xn, Un) = self.improve(t, Xp, Up, beta=beta)
+                _dU=_H_u*beta
+                Un = Up + _dU
+                Xn = self.trajectory(Un)
+
                 In = self.model.I(Xn, Un)
 
                 dI = Ip-In
@@ -387,16 +391,6 @@ class ParOptProcess(object):
             X.append(xn)
 
         return array(X)
-
-    def improve(self, t, X, U, **kwargs): # (a,b,c)
-        Psi=self.model.Psi(t, X, U, self.alpha)
-        _dU=self.dU(t, X, U, Psi=Psi, beta=kwargs['beta'])
-        Un = U + _dU
-        return self.trajectory(Un), Un
-
-    def dU(self, t, X, U, **kwargs):
-        _H_u=self.model.H_u(t, X, U, Psi=kwargs['Psi'])
-        return _H_u * kwargs['beta']
 
 class SeconOrderParOptProcess(ParOptProcess):
     """A second order parametric optimization process
