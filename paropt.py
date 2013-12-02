@@ -9,7 +9,7 @@ from sympy import symbols, diff, Symbol
 #DEBUG = 20
 DEBUG = 0
 PROFILE = False # True
-Ht = 0.01
+Ht = 0.2
 import time
 
 def constant(function):
@@ -293,9 +293,17 @@ class ParOptModel(object):
             _f_x_t = transpose(_f_x[i])
             _f0_x_t = transpose(_f0_x[i])
             _f_x_i = _f_x[i]
-            _H_x_x_i = H_x_x[i]
 
             pn = dot(_f_x_t, pp) - _f0_x_t
+
+            _H_x_x_i = -f0_x_x[i]
+            print ("----------------")
+            print (f0_x_x[i])
+            print (pp)
+
+            #for p_i in range(len)
+
+
             sn = dot(dot(_f_x_t, sp), _f_x_i) + _H_x_x_i
 
             psi.append(pn)
@@ -395,11 +403,11 @@ class ParOptProcess(object):
 class SeconOrderParOptProcess(ParOptProcess):
     """A second order parametric optimization process
     """
-    def __init__(self):
+    def __init__(self, model):
         X0=array([0.0, 0.0])
         self.t = arange(2)
-        ParOptModel.__init__(self, X0=X0)
-        self.find_second_order_diffs()
+        ParOptProcess.__init__(self, model)
+        self.model.find_second_order_diffs()
 
 
     def start_control(self):
@@ -592,7 +600,7 @@ def test2():
 def test2d():
     m = LinModel2d2du()
 
-    ip=ParOptProcess(m)
+    ip=SeconOrderParOptProcess(m)
     I, X, U, it, _ = ip.optimize(m.t, eps=0.001, iters=2000)
     print ("")
     print ("X,     U,   ")
