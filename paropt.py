@@ -139,8 +139,10 @@ class ParOptModel(object):
             print ("F_x:", self.v.F_x)
         self._F_x=_vcomp(self.v.F_x)
 
-        self._f_u=_vcomp(_vdiff(self.v.f, u))
-        self._f0_u=_vcomp(_diff(self.v.f0, u))
+        self.v.f_u=_vdiff(self.v.f, u)
+        self.v.f0_u=_diff(self.v.f0, u)
+        self._f_u=_vcomp(self.v.f_u)
+        self._f0_u=_vcomp(self.v.f0_u)
 
         if DEBUG>=5:
             print (self.v.f, self.v.f0, self._f_x, self._f0_x, sep=", ")
@@ -425,6 +427,7 @@ class SeconOrderParOptProcess(ParOptProcess):
         while True:
             # Something done with alphas and
             while True:
+                self.model.krot_d_dd(t, Xp, Up)
                 (Xn, Un, Psi) = self.improve(t, Xp, Up) #, alpha=)
                 In = self.model.I(Xn, Un)
                 dI = Ip-In
@@ -446,14 +449,6 @@ class SeconOrderParOptProcess(ParOptProcess):
 
         raise RuntimeError("this should be not reached")
 
-
-    def dU(self, t, X, U, **kwargs):
-        _H_u=self.model.H_u(t, X, U, Psi=kwargs['Psi'])
-        return _H_u * kwargs['beta']
-
-    def Ha(self, t, x, u, Psi, alpha):
-        pt=transpose(Psi)
-        return pt.dot(self.f(t,x,u))-alpha*self.f0(t,x,u)
 
 # -------------------- tests -------------------------------------------------
 
