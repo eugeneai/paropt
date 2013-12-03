@@ -85,7 +85,6 @@ def _teval(d, T,X,U, V): # d is a code of function to be evaluated at all T time
         rc.append(_eval(d, t, X[t], U[t], V))
     return array(rc)
 
-
 class Helper():
     pass
 
@@ -218,25 +217,28 @@ class ParOptModel(object):
 
         psi=[psie]
 
+        #for the rest of the interval
+        X=X[:-1]
+        t=t[:-1]
 
-        _f0_x=self.f0_x(t[:-1], X[:-1], U) # last element is useless
-        _f_x =self.f_x (t[:-1], X[:-1], U) # last element is useless
+        _f0_x=self.f0_x(t, X, U) # last element is useless
+        _f_x =self.f_x (t, X, U) # last element is useless
 
 
-        tt=t[:-1]
-
-        # -----
-        # rt.reverse()
-        j=len(tt)-1
+        j=len(t)-1
         p=psie
 
         while j>=1:
-            i=tt[j]
+            i=t[j]
             pp=p
             _f_x_t = transpose(_f_x[i])
-            _f0_x_t = transpose(_f0_x[i])
+            #_f0_x_t = transpose(_f0_x[i])
 
-            pn = dot(_f_x_t, pp) - alpha*_f0_x[i] # _t
+            pn = dot(_f_x_t, pp) - alpha*_f0_x[i]
+
+            #if j==1:
+            #    print (_f_x_t, pp, _f0_x_t, "=>", pn )
+            #    print (self.v[[0.4*x0], [0.4*x1]].f0_x)
             psi.append(pn)
             p=pn
             j-=1
@@ -244,12 +246,6 @@ class ParOptModel(object):
         # ----
 
         psi=array(psi)
-        #lp=len(psi)
-        #for i in range(len(psi) / 2 ):
-        #    p=psi[i]
-        #    psi[i]=psi[lp-i-1]
-        #    psi[lp-i-1]=p
-        # so Psi[0] is Psi[t+1] at the start t
 
         return psi[::-1]
 
@@ -277,41 +273,52 @@ class ParOptModel(object):
         sige  = -self.F_x_x(X[-1])
         sig=[sige]
 
+        #for the rest of the interval
+        X=X[:-1]
+        t=t[:-1]
+
         _f0_x=self.f0_x(t, X, U) # last element is useless
         _f_x =self.f_x (t, X, U) # last element is useless
+        _f0_x_x=self.f0_x_x(t, X, U) # last element is useless
+        _f_x_x=self.f_x_x(t, X, U) # last element is useless
 
-        tt=t[:-1]
 
-        # -----
-        # rt.reverse()
-        j=len(tt)-1
-        p=psie
-        s=sige
+        j=len(t)-1
+        pp=psie
+        sp=sige
 
-        while j>=0:
-            i=tt[j]
-            pp=p
-            sp=s
+        while j>=1:
+            i=t[j]
             _f_x_t = transpose(_f_x[i])
-            _f0_x_t = transpose(_f0_x[i])
             _f_x_i = _f_x[i]
 
-            pn = dot(_f_x_t, pp) - _f0_x_t
+            pn = dot(_f_x_t, pp) - _f0_x[i]
 
-            _H_x_x_i = -f0_x_x[i]
-            print ("----------------")
-            print (f0_x_x[i])
-            print (pp)
+            #if 1:
+            #    print (_f_x_t, pp, _f0_x[i], "=>", pn )
+            #    print (self.v.f0_x)
+
+            H_x_x_i = -_f0_x_x[i] # !
+            _f_x_x_i= _f_x_x[i] # !
+
+            for k, _p in enumerate(pn):
+                # print (_p[0], _f_x_x_i[k])
+                H_x_x_i += _p[0]*_f_x_x_i[k]
+
+            if 0:
+                print ("----------------")
+                print (_f_x_x[i], self.v.f_x_x, self.v.f, ":", _f_x_x[i][0])
+                print (pp)
 
             #for p_i in range(len)
 
 
-            sn = dot(dot(_f_x_t, sp), _f_x_i) + _H_x_x_i
+            sn = dot(dot(_f_x_t, sp), _f_x_i) + H_x_x_i
 
             psi.append(pn)
             sig.append(sn)
-            p=pn
-            s=sn
+            pp=pn
+            sp=sn
             j-=1
         # ----
 
@@ -324,8 +331,8 @@ class ParOptModel(object):
     def f_x_x(self, T, X, U, dt=1):
         return _teval(self._f_x_x, T,X,U, self.v)
 
-    def F_x_x(self, T, X, U, dt=1):
-        return _teval(self._F_x_x, T,X,U, self.v)
+    def F_x_x(self, xe):
+        return eval(self._F_x_x, {'x':xe, 'array':array})
 
     def f0_x_x(self, T, X, U, dt=1):
         return _teval(self._f0_x_x, T,X,U, self.v)
@@ -427,7 +434,7 @@ class SeconOrderParOptProcess(ParOptProcess):
         while True:
             # Something done with alphas and
             while True:
-                self.model.krot_d_dd(t, Xp, Up)
+                Psi, Sigma = self.model.krot_d_dd(t, Xp, Up)
                 (Xn, Un, Psi) = self.improve(t, Xp, Up) #, alpha=)
                 In = self.model.I(Xn, Un)
                 dI = Ip-In
@@ -595,6 +602,7 @@ def test2():
 def test2d():
     m = LinModel2d2du()
 
+    #ip=ParOptProcess(m)
     ip=SeconOrderParOptProcess(m)
     I, X, U, it, _ = ip.optimize(m.t, eps=0.001, iters=2000)
     print ("")
