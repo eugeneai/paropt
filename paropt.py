@@ -467,13 +467,6 @@ class SeconOrderParOptProcess(ParOptProcess):
         ParOptProcess.__init__(self, model)
         self.model.find_second_order_diffs()
 
-
-    def start_control(self):
-        return [
-            array([0.1, 0.0]),
-            array([0.2, 1.0])
-        ]
-
     def optimize(self, t, eps=0.001, iters=1000):
         Up=self.model.start_control()
         Xp=self.trajectory(Up)
@@ -490,39 +483,52 @@ class SeconOrderParOptProcess(ParOptProcess):
 
         f_part=linalg.inv(f_part)
 
+        v=self.model.v
 
         while True:
             # Something done with alphas and
             Psi, Sigma = self.model.krot_d_dd(t, Xp, Up)
             Un = numpy.copy(Up)
-            dU = numpy.copy(Up)
+            #dU = numpy.copy(Up)
             Xn = numpy.copy(Xp)
-            dX = numpy.copy(Xp)
+            #dX = numpy.copy(Xp)
+
+            Xn_p_i=Xp[0]
+            while i, psi in enumerate(Psi):
+                Xp_i=Xp[i]
+                Up_i=Up[i]
+                H_u_i=H_u[i]
+
+                dX_i=Xn_p_i-Xp_i
+                dU_i=f_part[i] * (H_u_a[i]+dot(s_part[i],dX_i))
+                Un_i = Up_i + dU_i
+
+                Xn_i=self.model.fun(self.model.f(t[i], Xn_p_i, Un_i))
+
+                Un[i]=Un_i
+                Xn[i+1]=Xn_i
+
+                Xn_p_i=Xn_i
 
 
-            while True:
-                i = i
 
-                In = self.model.I(Xn, Un)
-                dI = Ip-In
-                if DEBUG>5:
-                    print ("DI:", dI)
-                if abs(dI)<eps:
-                    return In, Xn, Un, it, "Opt"
-                if iters<=0:
-                    return In, Xn, Un, it, "Nonoptimal"
-                iters-=1
-                it+=1
+            In = self.model.I(Xn, Un)
+            dI = Ip-In
+            if DEBUG>5:
+                print ("DI:", dI)
+            if abs(dI)<eps:
+                return In, Xn, Un, it, "Opt"
+            if iters<=0:
+                return In, Xn, Un, it, "Nonoptimal"
+            iters-=1
+            it+=1
 
-                if In>=Ip:
-                    beta/=2
-                    continue
-                else:
-                    Xp, Up, Ip = Xn, Un, In
-                    break
-
-        raise RuntimeError("this should be not reached")
-
+            if In>=Ip:
+                beta/=2
+                continue
+            else:
+                Xp, Up, Ip = Xn, Un, In
+                break
 
 # -------------------- tests -------------------------------------------------
 
