@@ -308,9 +308,11 @@ class ParOptModel(object):
 
     #------------ These functions must be defined for Second Order Improvement Process -----
 
-    def krot_d_dd(self, t, X, U):
-        psie = -self.F_x(X[-1])
-        psi=[psie]
+    def krot_d_dd(self, t, X, U, alpha=1.0):
+        psi=self.Psi(t, X, U, alpha=alpha)
+        H_x_x=self.H((self.v.x,self.v.x), t, X, U, Psi, alpha=alpha)
+
+
         sige  = -self.F_x_x(X[-1])
         sig=[sige]
 
@@ -325,7 +327,6 @@ class ParOptModel(object):
 
 
         j=len(t)-1
-        pp=psie
         sp=sige
 
         while j>=1:
@@ -333,40 +334,16 @@ class ParOptModel(object):
             _f_x_t = transpose(_f_x[i])
             _f_x_i = _f_x[i]
 
-            pn = dot(_f_x_t, pp) - _f0_x[i]
+            pn = psi[i]
 
-            #if 1:
-            #    print (_f_x_t, pp, _f0_x[i], "=>", pn )
-            #    print (self.v.f0_x)
-
-            H_x_x_i = -_f0_x_x[i] # !
-            _f_x_x_i= _f_x_x[i] # !
-
-            for k, _p in enumerate(pn):
-                # print (_p[0], _f_x_x_i[k])
-                H_x_x_i += _p[0]*_f_x_x_i[k]
-
-            if 0:
-                print ("----------------")
-                print (_f_x_x[i], self.v.f_x_x, self.v.f, ":", _f_x_x[i][0])
-                print (pp)
-
-            #for p_i in range(len)
-
-
+            H_x_x_i = H_x_x[i]
             sn = dot(dot(_f_x_t, sp), _f_x_i) + H_x_x_i
-
-            psi.append(pn)
             sig.append(sn)
-            pp=pn
             sp=sn
             j-=1
-        # ----
 
-        psi=array(psi)
         sig=array(sig)
-
-        return psi[::-1], sig[::-1] # Really it is dPsidalpha
+        return psi, sig[::-1] # Really it is dPsidalpha
                                     # Really it is dSigmadalpha
 
     def f_x_x(self, T, X, U, dt=1):
