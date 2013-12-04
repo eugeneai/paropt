@@ -105,11 +105,11 @@ class ParOptModel(object):
         a=[]
         for i in range(N):
             a.append([Symbol('x%s' % i)])
-        self.v.x=a
+        self.v.x=tuple(a)
         a=[]
         for i in range(M):
             a.append([Symbol('u%s' % i)])
-        self.v.u=a
+        self.v.u=tuple(a)
 
         t, x, u = self.v.t, self.v.x, self.v.u
 
@@ -119,10 +119,17 @@ class ParOptModel(object):
 
         # -----------------
 
+        v=self.v
+        v.df={}
+        v.df0={}
+        v.dF={}
         self.v.f_x=_vdiff(self.v.f, x)
+        v.df[(x,)]=v.f_x
         self.v.f0_x=_diff(self.v.f0, x)
+        v.df0[(x,)]=v.f0_x
 
         self.v.f_x_x=_mdiff(self.v.f_x, x)
+        c.df[(x,x)]=v.f_x_x
 
         if DEBUG>=5:
             print ("f:", self.v.f)
@@ -132,19 +139,32 @@ class ParOptModel(object):
             print ("f0:", self.v.f0)
             print ("f0_x:", self.v.f0_x)
 
+        self.c=Helper()
+        c=self.c
+        c.df={}
+        c.df0={}
+        c.dF={}
         self._f_x=_vcomp(self.v.f_x)
+        c.df[(x,)]=self._f_x
         self._f0_x=_vcomp(self.v.f0_x)
+        c.df0[(x,)]=self._f0_x
 
         self.v.F_x=_diff(self.v.F, x)
+        v.dF[(x,)]=v.F_x
         if DEBUG>=5:
             print ("F:", self.v.F)
             print ("F_x:", self.v.F_x)
         self._F_x=_vcomp(self.v.F_x)
+        c.dF[(x,)]=self._F_x
 
         self.v.f_u=_vdiff(self.v.f, u)
+        v.df[(u,)]=v.f_u
         self.v.f0_u=_diff(self.v.f0, u)
+        v.df0[(u,)]=v.f0_u
         self._f_u=_vcomp(self.v.f_u)
+        c.df[(u,)]=self._f_u
         self._f0_u=_vcomp(self.v.f0_u)
+        c.df0[(u,)]=self._f0_u
 
         if DEBUG>=5:
             print (self.v.f, self.v.f0, self._f_x, self._f0_x, sep=", ")
@@ -157,21 +177,33 @@ class ParOptModel(object):
     def find_second_order_diffs(self):
         x=self.v.x
         u=self.v.u
+        c=self.c
+        v=self.v
         self.v.f_x_x=_mdiff(self.v.f_x, x)
+        v.df[(x,x)]=v.f_x_x
         self.v.F_x_x=_vdiff(self.v.F_x, x)
+        v.dF[(x,x)]=v.F_x_x
         self.v.f0_x_x=_vdiff(self.v.f0_x, x)
+        v.df0[(x,x)]=v.f0_x_x
         if DEBUG>=6:
             print ('f_x_x =', self.v.f_x_x)
             print ('F_x_x =', self.v.f_x_x)
             print ('f0_x_x=', self.v.f_x_x)
         self._f_x_x=_vcomp(self.v.f_x_x)
+        c.df[(x,x)]=self._f_x_x
         self._F_x_x=_vcomp(self.v.F_x_x)
+        c.dF[(x,x)]=self._F_x_x
         self._f0_x_x=_vcomp(self.v.f0_x_x)
+        c.df0[(x,x)]=self._f0_x_x
         # ---- f_u_u, f_u_x, ...
         self.v.f_u_x=_mdiff(self.v.f_u, x)
+        v.df[(u,x)]=self.v.f_u_x
         self.v.f_u_u=_mdiff(self.v.f_u, u)
+        v.df[(u,u)]=self.v.f_u_u
         self.v.f0_u_x=_vdiff(self.v.f0_u, x)
+        v.df0[(u,x)]=self.v.f0_u_x
         self.v.f0_u_u=_vdiff(self.v.f0_u, u)
+        v.df0[(u,u)]=self.v.f0_u_u
         if DEBUG>=6:
             print ('f_u_x =', self.v.f_u_x)
             print ('f_u_u =', self.v.f_u_u)
@@ -179,9 +211,13 @@ class ParOptModel(object):
             print ('f0_u_u=', self.v.f0_u_u)
 
         self._f_u_x=_vcomp(self.v.f_u_x)
+        c.df[(u,x)]=self._f_u_x
         self._f_u_u=_vcomp(self.v.f_u_u)
+        c.df[(u,u)]=self._f_u_u
         self._f0_u_x=_vcomp(self.v.f0_u_x)
+        c.df0[(u,x)]=self._f0_u_x
         self._f0_u_u=_vcomp(self.v.f0_u_u)
+        c.df0[(u,u)]=self._f0_u_u
 
     def I(self, X, U):
         def _add(acc, t):
