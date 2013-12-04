@@ -120,16 +120,17 @@ class ParOptModel(object):
         # -----------------
 
         v=self.v
-        v.df={}
-        v.df0={}
-        v.dF={}
+        f=v.f
+        f0=v.f0
+        F=f.F
+        v.fn={}
         self.v.f_x=_vdiff(self.v.f, x)
-        v.df[(x,)]=v.f_x
+        v.fn[(f,x)]=v.f_x
         self.v.f0_x=_diff(self.v.f0, x)
-        v.df0[(x,)]=v.f0_x
+        v.fn[(f0,x)]=v.f0_x
 
         self.v.f_x_x=_mdiff(self.v.f_x, x)
-        c.df[(x,x)]=v.f_x_x
+        f.fn[(f,x,x)]=v.f_x_x
 
         if DEBUG>=5:
             print ("f:", self.v.f)
@@ -141,30 +142,28 @@ class ParOptModel(object):
 
         self.c=Helper()
         c=self.c
-        c.df={}
-        c.df0={}
-        c.dF={}
+        c.fn={}
         self._f_x=_vcomp(self.v.f_x)
-        c.df[(x,)]=self._f_x
+        c.fn[(f,x)]=self._f_x
         self._f0_x=_vcomp(self.v.f0_x)
-        c.df0[(x,)]=self._f0_x
+        c.fn[(f0,x)]=self._f0_x
 
         self.v.F_x=_diff(self.v.F, x)
-        v.dF[(x,)]=v.F_x
+        v.fn[(F,x)]=v.F_x
         if DEBUG>=5:
             print ("F:", self.v.F)
             print ("F_x:", self.v.F_x)
         self._F_x=_vcomp(self.v.F_x)
-        c.dF[(x,)]=self._F_x
+        c.fn[(F,x)]=self._F_x
 
         self.v.f_u=_vdiff(self.v.f, u)
-        v.df[(u,)]=v.f_u
+        v.fn[(f,u)]=v.f_u
         self.v.f0_u=_diff(self.v.f0, u)
-        v.df0[(u,)]=v.f0_u
+        v.fn[(f0,u)]=v.f0_u
         self._f_u=_vcomp(self.v.f_u)
-        c.df[(u,)]=self._f_u
+        c.fn[(f,u)]=self._f_u
         self._f0_u=_vcomp(self.v.f0_u)
-        c.df0[(u,)]=self._f0_u
+        c.fn[(f0,u)]=self._f0_u
 
         if DEBUG>=5:
             print (self.v.f, self.v.f0, self._f_x, self._f0_x, sep=", ")
@@ -179,31 +178,34 @@ class ParOptModel(object):
         u=self.v.u
         c=self.c
         v=self.v
+        f=v.f
+        f0=v.f0
+        F=v.F
         self.v.f_x_x=_mdiff(self.v.f_x, x)
-        v.df[(x,x)]=v.f_x_x
+        v.fn[(f,x,x)]=v.f_x_x
         self.v.F_x_x=_vdiff(self.v.F_x, x)
-        v.dF[(x,x)]=v.F_x_x
+        v.fn[(F,x,x)]=v.F_x_x
         self.v.f0_x_x=_vdiff(self.v.f0_x, x)
-        v.df0[(x,x)]=v.f0_x_x
+        v.fn[(f0,x,x)]=v.f0_x_x
         if DEBUG>=6:
             print ('f_x_x =', self.v.f_x_x)
             print ('F_x_x =', self.v.f_x_x)
             print ('f0_x_x=', self.v.f_x_x)
         self._f_x_x=_vcomp(self.v.f_x_x)
-        c.df[(x,x)]=self._f_x_x
+        c.fn[(f,x,x)]=self._f_x_x
         self._F_x_x=_vcomp(self.v.F_x_x)
-        c.dF[(x,x)]=self._F_x_x
+        c.fn[(F,x,x)]=self._F_x_x
         self._f0_x_x=_vcomp(self.v.f0_x_x)
-        c.df0[(x,x)]=self._f0_x_x
+        c.fn[(f0,x,x)]=self._f0_x_x
         # ---- f_u_u, f_u_x, ...
         self.v.f_u_x=_mdiff(self.v.f_u, x)
-        v.df[(u,x)]=self.v.f_u_x
+        v.fn[(f,u,x)]=self.v.f_u_x
         self.v.f_u_u=_mdiff(self.v.f_u, u)
-        v.df[(u,u)]=self.v.f_u_u
+        v.fn[(f,u,u)]=self.v.f_u_u
         self.v.f0_u_x=_vdiff(self.v.f0_u, x)
-        v.df0[(u,x)]=self.v.f0_u_x
+        v.fn[(f0,u,x)]=self.v.f0_u_x
         self.v.f0_u_u=_vdiff(self.v.f0_u, u)
-        v.df0[(u,u)]=self.v.f0_u_u
+        v.fn[(f0,u,u)]=self.v.f0_u_u
         if DEBUG>=6:
             print ('f_u_x =', self.v.f_u_x)
             print ('f_u_u =', self.v.f_u_u)
@@ -211,13 +213,13 @@ class ParOptModel(object):
             print ('f0_u_u=', self.v.f0_u_u)
 
         self._f_u_x=_vcomp(self.v.f_u_x)
-        c.df[(u,x)]=self._f_u_x
+        c.fn[(f,u,x)]=self._f_u_x
         self._f_u_u=_vcomp(self.v.f_u_u)
-        c.df[(u,u)]=self._f_u_u
+        c.fn[(f,u,u)]=self._f_u_u
         self._f0_u_x=_vcomp(self.v.f0_u_x)
-        c.df0[(u,x)]=self._f0_u_x
+        c.fn[(f0,u,x)]=self._f0_u_x
         self._f0_u_u=_vcomp(self.v.f0_u_u)
-        c.df0[(u,u)]=self._f0_u_u
+        c.fn[(f0,u,u)]=self._f0_u_u
 
     def I(self, X, U):
         def _add(acc, t):
@@ -388,6 +390,36 @@ class ParOptModel(object):
     def f0_u_u(self, T, X, U, dt=1):
         return _teval(self._f0_u_x, T,X,U, self.v)
 
+    def fun(self, vars, T, X, U):
+        code=self.c.fn[vars]
+        if vars[0]==self.v.F:
+            return eval(c, {'x':xe, 'array':array})
+        else:
+            return _teval(c, T, X, U, self.v)
+
+    def H(self, vars, T, X, U, Psi, alpha = 1.0):
+        # calculate H_u_u(t)
+        assert len(vars)>0
+        TT=T[:-1]
+        XX=X[:-1]
+
+        f=self.fun((self.v.f,)+vars, T, X, U)
+        f0=self.fun((self.v.f0,)+vars, T, X, U)
+
+        H = []
+        for ipsi, psi in enumerate(Psi):
+            H_i = - alpha * f0[ipsi] # !
+
+            for k, p in enumerate(psi):
+                # print (_p[0], _f_x_x_i[k])
+                H_i += p[0]*f[ipsi][k]
+
+                H.append(H_i)
+
+        H = array(H)
+        return H
+
+
 class ParOptProcess(object):
     """This calss corresponds to a optimizational model.
     """
@@ -489,18 +521,6 @@ class SeconOrderParOptProcess(ParOptProcess):
             Xn = numpy.copy(Xp)
             dX = numpy.copy(Xp)
 
-            # calculate H_u_u(t)
-            H_u_u = []
-            for ipsi, psi in enumerate(Psi):
-                H_u_u_i = - _f0_u_u[ipsi] # !
-
-                for k, _p in enumerate(psi):
-                    # print (_p[0], _f_x_x_i[k])
-                    H_u_u_i += _p[0]*_f_u_u[ipsi][k]
-
-                    H_u_u.append(H_u_u_i)
-
-            H_u_u = array(H_u_u)
 
             while True:
                 i = i
