@@ -5,6 +5,9 @@ from functools import reduce
 from pprint import pprint
 import itertools
 from sympy import symbols, diff, Symbol
+import numpy.linalg
+
+
 
 #DEBUG = 20
 DEBUG = 0
@@ -431,11 +434,41 @@ class SeconOrderParOptProcess(ParOptProcess):
         Ip=self.model.I(Xp,Up)
 
         it = 1
+        _f_u=self.f_u(t, Xp, Up)
+        _f_u_t=transposed(_f_u)
+
+        _f_u_u=self.f_u_u(t, Xp, Up)
+        #_f_x_x_i= _f_x_x[i] # !
+
+
+
+        f_part=linalg.inv(f_part)
+
+
         while True:
             # Something done with alphas and
+            Psi, Sigma = self.model.krot_d_dd(t, Xp, Up)
+            Un = numpy.copy(Up)
+            dU = numpy.copy(Up)
+            Xn = numpy.copy(Xp)
+            dX = numpy.copy(Xp)
+
+            # calculate H_u_u(t)
+            H_u_u = []
+            for ipsi, psi in enumerate(Psi):
+                H_u_u_i = - _f0_u_u[ipsi] # !
+
+                for k, _p in enumerate(psi):
+                    # print (_p[0], _f_x_x_i[k])
+                    H_u_u_i += _p[0]*_f_u_u[ipsi][k]
+
+                    H_u_u.append(H_u_u_i)
+
+            H_u_u = array(H_u_u)
+
             while True:
-                Psi, Sigma = self.model.krot_d_dd(t, Xp, Up)
-                (Xn, Un, Psi) = self.improve(t, Xp, Up) #, alpha=)
+                i = i
+
                 In = self.model.I(Xn, Un)
                 dI = Ip-In
                 if DEBUG>5:
