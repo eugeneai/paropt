@@ -310,20 +310,21 @@ class ParOptModel(object):
 
     def krot_d_dd(self, t, X, U, alpha=1.0):
         psi=self.Psi(t, X, U, alpha=alpha)
-        H_x_x=self.H((self.v.x,self.v.x), t, X, U, Psi, alpha=alpha)
+        v=self.v
+        H_x_x=self.H((v.x,v.x), t, X, U, Psi, alpha=alpha)
 
 
-        sige  = -self.F_x_x(X[-1])
+        sige  = -self.fun((v.F,v.x,v.x), 0, X[-1], 0)
         sig=[sige]
 
         #for the rest of the interval
         X=X[:-1]
         t=t[:-1]
 
-        _f0_x=self.f0_x(t, X, U) # last element is useless
-        _f_x =self.f_x (t, X, U) # last element is useless
-        _f0_x_x=self.f0_x_x(t, X, U) # last element is useless
-        _f_x_x=self.f_x_x(t, X, U) # last element is useless
+        _f0_x=self.fun((v.f0, v.x), t,X,U)
+        _f_x =self.fun((v.f, v,x), t, X, U)
+        _f0_x_x=self.fun((v.f0,v.x,v.x), t, X, U)
+        _f_x_x=self.fun((v.f,v.x,v.x), t, X, U)
 
 
         j=len(t)-1
