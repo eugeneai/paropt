@@ -312,20 +312,21 @@ class ParOptModel(object):
     #------------ These functions must be defined for Second Order Improvement Process -----
 
     def krot_d_dd(self, t, X, U, alpha=1.0):
-        psi=self.Psi(t, X, U, alpha=alpha)
+        Psi=self.Psi(t, X, U, alpha=alpha)
         v=self.v
-        H_x_x=self.H((v.x,v.x), t, X, U, Psi, alpha=alpha)
 
 
         sige  = -self.fun((v.F,v.x,v.x), 0, X[-1], 0)
-        sig=[sige]
+        Sig=[sige]
 
         #for the rest of the interval
         X=X[:-1]
         t=t[:-1]
 
+        H_x_x=self.H((v.x,v.x), t, X,U, Psi, alpha=alpha)
+
         _f0_x=self.fun((v.f0, v.x), t,X,U)
-        _f_x =self.fun((v.f, v,x), t, X, U)
+        _f_x =self.fun((v.f, v.x), t, X, U)
         _f0_x_x=self.fun((v.f0,v.x,v.x), t, X, U)
         _f_x_x=self.fun((v.f,v.x,v.x), t, X, U)
 
@@ -338,16 +339,16 @@ class ParOptModel(object):
             _f_x_t = transpose(_f_x[i])
             _f_x_i = _f_x[i]
 
-            pn = psi[i]
+            pn = Psi[i]
 
             H_x_x_i = H_x_x[i]
             sn = dot(dot(_f_x_t, sp), _f_x_i) + H_x_x_i
-            sig.append(sn)
+            Sig.append(sn)
             sp=sn
             j-=1
 
-        sig=array(sig)
-        return psi, sig[::-1] # Really it is dPsidalpha
+        Sig=array(Sig)
+        return Psi, Sig[::-1] # Really it is dPsidalpha
                                     # Really it is dSigmadalpha
 
     def f_x_x(self, T, X, U, dt=1):
@@ -374,15 +375,18 @@ class ParOptModel(object):
     def fun(self, vars, T, X, U):
         code=self.c.fn[vars]
         if vars[0]==self.v.F:
-            return eval(code, {'x':xe, 'array':array})
+            return eval(code, {'x':X, 'array':array})
         else:
             return _teval(code, T, X, U, self.v)
 
     def H(self, vars, T, X, U, Psi, alpha = 1.0):
         # calculate H_v_v...(t.
+        print ("Evaluating H:", vars, len(T), len(X), len(U), len(Psi))
         assert len(vars)>0
-        TT=T[:-1]
-        XX=X[:-1]
+        assert len(T) == len(X)
+        assert len(X)==len(U)
+        assert len(U)==len(Psi)
+
 
         f=self.fun((self.v.f,)+vars, T, X, U)
         f0=self.fun((self.v.f0,)+vars, T, X, U)
@@ -470,7 +474,7 @@ class SeconOrderParOptProcess(ParOptProcess):
         ParOptProcess.__init__(self, model)
         self.model.find_second_order_diffs()
 
-    def optimize(self, t, eps=0.001, iters=1000):
+    def optimize(self, t, eps=0.001, iters=1000, alpha=1.0):
         Up=self.model.start_control()
         Xp=self.trajectory(Up)
         Ip=self.model.I(Xp,Up)
@@ -481,22 +485,31 @@ class SeconOrderParOptProcess(ParOptProcess):
         tc =t[:-1]
         Xpc=Xp[:-1]
 
-        E=numpy.identity(self.M)
+        E=numpy.identity(self.model.M)
 
         while True:
             # Something done with alphas and
             Psi, Sigma = self.model.krot_d_dd(t, Xp, Up)
 
             _f_u=self.model.fun((v.f,v.u), tc, Xpc, Up)
-            _f_u_u=self.model.fun((v.f,v.u,v.u), tc, Xpc, Up)
             _f_u_t=transpose(_f_u)
-            f_part=dot(dot(_f_u_t,Sigma),_f_u)+
-                  self.model.H((v.u,v.u), tc, Xpc, Up,  alpha=alpha)-
+            _f_x=self.model.fun((v.f,v.x), tc, Xpc, Up)
+            _f_x_t=transpose(_f_x)
 
-
-
+            _f_u_u=self.model.fun((v.f,v.u,v.u), tc, Xpc, Up)
+            f_part=self.model.H(
+                (v.u,v.u), tc, Xpc, Up, Psi, alpha=alpha
+            )-dot(
+                dot(_f_u_t,Sigma),
+            _f_u)-E
             f_part=linalg.inv(f_part)
 
+            s_part=self.model.H(
+                (v.u,v.x), tc, Xpc, Up, Psi, alpha=alpha
+            )+dot(dot(_f_x_t,Sigma),_f_u)
+
+
+            H_u_a=self.model.H((v.u), tc, Xpc,Up, Psi, alpha=alpha)
 
             Un = numpy.copy(Up)
             #dU = numpy.copy(Up)
