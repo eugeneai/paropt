@@ -12,7 +12,7 @@ import numpy.linalg
 #DEBUG = 20
 DEBUG = 0
 PROFILE = False # True
-Ht = 0.01
+Ht = 0.2
 import time
 
 def constant(function):
@@ -374,12 +374,12 @@ class ParOptModel(object):
     def fun(self, vars, T, X, U):
         code=self.c.fn[vars]
         if vars[0]==self.v.F:
-            return eval(c, {'x':xe, 'array':array})
+            return eval(code, {'x':xe, 'array':array})
         else:
-            return _teval(c, T, X, U, self.v)
+            return _teval(code, T, X, U, self.v)
 
     def H(self, vars, T, X, U, Psi, alpha = 1.0):
-        # calculate H_u_u(t)
+        # calculate H_v_v...(t.
         assert len(vars)>0
         TT=T[:-1]
         XX=X[:-1]
@@ -474,27 +474,35 @@ class SeconOrderParOptProcess(ParOptProcess):
         Up=self.model.start_control()
         Xp=self.trajectory(Up)
         Ip=self.model.I(Xp,Up)
+        v=self.model.v
+
 
         it = 1
-        _f_u=self.f_u(t, Xp, Up)
-        _f_u_t=transposed(_f_u)
+        tc =t[:-1]
+        Xpc=Xp[:-1]
 
-        _f_u_u=self.f_u_u(t, Xp, Up)
-        #_f_x_x_i= _f_x_x[i] # !
-
-
-
-        f_part=linalg.inv(f_part)
-
-        v=self.model.v
+        E=numpy.identity(self.M)
 
         while True:
             # Something done with alphas and
             Psi, Sigma = self.model.krot_d_dd(t, Xp, Up)
+
+            _f_u=self.model.fun((v.f,v.u), tc, Xpc, Up)
+            _f_u_u=self.model.fun((v.f,v.u,v.u), tc, Xpc, Up)
+            _f_u_t=transpose(_f_u)
+            f_part=dot(dot(_f_u_t,Sigma),_f_u)+
+                  self.model.H((v.u,v.u), tc, Xpc, Up,  alpha=alpha)-
+
+
+
+            f_part=linalg.inv(f_part)
+
+
             Un = numpy.copy(Up)
             #dU = numpy.copy(Up)
             Xn = numpy.copy(Xp)
             #dX = numpy.copy(Xp)
+            Xn[0]=Xp[0] # In reality it is already copied.
 
             Xn_p_i=Xp[0]
             for i, psi in enumerate(Psi):
@@ -506,7 +514,7 @@ class SeconOrderParOptProcess(ParOptProcess):
                 dU_i=f_part[i] * (H_u_a[i]+dot(s_part[i],dX_i))
                 Un_i = Up_i + dU_i
 
-                Xn_i=self.model.fun(self.model.f(t[i], Xn_p_i, Un_i))
+                Xn_i=self.model.f(t[i], Xn_p_i, Un_i)
 
                 Un[i]=Un_i
                 Xn[i+1]=Xn_i
@@ -568,7 +576,7 @@ class LinModel1(ParOptModel):
         ((x0,),)=x
         ((u0,),)=u
 
-        return [[x0+self.h*u0]]
+        return ((x0+self.h*u0,),)
 
 
     def f0(self, t, x, u, dt=1):
@@ -678,8 +686,8 @@ def test2():
 def test2d():
     m = LinModel2d2du()
 
-    ip=ParOptProcess(m)
-    #ip=SeconOrderParOptProcess(m)
+    #ip=ParOptProcess(m)
+    ip=SeconOrderParOptProcess(m)
     I, X, U, it, _ = ip.optimize(m.t, eps=0.001, iters=2000)
     print ("")
     print ("X,     U,   ")
