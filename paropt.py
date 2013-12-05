@@ -399,7 +399,7 @@ class ParOptModel(object):
                 # print (_p[0], _f_x_x_i[k])
                 H_i += p[0]*f[ipsi][k]
 
-                H.append(H_i)
+            H.append(H_i)
 
         H = array(H)
         return H
@@ -481,6 +481,7 @@ class SeconOrderParOptProcess(ParOptProcess):
         v=self.model.v
 
 
+        import pudb; pu.db
         it = 1
         tc =t[:-1]
         Xpc=Xp[:-1]
@@ -492,24 +493,39 @@ class SeconOrderParOptProcess(ParOptProcess):
             Psi, Sigma = self.model.krot_d_dd(t, Xp, Up)
 
             _f_u=self.model.fun((v.f,v.u), tc, Xpc, Up)
-            _f_u_t=transpose(_f_u)
+
+            print ("------------------>", _f_u, "<---------------")
+            _f_u_t=_f_u.transpose(0,2,1)
+
             _f_x=self.model.fun((v.f,v.x), tc, Xpc, Up)
-            _f_x_t=transpose(_f_x)
+            _f_x_t=_f_x.transpose(0,2,1)
 
             _f_u_u=self.model.fun((v.f,v.u,v.u), tc, Xpc, Up)
-            f_part=self.model.H(
-                (v.u,v.u), tc, Xpc, Up, Psi, alpha=alpha
-            )-dot(
-                dot(_f_u_t,Sigma),
-            _f_u)-E
-            f_part=linalg.inv(f_part)
-
-            s_part=self.model.H(
-                (v.u,v.x), tc, Xpc, Up, Psi, alpha=alpha
-            )+dot(dot(_f_x_t,Sigma),_f_u)
 
 
-            H_u_a=self.model.H((v.u), tc, Xpc,Up, Psi, alpha=alpha)
+            f_part=self.model.H((v.u,v.u), tc, Xpc, Up, Psi, alpha=alpha)
+
+            print (">>>>>>", len(Sigma), "gg", len(f_part))
+
+            hh=numpy.copy(f_part)
+            for k, h in enumerate(f_part):
+                rc=h-dot(
+                    dot(_f_u_t[k],Sigma[k]),
+                    _f_u[k]
+                )-E
+                hh[k]=linalg.inv(rc)
+
+            f_part=hh
+            s_part=self.model.H((v.u,v.x), tc, Xpc, Up, Psi, alpha=alpha)
+
+            hh=numpy.copy(s_part)
+            for k, h in enumerate(s_part):
+                rc=h+dot(dot(_f_x_t[k],Sigma[k]),_f_u[k])
+                hh[k]=rc
+
+            s_part=hh
+
+            H_u_a=self.model.H((v.u,), tc, Xpc,Up, Psi, alpha=alpha)
 
             Un = numpy.copy(Up)
             #dU = numpy.copy(Up)
