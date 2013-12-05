@@ -12,7 +12,7 @@ import numpy.linalg
 #DEBUG = 20
 DEBUG = 0
 PROFILE = False # True
-Ht = 0.2
+Ht = 0.01
 import time
 
 def constant(function):
@@ -65,22 +65,22 @@ def _vdiff(F, V, num=1): # F is a column
         for v in V:
             df=diff(f[0], v[0], num)
             dfs.append(df)
-        DF.append(dfs)
-    return DF
+        DF.append(tuple(dfs))
+    return tuple(DF)
 
 def _mdiff(F_v, V, num=1): # F is not transposed
     F_v_v=[]
     for row in F_v:
         F_v_v.append(_vdiff([[r] for r in row ], V))
-    return F_v_v
+    return tuple(F_v_v)
 
 def _diff(f, V, num=1):
 
     DF=[]
     for v in V:
         df=diff(f, v[0], num)
-        DF.append([df])
-    return DF
+        DF.append((df,))
+    return tuple(DF)
 
 def _teval(d, T,X,U, V): # d is a code of function to be evaluated at all T time instance.
     rc=[]
@@ -104,14 +104,16 @@ class ParOptModel(object):
         self.v.t=Symbol('t')
         a=[]
         for i in range(N):
-            a.append([Symbol('x%s' % i)])
+            a.append((Symbol('x%s' % i),))
         self.v.x=tuple(a)
         a=[]
         for i in range(M):
-            a.append([Symbol('u%s' % i)])
+            a.append((Symbol('u%s' % i),))
         self.v.u=tuple(a)
 
         t, x, u = self.v.t, self.v.x, self.v.u
+
+
 
         self.v.f=self.f(t, x, u)
         self.v.f0=self.f0(t, x, u)
@@ -122,15 +124,16 @@ class ParOptModel(object):
         v=self.v
         f=v.f
         f0=v.f0
-        F=f.F
+        F=v.F
         v.fn={}
         self.v.f_x=_vdiff(self.v.f, x)
+        print (f,x)
         v.fn[(f,x)]=v.f_x
         self.v.f0_x=_diff(self.v.f0, x)
         v.fn[(f0,x)]=v.f0_x
 
         self.v.f_x_x=_mdiff(self.v.f_x, x)
-        f.fn[(f,x,x)]=v.f_x_x
+        v.fn[(f,x,x)]=v.f_x_x
 
         if DEBUG>=5:
             print ("f:", self.v.f)
@@ -494,7 +497,7 @@ class SeconOrderParOptProcess(ParOptProcess):
             #dX = numpy.copy(Xp)
 
             Xn_p_i=Xp[0]
-            while i, psi in enumerate(Psi):
+            for i, psi in enumerate(Psi):
                 Xp_i=Xp[i]
                 Up_i=Up[i]
                 H_u_i=H_u[i]
@@ -607,7 +610,7 @@ class LinModel2d2du(ParOptModel):
         ((x0,),(x1,))=x
         ((u0,),(u1,))=u
 
-        return [[x0+self.h*u0],[x1+self.h*u1]]
+        return ((x0+self.h*u0,),(x1+self.h*u1,))
 
 
     def f0(self, t, x, u, dt=1):
@@ -648,7 +651,7 @@ class LinModel2d2du1(ParOptModel):
         ((x0,),(x1,))=x
         ((u0,),(u1,))=u
 
-        return [[x0**5+self.h*u0],[x1**5+self.h*u1]]
+        return ((x0**5+self.h*u0,),(x1**5+self.h*u1,))
 
 
     def f0(self, t, x, u, dt=1):
@@ -675,8 +678,8 @@ def test2():
 def test2d():
     m = LinModel2d2du()
 
-    #ip=ParOptProcess(m)
-    ip=SeconOrderParOptProcess(m)
+    ip=ParOptProcess(m)
+    #ip=SeconOrderParOptProcess(m)
     I, X, U, it, _ = ip.optimize(m.t, eps=0.001, iters=2000)
     print ("")
     print ("X,     U,   ")
