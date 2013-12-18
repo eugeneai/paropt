@@ -7,10 +7,11 @@ import itertools
 from sympy import symbols, diff, Symbol
 import numpy.linalg
 
+TupleType=type((1,))
 
 
 #DEBUG = 20
-DEBUG = 0
+DEBUG = 10
 PROFILE = False # True
 Ht = 0.2
 import time
@@ -49,38 +50,26 @@ def _comp(exp):
 def _eval(f, t, xc, uc, V):
     g={'t':t, 'array':array}
     for i, x in enumerate(V.x):
-        g.setdefault(str(x[0]),xc[i][0])
+        g.setdefault(str(x),xc[i])
     for i, u in enumerate(V.u):
-        g.setdefault(str(u[0]),uc[i][0])
+        g.setdefault(str(u),uc[i])
 
     rc = eval(f, g)
     return rc
 
-def _vdiff(F, V, num=1): # F is a column
-
-    DF=[]
-
-    for f in F:
-        dfs=[]
-        for v in V:
-            df=diff(f[0], v[0], num)
-            dfs.append(df)
-        DF.append(tuple(dfs))
-    return tuple(DF)
+def _vdiff(F, V): # F is a column
+    return _rdiff(F,V)
 
 def _mdiff(F_v, V, num=1): # F is not transposed
-    F_v_v=[]
-    for row in F_v:
-        F_v_v.append(_vdiff([[r] for r in row ], V))
-    return tuple(F_v_v)
+    return _rdiff(F_v,V)
+
+def _rdiff(F, V):
+    if type(F) == TupleType:
+        return tuple([_rdiff(f, V) for f in F])
+    return tuple([diff(F,v) for v in V])
 
 def _diff(f, V, num=1):
-
-    DF=[]
-    for v in V:
-        df=diff(f, v[0], num)
-        DF.append((df,))
-    return tuple(DF)
+    return _rdiff(f, V)
 
 def _teval(d, T,X,U, V): # d is a code of function to be evaluated at all T time instance.
     rc=[]
@@ -104,11 +93,11 @@ class ParOptModel(object):
         self.v.t=Symbol('t')
         a=[]
         for i in range(N):
-            a.append((Symbol('x%s' % i),))
+            a.append(Symbol('x%s' % i))
         self.v.x=tuple(a)
         a=[]
         for i in range(M):
-            a.append((Symbol('u%s' % i),))
+            a.append(Symbol('u%s' % i))
         self.v.u=tuple(a)
 
         t, x, u = self.v.t, self.v.x, self.v.u
@@ -269,16 +258,18 @@ class ParOptModel(object):
         _f_x =self.f_x (t, X, U) # last element is useless
 
 
+        import pdb; pdb.set_trace()
         j=len(t)-1
         p=psie
 
         while j>=1:
             i=t[j]
             pp=p
-            _f_x_t = transpose(_f_x[i])
+            _f_x_i = _f_x[i]
             #_f0_x_t = transpose(_f0_x[i])
 
-            pn = dot(_f_x_t, pp) - alpha*_f0_x[i]
+            pn = dot(pp,_f_x_i)
+            #- alpha*_f0_x[i]
 
             #if j==1:
             #    print (_f_x_t, pp, _f0_x_t, "=>", pn )
@@ -289,6 +280,7 @@ class ParOptModel(object):
 
         # ----
 
+
         psi=array(psi)
 
         return psi[::-1]
@@ -297,13 +289,16 @@ class ParOptModel(object):
 
         _f0_u=self.f0_u(t[:-1], X[:-1], U)
         _f_u =self.f_u (t[:-1], X[:-1], U)
+        _f0_u_t=numpy.transpose(_f0_u)
         p=Psi
         if DEBUG>10:
             print ("f_u:", len(_f_u))
             print ("psi:", len(p))
             print ("f0_u", len(_f0_u))
-        _s=array([dot(_f_u[i], Psi[i]) for i in range(len(X)-1)]) # Psi[i] is shifted left to 1 step.
-        return _s + _f0_u # FIXME Check dot operation.
+        #_s=array([dot(_f_u[i], Psi[i]) for i in range(len(X)-1)]) # Psi[i] is shifted left to 1 step.
+        #_s1=dot(f_u, Psi)
+        _s=dot(Psi,f_u)
+        return _s + _f0_u_t # FIXME Check dot operation.
         #return array(_s) + _f0_u # FIXME Check dot operation.
 
     def start_control(self):
@@ -634,7 +629,7 @@ class LinModel2d2du(ParOptModel):
         ParOptModel.__init__(self, X0=X0, N=2, M=2)
 
     def start_control(self):
-        U = [array([[0.0],[0.0]]) for t in self.t[:-1]]
+        U = [[0.0,0.0] for t in self.t[:-1]]
         return array(U)
 
     def F(self, x):
@@ -645,18 +640,19 @@ class LinModel2d2du(ParOptModel):
     def f(self, t, x, u, dt=1):
         """ X ia a vector of the previous state
         """
-        ((x0,),(x1,))=x
-        ((u0,),(u1,))=u
+        (x0,x1)=x
+        (u0,u1)=u
 
-        return ((x0+self.h*u0,),(x1+self.h*u1,))
+        return (x0+self.h*u0, x1+self.h*u1)
+#        return ((x0+self.h*u0,),(x1+self.h*u1,))
 
 
     def f0(self, t, x, u, dt=1):
         """ X ia a vector of the previous state
         """
-        ((x0,),(x1,))=x
-        ((u0,),(u1,))=u
 
+        (x0,x1)=x
+        (u0,u1)=u
         return self.h * (x0*x0+x1*x1+u0*u0+u1*u1)
 
 class LinModel2d2du1(ParOptModel):
@@ -716,8 +712,8 @@ def test2():
 def test2d():
     m = LinModel2d2du()
 
-    #ip=ParOptProcess(m)
-    ip=SeconOrderParOptProcess(m)
+    ip=ParOptProcess(m)
+    #ip=SeconOrderParOptProcess(m)
     I, X, U, it, _ = ip.optimize(m.t, eps=0.001, iters=2000)
     print ("")
     print ("X,     U,   ")
