@@ -334,6 +334,7 @@ class ParOptModel(object):
         j=len(t)-1
         sp=sige
 
+
         while j>=1:
             i=t[j]
             _f_x_t = transpose(_f_x[i])
@@ -481,7 +482,6 @@ class SeconOrderParOptProcess(ParOptProcess):
         v=self.model.v
 
 
-        import pudb; pu.db
         it = 1
         tc =t[:-1]
         Xpc=Xp[:-1]
@@ -525,6 +525,7 @@ class SeconOrderParOptProcess(ParOptProcess):
 
             s_part=hh
 
+            #import pudb; pu.db
             H_u_a=self.model.H((v.u,), tc, Xpc,Up, Psi, alpha=alpha)
 
             Un = numpy.copy(Up)
