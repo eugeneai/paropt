@@ -11,9 +11,9 @@ TupleType=type((1,))
 
 
 #DEBUG = 20
-DEBUG = 0
+DEBUG = 2
 PROFILE = False # True
-Ht = 0.2
+Ht = 0.01
 import time
 
 def constant(function):
@@ -101,110 +101,16 @@ class ParOptModel(object):
         self.v.f0=self.f0(t, x, u)
         self.v.F=self.F(x)
 
-        # -----------------
-
-        v=self.v
-        f=v.f
-        f0=v.f0
-        F=v.F
-        v.fn={}
-        self.v.f_x=_rdiff(self.v.f, x)
-        print (f,x)
-        v.fn[(f,x)]=v.f_x
-        self.v.f0_x=_rdiff(self.v.f0, x)
-        v.fn[(f0,x)]=v.f0_x
-
-        self.v.f_x_x=_rdiff(self.v.f_x, x)
-        v.fn[(f,x,x)]=v.f_x_x
-
-        if DEBUG>=5:
-            print ("f:", self.v.f)
-            print ("f_x:", self.v.f_x)
-            print ("f_x_x:", self.v.f_x_x)
-
-            print ("f0:", self.v.f0)
-            print ("f0_x:", self.v.f0_x)
-
         self.c=Helper()
         c=self.c
         c.fn={}
-        self._f_x=_vcomp(self.v.f_x)
-        c.fn[(f,x)]=self._f_x
-        self._f0_x=_vcomp(self.v.f0_x)
-        c.fn[(f0,x)]=self._f0_x
-
-        self.v.F_x=_rdiff(self.v.F, x)
-        v.fn[(F,x)]=v.F_x
-        if DEBUG>=5:
-            print ("F:", self.v.F)
-            print ("F_x:", self.v.F_x)
-        self._F_x=_vcomp(self.v.F_x)
-        c.fn[(F,x)]=self._F_x
-
-        self.v.f_u=_rdiff(self.v.f, u)
-        v.fn[(f,u)]=v.f_u
-        self.v.f0_u=_rdiff(self.v.f0, u)
-        v.fn[(f0,u)]=v.f0_u
-        self._f_u=_vcomp(self.v.f_u)
-        c.fn[(f,u)]=self._f_u
-        self._f0_u=_vcomp(self.v.f0_u)
-        c.fn[(f0,u)]=self._f0_u
-
-        if DEBUG>=5:
-            print (self.v.f, self.v.f0, self._f_x, self._f0_x, sep=", ")
-
-        if DEBUG>=5:
-            print (self.v.F, self._F_x, sep=", ")
-            print (self.v.f, self.v.f0, self._f_u, self._f0_u, sep=", ")
-        self.__cache__={}
-
-    def find_second_order_diffs(self):
-        x=self.v.x
-        u=self.v.u
-        c=self.c
         v=self.v
-        f=v.f
-        f0=v.f0
-        F=v.F
-        self.v.f_x_x=_rdiff(self.v.f_x, x)
-        v.fn[(f,x,x)]=v.f_x_x
-        self.v.F_x_x=_rdiff(self.v.F_x, x)
-        v.fn[(F,x,x)]=v.F_x_x
-        self.v.f0_x_x=_rdiff(self.v.f0_x, x)
-        v.fn[(f0,x,x)]=v.f0_x_x
-        if DEBUG>=6:
-            print ('f_x_x =', self.v.f_x_x)
-            print ('F_x_x =', self.v.f_x_x)
-            print ('f0_x_x=', self.v.f_x_x)
-        self._f_x_x=_vcomp(self.v.f_x_x)
-        c.fn[(f,x,x)]=self._f_x_x
-        self._F_x_x=_vcomp(self.v.F_x_x)
-        c.fn[(F,x,x)]=self._F_x_x
-        self._f0_x_x=_vcomp(self.v.f0_x_x)
-        c.fn[(f0,x,x)]=self._f0_x_x
-        # ---- f_u_u, f_u_x, ...
-        self.v.f_u_x=_rdiff(self.v.f_u, x)
-        v.fn[(f,u,x)]=self.v.f_u_x
-        self.v.f_u_u=_rdiff(self.v.f_u, u)
-        v.fn[(f,u,u)]=self.v.f_u_u
-        self.v.f0_u_x=_rdiff(self.v.f0_u, x)
-        v.fn[(f0,u,x)]=self.v.f0_u_x
-        self.v.f0_u_u=_rdiff(self.v.f0_u, u)
-        v.fn[(f0,u,u)]=self.v.f0_u_u
-        if DEBUG>=6:
-            print ('f_u_x =', self.v.f_u_x)
-            print ('f_u_u =', self.v.f_u_u)
-            print ('f0_u_x=', self.v.f0_u_x)
-            print ('f0_u_u=', self.v.f0_u_u)
+        v.fn={}
+        v.fn[(v.f,)]=v.f
+        v.fn[(v.f0,)]=v.f0
+        v.fn[(v.F,)]=v.F
 
-        self._f_u_x=_vcomp(self.v.f_u_x)
-        c.fn[(f,u,x)]=self._f_u_x
-        self._f_u_u=_vcomp(self.v.f_u_u)
-        c.fn[(f,u,u)]=self._f_u_u
-        self._f0_u_x=_vcomp(self.v.f0_u_x)
-        c.fn[(f0,u,x)]=self._f0_u_x
-        self._f0_u_u=_vcomp(self.v.f0_u_u)
-        c.fn[(f0,u,u)]=self._f0_u_u
+        self.__cache__={}
 
     def I(self, X, U):
         def _add(acc, t):
@@ -221,22 +127,6 @@ class ParOptModel(object):
 
     def f0(self, t, x, u, dt=1):
         raise RuntimeError("should be implemented by subclass")
-    """
-    def F_x(self, xe):
-        return eval(self._F_x, {'x':xe, 'array':array})
-
-    def f_x(self, T, X, U, dt=1):
-        return _teval(self._f_x,  T,X,U, self.v)
-
-    def f0_x(self, T, X, U, dt=1):
-        return _teval(self._f0_x, T,X,U, self.v)
-
-    def f_u(self, T, X, U, dt=1):
-        return _teval(self._f_u, T,X,U, self.v)
-
-    def f0_u(self, T, X, U, dt=1):
-        return _teval(self._f0_u, T,X,U, self.v)
-    """
 
     def Psi(self, t, X, U, alpha):
 
@@ -273,6 +163,7 @@ class ParOptModel(object):
             j-=1
 
         # ----
+
 
 
         psi=array(psi)
@@ -375,16 +266,26 @@ class ParOptModel(object):
             return _teval(code, T, X, U, self.v)
 
     def get_code_for(self, vars):
+        if not vars:
+            raise ValueError("no variables")
         try:
             return self.c.fn[vars]
-        except IndexError:
+        except KeyError:
+            pass
+
+        try:
+            c=self.c.fn[vars]=_vcomp(self.v.fn[vars])
+            return c
+        except KeyError:
             pass
 
         vp=vars[:-1]
-        cp=self.get_code_for(self, vp)
+        cp=self.get_code_for(vp)
         fp=self.v.fn[vp]
-        self.v.fn[vars]=_rdiff(fp, vars[-1])
-        c=self.c.fn[vars]=_vcomp(fp)
+        df=self.v.fn[vars]=_rdiff(fp, vars[-1])
+        c=self.c.fn[vars]=_vcomp(df)
+        if DEBUG>1:
+            print ("A derivative needed for:\n\t", vars, "\nand it is as follows:\n\t", df)
         return c
 
     def H(self, vars, T, X, U, Psi, alpha = 1.0):
