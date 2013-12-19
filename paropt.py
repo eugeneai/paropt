@@ -221,7 +221,7 @@ class ParOptModel(object):
 
     def f0(self, t, x, u, dt=1):
         raise RuntimeError("should be implemented by subclass")
-
+    """
     def F_x(self, xe):
         return eval(self._F_x, {'x':xe, 'array':array})
 
@@ -236,10 +236,13 @@ class ParOptModel(object):
 
     def f0_u(self, T, X, U, dt=1):
         return _teval(self._f0_u, T,X,U, self.v)
+    """
 
     def Psi(self, t, X, U, alpha):
 
-        psie = -self.F_x(X[-1])
+        v=self.v
+
+        psie = -self.fun((v.F,v.x), None, X[-1], None)
 
         psi=[psie]
 
@@ -247,8 +250,8 @@ class ParOptModel(object):
         X=X[:-1]
         t=t[:-1]
 
-        _f0_x=self.f0_x(t, X, U) # last element is useless
-        _f_x =self.f_x (t, X, U) # last element is useless
+        _f0_x=self.fun((v.f0,v.x), t, X, U) # last element is useless
+        _f_x =self.fun((v.f,v.x), t, X, U) # last element is useless
 
 
         j=len(t)-1
@@ -280,8 +283,9 @@ class ParOptModel(object):
 
         XX=X[:-1]
         tt=t[:-1]
-        _f0_u=self.f0_u(tt, XX, U)
-        _f_u =self.f_u (tt, XX, U)
+        v=self.v
+        _f0_u=self.fun((v.f0,v.u), tt, XX, U)
+        _f_u =self.fun((v.f,v.u), tt, XX, U)
         p=Psi
         if DEBUG>10:
             print ("f_u:", len(_f_u))
@@ -340,6 +344,7 @@ class ParOptModel(object):
         return Psi, Sig[::-1] # Really it is dPsidalpha
                                     # Really it is dSigmadalpha
 
+    """
     def f_x_x(self, T, X, U, dt=1):
         return _teval(self._f_x_x, T,X,U, self.v)
 
@@ -360,6 +365,7 @@ class ParOptModel(object):
 
     def f0_u_u(self, T, X, U, dt=1):
         return _teval(self._f0_u_x, T,X,U, self.v)
+    """
 
     def fun(self, vars, T, X, U):
         code=self.get_code_for(vars)
@@ -405,7 +411,6 @@ class ParOptModel(object):
 
         H = array(H)
         return H
-
 
 class ParOptProcess(object):
     """This calss corresponds to a optimizational model.
