@@ -47,13 +47,17 @@ def _comp(exp):
     sexp=str(exp)
     return compile(sexp, "<-%s->" % sexp, "eval")
 
-def _eval(f, t, xc, uc, V):
+def _eprep(t, xc, uc, V):
     g={'t':t, 'array':array}
     for i, x in enumerate(V.x):
         g.setdefault(str(x),xc[i])
     for i, u in enumerate(V.u):
         g.setdefault(str(u),uc[i])
+    return g
 
+def _eval(f, t, xc, uc, V, g=None):
+    if g == None:
+        g=_eprep(t, xc, uc, V)
     rc = eval(f, g)
     return rc
 
