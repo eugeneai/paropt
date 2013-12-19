@@ -13,7 +13,7 @@ TupleType=type((1,))
 #DEBUG = 20
 DEBUG = 2
 PROFILE = False # True
-Ht = 0.01
+Ht = 0.2
 import time
 
 def constant(function):
@@ -220,13 +220,13 @@ class ParOptModel(object):
 
         while j>=1:
             i=t[j]
-            _f_x_t = transpose(_f_x[i])
             _f_x_i = _f_x[i]
+            _f_x_t = transpose(_f_x_i)
 
             pn = Psi[i]
 
             H_x_x_i = H_x_x[i]
-            sn = dot(dot(_f_x_t, sp), _f_x_i) + H_x_x_i
+            sn = dot(dot(sp,_f_x_i), _f_x_i) + H_x_x_i
             Sig.append(sn)
             sp=sn
             j-=1
@@ -234,29 +234,6 @@ class ParOptModel(object):
         Sig=array(Sig)
         return Psi, Sig[::-1] # Really it is dPsidalpha
                                     # Really it is dSigmadalpha
-
-    """
-    def f_x_x(self, T, X, U, dt=1):
-        return _teval(self._f_x_x, T,X,U, self.v)
-
-    def F_x_x(self, xe):
-        return eval(self._F_x_x, {'x':xe, 'array':array})
-
-    def f0_x_x(self, T, X, U, dt=1):
-        return _teval(self._f0_x_x, T,X,U, self.v)
-
-    def f_u_x(self, T, X, U, dt=1):
-        return _teval(self._f_u_x, T,X,U, self.v)
-
-    def f_u_u(self, T, X, U, dt=1):
-        return _teval(self._f_u_u, T,X,U, self.v)
-
-    def f0_u_x(self, T, X, U, dt=1):
-        return _teval(self._f0_u_x, T,X,U, self.v)
-
-    def f0_u_u(self, T, X, U, dt=1):
-        return _teval(self._f0_u_x, T,X,U, self.v)
-    """
 
     def fun(self, vars, T, X, U):
         code=self.get_code_for(vars)
@@ -301,15 +278,12 @@ class ParOptModel(object):
         f0=self.fun((self.v.f0,)+vars, T, X, U)
 
         H = []
-        for ipsi, psi in enumerate(Psi):
-            H_i = - alpha * f0[ipsi] # !
+        for psi,_f0,_f in zip(Psi,f0, f):
+            _H = dot(psi,f) - alpha * _f0 # !
+            H.append(_H)
 
-            for k, p in enumerate(psi):
-                # print (_p[0], _f_x_x_i[k])
-                H_i += p[0]*f[ipsi][k]
 
-            H.append(H_i)
-
+        import pdb; pdb.set_trace()
         H = array(H)
         return H
 
@@ -381,7 +355,6 @@ class SeconOrderParOptProcess(ParOptProcess):
         X0=array([0.0, 0.0])
         self.t = arange(2)
         ParOptProcess.__init__(self, model)
-        self.model.find_second_order_diffs()
 
     def optimize(self, t, eps=0.001, iters=1000, alpha=1.0):
         Up=self.model.start_control()
@@ -622,11 +595,13 @@ def test2():
     print ("Result is:", I, "in", it, "iters")
     print (_)
 
-def test2d():
+def test2d(so=True):
     m = LinModel2d2du()
 
-    ip=ParOptProcess(m)
-    #ip=SeconOrderParOptProcess(m)
+    if not so:
+        ip=ParOptProcess(m)
+    else:
+        ip=SeconOrderParOptProcess(m)
     I, X, U, it, _ = ip.optimize(m.t, eps=0.001, iters=2000)
     print ("")
     print ("X,     U,   ")
