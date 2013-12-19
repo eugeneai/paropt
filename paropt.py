@@ -206,6 +206,7 @@ class ParOptModel(object):
         X=X[:-1]
         t=t[:-1]
 
+
         H_x_x=self.H((v.x,v.x), t, X,U, Psi, alpha=alpha)
 
         _f0_x=self.fun((v.f0, v.x), t,X,U)
@@ -267,7 +268,7 @@ class ParOptModel(object):
 
     def H(self, vars, T, X, U, Psi, alpha = 1.0):
         # calculate H_v_v...(t.
-        print ("Evaluating H:", vars, len(T), len(X), len(U), len(Psi))
+        # print ("Evaluating H:", vars, len(T), len(X), len(U), len(Psi))
         assert len(vars)>0
         assert len(T) == len(X)
         assert len(X)==len(U)
@@ -277,14 +278,12 @@ class ParOptModel(object):
         f=self.fun((self.v.f,)+vars, T, X, U)
         f0=self.fun((self.v.f0,)+vars, T, X, U)
 
-        H = []
-        for psi,_f0,_f in zip(Psi,f0, f):
-            _H = dot(psi,f) - alpha * _f0 # !
-            H.append(_H)
+        H = -alpha * f0
 
+        for psi,_H,_f,i in zip(Psi, H, f, range(len(H))):
+            _H += dot(psi,_f) # !
+            H[i]=_H
 
-        import pdb; pdb.set_trace()
-        H = array(H)
         return H
 
 class ParOptProcess(object):
@@ -373,9 +372,9 @@ class SeconOrderParOptProcess(ParOptProcess):
             # Something done with alphas and
             Psi, Sigma = self.model.krot_d_dd(t, Xp, Up)
 
+
             _f_u=self.model.fun((v.f,v.u), tc, Xpc, Up)
 
-            print ("------------------>", _f_u, "<---------------")
             _f_u_t=_f_u.transpose(0,2,1)
 
             _f_x=self.model.fun((v.f,v.x), tc, Xpc, Up)
@@ -383,31 +382,26 @@ class SeconOrderParOptProcess(ParOptProcess):
 
             _f_u_u=self.model.fun((v.f,v.u,v.u), tc, Xpc, Up)
 
-
             f_part=self.model.H((v.u,v.u), tc, Xpc, Up, Psi, alpha=alpha)
 
-            print (">>>>>>", len(Sigma), "gg", len(f_part))
 
             hh=numpy.copy(f_part)
-            for k, h in enumerate(f_part):
-                rc=h-dot(
-                    dot(_f_u_t[k],Sigma[k]),
-                    _f_u[k]
-                )-E
+            for h, fut, fu, sik, k in zip(f_part, _f_u_t, _f_u, Sigma, range(len(hh))):
+                rc=h-dot(dot(fut,sik),fu)-E
                 hh[k]=linalg.inv(rc)
 
             f_part=hh
             s_part=self.model.H((v.u,v.x), tc, Xpc, Up, Psi, alpha=alpha)
 
             hh=numpy.copy(s_part)
-            for k, h in enumerate(s_part):
-                rc=h+dot(dot(_f_x_t[k],Sigma[k]),_f_u[k])
+            for h, fxt, sik, fu in zip(s_part, _f_x_t, Sigma, _f_u):
+                rc=h+dot(dot(fxt, sik),fu)
                 hh[k]=rc
 
             s_part=hh
 
             #import pudb; pu.db
-            H_u_a=self.model.H((v.u,), tc, Xpc,Up, Psi, alpha=alpha)
+            H_u=H_u_a=self.model.H((v.u,), tc, Xpc,Up, Psi, alpha=alpha)
 
             Un = numpy.copy(Up)
             #dU = numpy.copy(Up)
@@ -416,13 +410,14 @@ class SeconOrderParOptProcess(ParOptProcess):
             Xn[0]=Xp[0] # In reality it is already copied.
 
             Xn_p_i=Xp[0]
+
             for i, psi in enumerate(Psi):
                 Xp_i=Xp[i]
                 Up_i=Up[i]
                 H_u_i=H_u[i]
 
                 dX_i=Xn_p_i-Xp_i
-                dU_i=f_part[i] * (H_u_a[i]+dot(s_part[i],dX_i))
+                dU_i=dot( (H_u_a[i]+dot(dX_i,s_part[i])),f_part[i])
                 Un_i = Up_i + dU_i
 
                 Xn_i=self.model.f(t[i], Xn_p_i, Un_i)
@@ -436,7 +431,7 @@ class SeconOrderParOptProcess(ParOptProcess):
 
             In = self.model.I(Xn, Un)
             dI = Ip-In
-            if DEBUG>5:
+            if DEBUG>=0:
                 print ("DI:", dI)
             if abs(dI)<eps:
                 return In, Xn, Un, it, "Opt"
@@ -445,12 +440,17 @@ class SeconOrderParOptProcess(ParOptProcess):
             iters-=1
             it+=1
 
+            Xp, Up, Ip = Xn, Un, In
+
+            """
+
             if In>=Ip:
                 beta/=2
                 continue
             else:
                 Xp, Up, Ip = Xn, Un, In
                 break
+            """
 
 # -------------------- tests -------------------------------------------------
 
