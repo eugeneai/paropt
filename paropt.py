@@ -11,7 +11,7 @@ TupleType=type((1,))
 
 
 #DEBUG = 20
-DEBUG = 10
+DEBUG = 0
 PROFILE = False # True
 Ht = 0.2
 import time
@@ -574,7 +574,7 @@ class LinModel1(ParOptModel):
     """
 
     def __init__(self):
-        X0=array([[1.0]])
+        X0=(1.0,)
         self.h = Ht
         # self.h = 0.001
         # self.h = 0.2
@@ -588,7 +588,7 @@ class LinModel1(ParOptModel):
         ParOptModel.__init__(self, X0=X0, N=1, M=1)
 
     def start_control(self):
-        U = [array([[0.0]]) for t in self.t[:-1]]
+        U = [(0.0,) for t in self.t[:-1]]
         return array(U)
 
     def F(self, x):
@@ -599,17 +599,17 @@ class LinModel1(ParOptModel):
     def f(self, t, x, u, dt=1):
         """ X ia a vector of the previous state
         """
-        ((x0,),)=x
-        ((u0,),)=u
+        x0=x[0]
+        u0=u[0]
 
-        return ((x0+self.h*u0,),)
+        return (x0+self.h*u0,)
 
 
     def f0(self, t, x, u, dt=1):
         """ X ia a vector of the previous state
         """
-        ((x0,),)=x
-        ((u0,),)=u
+        x0=x[0]
+        u0=u[0]
 
         return self.h * (x0*x0+u0*u0)
 
@@ -740,7 +740,7 @@ def test2d1():
 if __name__=="__main__":
     print ("ok")
 
-    TEST='test2d'
+    TEST='test2'
     LOG='restats.log'
     if PROFILE:
         import cProfile, pstats
