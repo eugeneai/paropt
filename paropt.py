@@ -258,7 +258,6 @@ class ParOptModel(object):
         _f_x =self.f_x (t, X, U) # last element is useless
 
 
-        import pdb; pdb.set_trace()
         j=len(t)-1
         p=psie
 
@@ -268,8 +267,7 @@ class ParOptModel(object):
             _f_x_i = _f_x[i]
             #_f0_x_t = transpose(_f0_x[i])
 
-            pn = dot(pp,_f_x_i)
-            #- alpha*_f0_x[i]
+            pn = dot(pp,_f_x_i) - alpha*_f0_x[i]
 
             #if j==1:
             #    print (_f_x_t, pp, _f0_x_t, "=>", pn )
@@ -287,18 +285,20 @@ class ParOptModel(object):
 
     def H_u(self, t, X, U, Psi):
 
-        _f0_u=self.f0_u(t[:-1], X[:-1], U)
-        _f_u =self.f_u (t[:-1], X[:-1], U)
-        _f0_u_t=numpy.transpose(_f0_u)
+        XX=X[:-1]
+        tt=t[:-1]
+        _f0_u=self.f0_u(tt, XX, U)
+        _f_u =self.f_u (tt, XX, U)
         p=Psi
         if DEBUG>10:
             print ("f_u:", len(_f_u))
             print ("psi:", len(p))
             print ("f0_u", len(_f0_u))
-        #_s=array([dot(_f_u[i], Psi[i]) for i in range(len(X)-1)]) # Psi[i] is shifted left to 1 step.
+        _s=array([dot(_f_u[i], Psi[i]) for i in range(len(_f_u))]) # Psi[i] is shifted left to 1 step.
         #_s1=dot(f_u, Psi)
-        _s=dot(Psi,f_u)
-        return _s + _f0_u_t # FIXME Check dot operation.
+        #_s=dot(Psi,_f_u)
+
+        return _s + _f0_u # FIXME Check dot operation.
         #return array(_s) + _f0_u # FIXME Check dot operation.
 
     def start_control(self):
@@ -453,6 +453,7 @@ class ParOptProcess(object):
         raise RuntimeError("this should be not reached")
 
     def trajectory(self, U):
+
         x0=self.model.X0
         X = [x0]
         for t, u in enumerate(U): # (0, u0), (1, u1)
@@ -617,7 +618,7 @@ class LinModel2d2du(ParOptModel):
     """Possibly not a simple linear test model.
     """
     def __init__(self):
-        X0=array([[1.0],[1.0]])
+        X0=(1.0,1.0)
         self.h = Ht
         self.num = int((1.0-0.0) / self.h)
         self.T = linspace(
