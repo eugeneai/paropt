@@ -97,8 +97,6 @@ class ParOptModel(object):
 
         t, x, u = self.v.t, self.v.x, self.v.u
 
-
-
         self.v.f=self.f(t, x, u)
         self.v.f0=self.f0(t, x, u)
         self.v.F=self.F(x)
@@ -364,11 +362,24 @@ class ParOptModel(object):
         return _teval(self._f0_u_x, T,X,U, self.v)
 
     def fun(self, vars, T, X, U):
-        code=self.c.fn[vars]
+        code=self.get_code_for(vars)
         if vars[0]==self.v.F:
             return eval(code, {'x':X, 'array':array})
         else:
             return _teval(code, T, X, U, self.v)
+
+    def get_code_for(self, vars):
+        try:
+            return self.c.fn[vars]
+        except IndexError:
+            pass
+
+        vp=vars[:-1]
+        cp=self.get_code_for(self, vp)
+        fp=self.v.fn[vp]
+        self.v.fn[vars]=_rdiff(fp, vars[-1])
+        c=self.c.fn[vars]=_vcomp(fp)
+        return c
 
     def H(self, vars, T, X, U, Psi, alpha = 1.0):
         # calculate H_v_v...(t.
