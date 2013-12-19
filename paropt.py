@@ -61,19 +61,10 @@ def _eval(f, t, xc, uc, V, g=None):
     rc = eval(f, g)
     return rc
 
-def _vdiff(F, V): # F is a column
-    return _rdiff(F,V)
-
-def _mdiff(F_v, V, num=1): # F is not transposed
-    return _rdiff(F_v,V)
-
 def _rdiff(F, V):
     if type(F) == TupleType:
         return tuple([_rdiff(f, V) for f in F])
     return tuple([diff(F,v) for v in V])
-
-def _diff(f, V, num=1):
-    return _rdiff(f, V)
 
 def _teval(d, T,X,U, V): # d is a code of function to be evaluated at all T time instance.
     rc=[]
@@ -119,13 +110,13 @@ class ParOptModel(object):
         f0=v.f0
         F=v.F
         v.fn={}
-        self.v.f_x=_vdiff(self.v.f, x)
+        self.v.f_x=_rdiff(self.v.f, x)
         print (f,x)
         v.fn[(f,x)]=v.f_x
-        self.v.f0_x=_diff(self.v.f0, x)
+        self.v.f0_x=_rdiff(self.v.f0, x)
         v.fn[(f0,x)]=v.f0_x
 
-        self.v.f_x_x=_mdiff(self.v.f_x, x)
+        self.v.f_x_x=_rdiff(self.v.f_x, x)
         v.fn[(f,x,x)]=v.f_x_x
 
         if DEBUG>=5:
@@ -144,7 +135,7 @@ class ParOptModel(object):
         self._f0_x=_vcomp(self.v.f0_x)
         c.fn[(f0,x)]=self._f0_x
 
-        self.v.F_x=_diff(self.v.F, x)
+        self.v.F_x=_rdiff(self.v.F, x)
         v.fn[(F,x)]=v.F_x
         if DEBUG>=5:
             print ("F:", self.v.F)
@@ -152,9 +143,9 @@ class ParOptModel(object):
         self._F_x=_vcomp(self.v.F_x)
         c.fn[(F,x)]=self._F_x
 
-        self.v.f_u=_vdiff(self.v.f, u)
+        self.v.f_u=_rdiff(self.v.f, u)
         v.fn[(f,u)]=v.f_u
-        self.v.f0_u=_diff(self.v.f0, u)
+        self.v.f0_u=_rdiff(self.v.f0, u)
         v.fn[(f0,u)]=v.f0_u
         self._f_u=_vcomp(self.v.f_u)
         c.fn[(f,u)]=self._f_u
@@ -177,11 +168,11 @@ class ParOptModel(object):
         f=v.f
         f0=v.f0
         F=v.F
-        self.v.f_x_x=_mdiff(self.v.f_x, x)
+        self.v.f_x_x=_rdiff(self.v.f_x, x)
         v.fn[(f,x,x)]=v.f_x_x
-        self.v.F_x_x=_vdiff(self.v.F_x, x)
+        self.v.F_x_x=_rdiff(self.v.F_x, x)
         v.fn[(F,x,x)]=v.F_x_x
-        self.v.f0_x_x=_vdiff(self.v.f0_x, x)
+        self.v.f0_x_x=_rdiff(self.v.f0_x, x)
         v.fn[(f0,x,x)]=v.f0_x_x
         if DEBUG>=6:
             print ('f_x_x =', self.v.f_x_x)
@@ -194,13 +185,13 @@ class ParOptModel(object):
         self._f0_x_x=_vcomp(self.v.f0_x_x)
         c.fn[(f0,x,x)]=self._f0_x_x
         # ---- f_u_u, f_u_x, ...
-        self.v.f_u_x=_mdiff(self.v.f_u, x)
+        self.v.f_u_x=_rdiff(self.v.f_u, x)
         v.fn[(f,u,x)]=self.v.f_u_x
-        self.v.f_u_u=_mdiff(self.v.f_u, u)
+        self.v.f_u_u=_rdiff(self.v.f_u, u)
         v.fn[(f,u,u)]=self.v.f_u_u
-        self.v.f0_u_x=_vdiff(self.v.f0_u, x)
+        self.v.f0_u_x=_rdiff(self.v.f0_u, x)
         v.fn[(f0,u,x)]=self.v.f0_u_x
-        self.v.f0_u_u=_vdiff(self.v.f0_u, u)
+        self.v.f0_u_u=_rdiff(self.v.f0_u, u)
         v.fn[(f0,u,u)]=self.v.f0_u_u
         if DEBUG>=6:
             print ('f_u_x =', self.v.f_u_x)
@@ -298,12 +289,12 @@ class ParOptModel(object):
             print ("f_u:", len(_f_u))
             print ("psi:", len(p))
             print ("f0_u", len(_f0_u))
-        _s=array([dot(_f_u[i], Psi[i]) for i in range(len(_f_u))]) # Psi[i] is shifted left to 1 step.
+
+        _s=array([dot(p,fu) for p,fu in zip(Psi,_f_u)]) # Psi[i] is shifted left to 1 step.
         #_s1=dot(f_u, Psi)
         #_s=dot(Psi,_f_u)
 
         return _s + _f0_u # FIXME Check dot operation.
-        #return array(_s) + _f0_u # FIXME Check dot operation.
 
     def start_control(self):
         raise RuntimeError("should be implemented by subclass")
@@ -744,7 +735,7 @@ def test2d1():
 if __name__=="__main__":
     print ("ok")
 
-    TEST='test2'
+    TEST='test2d'
     LOG='restats.log'
     if PROFILE:
         import cProfile, pstats
