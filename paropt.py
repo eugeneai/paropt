@@ -13,7 +13,7 @@ TupleType=type((1,))
 #DEBUG = 20
 DEBUG = 2
 PROFILE = False # True
-Ht = 0.2
+Ht = 0.01
 import time
 
 def constant(function):
@@ -276,9 +276,9 @@ class ParOptModel(object):
 
 
         f=self.fun((self.v.f,)+vars, T, X, U)
-        f0=self.fun((self.v.f0,)+vars, T, X, U)
+        f0=-self.fun((self.v.f0,)+vars, T, X, U)
 
-        H = -alpha * f0
+        H = alpha * f0
 
         for psi,_H,_f,i in zip(Psi, H, f, range(len(H))):
             _H += dot(psi,_f) # !
@@ -367,6 +367,7 @@ class SeconOrderParOptProcess(ParOptProcess):
         Xpc=Xp[:-1]
 
         E=numpy.identity(self.model.M)
+        _a=alpha
 
         while True:
             # Something done with alphas and
@@ -381,76 +382,64 @@ class SeconOrderParOptProcess(ParOptProcess):
             _f_x_t=_f_x.transpose(0,2,1)
 
             _f_u_u=self.model.fun((v.f,v.u,v.u), tc, Xpc, Up)
+            alpha=_a
 
-            f_part=self.model.H((v.u,v.u), tc, Xpc, Up, Psi, alpha=alpha)
+            while True:
+                f_part=self.model.H((v.u,v.u), tc, Xpc, Up, Psi, alpha=alpha)
 
+                for h, fut, fu, sik, k in zip(f_part, _f_u_t, _f_u, Sigma, range(len(f_part))):
+                    h+=dot(dot(fut, alpha*sik),fu)-E
+                    f_part[k]=-linalg.inv(h)
 
-            hh=numpy.copy(f_part)
-            for h, fut, fu, sik, k in zip(f_part, _f_u_t, _f_u, Sigma, range(len(hh))):
-                rc=h-dot(dot(fut,sik),fu)-E
-                hh[k]=linalg.inv(rc)
+                s_part=self.model.H((v.u,v.x), tc, Xpc, Up, Psi, alpha=alpha)
 
-            f_part=hh
-            s_part=self.model.H((v.u,v.x), tc, Xpc, Up, Psi, alpha=alpha)
+                for h, fxt, sik, fu in zip(s_part, _f_x_t, Sigma, _f_u):
+                    s_part[k]+=dot(dot(fxt, alpha*sik),fu)
 
-            hh=numpy.copy(s_part)
-            for h, fxt, sik, fu in zip(s_part, _f_x_t, Sigma, _f_u):
-                rc=h+dot(dot(fxt, sik),fu)
-                hh[k]=rc
+                H_u=H_u_a=self.model.H((v.u,), tc, Xpc,Up, Psi, alpha=alpha)
 
-            s_part=hh
+                Un = numpy.copy(Up)
+                #dU = numpy.copy(Up)
+                Xn = numpy.copy(Xp)
+                #dX = numpy.copy(Xp)
+                Xn[0]=Xp[0] # In reality it is already copied.
 
-            #import pudb; pu.db
-            H_u=H_u_a=self.model.H((v.u,), tc, Xpc,Up, Psi, alpha=alpha)
+                Xn_p_i=Xp[0]
 
-            Un = numpy.copy(Up)
-            #dU = numpy.copy(Up)
-            Xn = numpy.copy(Xp)
-            #dX = numpy.copy(Xp)
-            Xn[0]=Xp[0] # In reality it is already copied.
+                for i, psi in enumerate(Psi):
+                    Xp_i=Xp[i]
+                    Up_i=Up[i]
+                    H_u_i=H_u[i]
 
-            Xn_p_i=Xp[0]
+                    dX_i=Xn_p_i-Xp_i
+                    dU_i=dot((H_u_a[i]+dot(dX_i,s_part[i])),f_part[i])
+                    Un_i = Up_i + dU_i
 
-            for i, psi in enumerate(Psi):
-                Xp_i=Xp[i]
-                Up_i=Up[i]
-                H_u_i=H_u[i]
+                    Xn_i=self.model.f(t[i], Xn_p_i, Un_i)
 
-                dX_i=Xn_p_i-Xp_i
-                dU_i=dot( (H_u_a[i]+dot(dX_i,s_part[i])),f_part[i])
-                Un_i = Up_i + dU_i
+                    Un[i]=Un_i
+                    Xn[i+1]=Xn_i
 
-                Xn_i=self.model.f(t[i], Xn_p_i, Un_i)
-
-                Un[i]=Un_i
-                Xn[i+1]=Xn_i
-
-                Xn_p_i=Xn_i
+                    Xn_p_i=Xn_i
 
 
+                In = self.model.I(Xn, Un)
+                dI = Ip-In
+                if DEBUG>=0:
+                    print ("Ip:", Ip, "In:", In,  "DI:", dI)
+                if abs(dI)<eps:
+                    return In, Xn, Un, it, "Opt"
+                if iters<=0:
+                    return In, Xn, Un, it, "Nonoptimal"
+                iters-=1
+                it+=1
 
-            In = self.model.I(Xn, Un)
-            dI = Ip-In
-            if DEBUG>=0:
-                print ("DI:", dI)
-            if abs(dI)<eps:
-                return In, Xn, Un, it, "Opt"
-            if iters<=0:
-                return In, Xn, Un, it, "Nonoptimal"
-            iters-=1
-            it+=1
-
-            Xp, Up, Ip = Xn, Un, In
-
-            """
-
-            if In>=Ip:
-                beta/=2
-                continue
-            else:
-                Xp, Up, Ip = Xn, Un, In
-                break
-            """
+                if In>Ip:
+                    alpha*=0.7
+                    continue
+                else:
+                    Xp, Up, Ip = Xn, Un, In
+                    break
 
 # -------------------- tests -------------------------------------------------
 
@@ -583,10 +572,14 @@ class LinModel2d2du1(ParOptModel):
         return self.h * (x0*x0+x1*x1+u0*u0+u1*u1)
 
 
-def test2():
+def test2(so=True):
     m = LinModel1()
 
-    ip=ParOptProcess(m)
+    if not so:
+        ip=ParOptProcess(m)
+    else:
+        ip=SeconOrderParOptProcess(m)
+
     I, X, U, it, _ = ip.optimize(m.t, eps=0.001, iters=2000)
     print ("")
     print ("X,     U,   ")
@@ -602,7 +595,7 @@ def test2d(so=True):
         ip=ParOptProcess(m)
     else:
         ip=SeconOrderParOptProcess(m)
-    I, X, U, it, _ = ip.optimize(m.t, eps=0.001, iters=2000)
+    I, X, U, it, _ = ip.optimize(m.t, eps=0.001, iters=200)
     print ("")
     print ("X,     U,   ")
     for x,u in zip(X,U):
