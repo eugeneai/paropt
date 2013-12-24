@@ -610,6 +610,19 @@ def test2d(so=True):
     print ("Result is:", I, "in", it, "iters")
     print (_)
 
+def test_with_plot():
+    m = LinModel1()
+    p1=ParOptProcess(m)
+    p2=SeconOrderParOptProcess(m)
+    iters=2000
+    eps=0.001
+    print ("First process:")
+    r1=I1, X1, U1, it1, _1 = p1.optimize(m.t, eps=eps, iters=iters)
+    print ("Second process:")
+    r2=I2, X2, U2, it2, _2 = p2.optimize(m.t, eps=eps, iters=iters)
+
+    gnuplot(r1,r2, "test_with_plt")
+
 def test2d1():
     m = LinModel2d2du1()
     return
@@ -627,7 +640,7 @@ def test2d1():
 if __name__=="__main__":
     print ("ok")
 
-    TEST='test2d'
+    TEST='test_with_plot'
     LOG='restats.log'
     if PROFILE:
         import cProfile, pstats
