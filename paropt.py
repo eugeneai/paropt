@@ -413,6 +413,7 @@ class SeconOrderParOptProcess(ParOptProcess):
 
                     dX_i=Xn_p_i-Xp_i
                     dU_i=dot((H_u_a[i]+dot(dX_i,s_part[i])),f_part[i])
+                    #dU_i=dot(H_u_a[i],f_part[i])
                     Un_i = Up_i + dU_i
 
                     Xn_i=self.model.f(t[i], Xn_p_i, Un_i)
@@ -573,17 +574,17 @@ class LinModel2d2du1(ParOptModel):
 
 def gnuplot(fn, *args):
     # args are I, X, U, it, _ (result: Opt, etc.)
-    X=args[0][1]
-    o=open(fn+".dat", "w")
-    print (args)
-    for i, x in enumerate(X[:-1]):
-        o.write("\t".join([str(a) for a in x ]))
-        o.write("\t")
-        for  I, X, U, it, _ in args:
-            o.write("\t".join([str(a) for a in U[i]]))
+    for i, (I, X, U, it, _) in enumerate(args):
+        o=open(fn+str(i)+".dat", "w")
+        lx=len(X)
+        for i,x,u in zip(range(lx-1), X[:-1],U):
+            t=i/lx
+            o.write(str(t)+"\t")
+            o.write("\t".join([str(a) for a in x]))
             o.write("\t")
-        o.write("\n")
-    o.close()
+            o.write("\t".join([str(a) for a in u]))
+            o.write("\n")
+        o.close()
 
 def test2(so=True):
     m = LinModel1()
