@@ -11,7 +11,7 @@ TupleType=type((1,))
 
 
 #DEBUG = 20
-DEBUG = 2
+DEBUG = 0
 PROFILE = False # True
 Ht = 0.01
 import time
@@ -571,6 +571,19 @@ class LinModel2d2du1(ParOptModel):
 
         return self.h * (x0*x0+x1*x1+u0*u0+u1*u1)
 
+def gnuplot(fn, *args):
+    # args are I, X, U, it, _ (result: Opt, etc.)
+    X=args[0][1]
+    o=open(fn+".dat", "w")
+    print (args)
+    for i, x in enumerate(X[:-1]):
+        o.write("\t".join([str(a) for a in x ]))
+        o.write("\t")
+        for  I, X, U, it, _ in args:
+            o.write("\t".join([str(a) for a in U[i]]))
+            o.write("\t")
+        o.write("\n")
+    o.close()
 
 def test2(so=True):
     m = LinModel1()
@@ -614,7 +627,7 @@ def test_with_plot():
     print ("Second process:")
     r2=I2, X2, U2, it2, _2 = p2.optimize(m.t, eps=eps, iters=iters)
 
-    gnuplot(r1,r2, "test_with_plt")
+    gnuplot("test_with_plt", r1,r2)
 
 def test2d1():
     m = LinModel2d2du1()
