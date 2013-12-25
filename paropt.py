@@ -13,7 +13,7 @@ TupleType=type((1,))
 #DEBUG = 20
 DEBUG = 0
 PROFILE = False # True
-Ht = 0.01
+Ht = 0.005
 import time
 
 def constant(function):
@@ -385,6 +385,8 @@ class SeconOrderParOptProcess(ParOptProcess):
             alpha=_a
 
             while True:
+
+                #import pudb; pu.db
                 f_part=self.model.H((v.u,v.u), tc, Xpc, Up, Psi, alpha=alpha)
 
                 for h, fut, fu, sik, k in zip(f_part, _f_u_t, _f_u, Sigma, range(len(f_part))):
@@ -404,24 +406,25 @@ class SeconOrderParOptProcess(ParOptProcess):
                 #dX = numpy.copy(Xp)
                 Xn[0]=Xp[0] # In reality it is already copied.
 
-                Xn_p_i=Xp[0]
+                Xn_i=Xp[0]
 
                 for i, psi in enumerate(Psi):
                     Xp_i=Xp[i]
                     Up_i=Up[i]
                     H_u_i=H_u[i]
 
-                    dX_i=Xn_p_i-Xp_i
-                    dU_i=dot((H_u_a[i]+dot(dX_i,s_part[i])),f_part[i])
+                    dX_i=Xn_i-Xp_i
+                    #dU_i=dot((H_u_a[i]+dot(dX_i,s_part[i])),f_part[i])
                     #dU_i=dot(H_u_a[i],f_part[i])
+                    dU_i=H_u_a[i]
                     Un_i = Up_i + dU_i
 
-                    Xn_i=self.model.f(t[i], Xn_p_i, Un_i)
+                    Xnn_i=self.model.f(t[i], Xn_i, Un_i)
 
                     Un[i]=Un_i
-                    Xn[i+1]=Xn_i
+                    Xn[i+1]=Xnn_i
 
-                    Xn_p_i=Xn_i
+                    Xn_i=Xnn_i
 
 
                 In = self.model.I(Xn, Un)
