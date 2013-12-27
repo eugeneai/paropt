@@ -13,7 +13,7 @@ TupleType=type((1,))
 #DEBUG = 20
 DEBUG = 0
 PROFILE = False # True
-Ht = 0.005
+Ht = 0.01
 import time
 
 def constant(function):
@@ -187,7 +187,7 @@ class ParOptModel(object):
         #_s1=dot(f_u, Psi)
         #_s=dot(Psi,_f_u)
 
-        return _s + _f0_u # FIXME Check dot operation.
+        return _s - _f0_u # FIXME Check dot operation.
 
     def start_control(self):
         raise RuntimeError("should be implemented by subclass")
@@ -479,7 +479,6 @@ class LinModel1(ParOptModel):
         """
         x0=x[0]
         u0=u[0]
-
         return (x0+self.h*u0,)
 
 
@@ -488,7 +487,6 @@ class LinModel1(ParOptModel):
         """
         x0=x[0]
         u0=u[0]
-
         return self.h * (x0*x0+u0*u0)
 
 
@@ -521,10 +519,7 @@ class LinModel2d2du(ParOptModel):
         """
         (x0,x1)=x
         (u0,u1)=u
-
         return (x0+self.h*u0, x1+self.h*u1)
-#        return ((x0+self.h*u0,),(x1+self.h*u1,))
-
 
     def f0(self, t, x, u, dt=1):
         """ X ia a vector of the previous state
@@ -626,10 +621,12 @@ def test_with_plot():
     p2=SeconOrderParOptProcess(m)
     iters=2000
     eps=0.001
-    print ("First process:")
+    print ("First process:", end='')
     r1=I1, X1, U1, it1, _1 = p1.optimize(m.t, eps=eps, iters=iters)
+    print (I1)
     print ("Second process:")
     r2=I2, X2, U2, it2, _2 = p2.optimize(m.t, eps=eps, iters=iters)
+    print (I2)
 
     gnuplot("test_with_plt", r1,r2)
 
