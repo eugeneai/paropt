@@ -10,8 +10,8 @@ import numpy.linalg
 TupleType=type((1,))
 
 
-#DEBUG = 20
-DEBUG = 0
+DEBUG = 20
+#DEBUG = 0
 PROFILE = False # True
 Ht = 0.01
 import time
@@ -95,7 +95,7 @@ class ParOptModel(object):
             a.append(Symbol('u%s' % i))
         self.v.u=tuple(a)
 
-        t, x, u = self.v.t, self.v.x, self.v.u
+        v, t, x, u = self.v, self.v.t, self.v.x, self.v.u
 
         self.v.f=self.f(t, x, u)
         self.v.f0=self.f0(t, x, u)
@@ -104,7 +104,6 @@ class ParOptModel(object):
         self.c=Helper()
         c=self.c
         c.fn={}
-        v=self.v
         v.fn={}
         v.fn[(v.f,)]=v.f
         v.fn[(v.f0,)]=v.f0
@@ -307,8 +306,9 @@ class ParOptProcess(object):
         while True:
             beta = self.beta
             Psi=self.model.Psi(t, Xp, Up, self.alpha)
-            _H_u=self.model.H_u(t, Xp, Up, Psi=Psi)
+            _H_u=self.model.H((self.model.v.u,), t[:-1], Xp[:-1], Up, Psi, alpha=1.0)
             while True:
+                print (it, beta)
                 _dU=_H_u*beta
                 Un = Up + _dU
                 Xn = self.trajectory(Un)
@@ -350,12 +350,12 @@ class ParOptProcess(object):
 class SeconOrderParOptProcess(ParOptProcess):
     """A second order parametric optimization process
     """
-    def __init__(self, model):
+    def __init__(self, model, **kwargs):
         X0=array([0.0, 0.0])
         self.t = arange(2)
-        ParOptProcess.__init__(self, model)
+        ParOptProcess.__init__(self, model, **kwargs)
 
-    def optimize(self, t, eps=0.001, iters=1000, alpha=1.0):
+    def optimize(self, t, eps=0.001, iters=1000, alpha=None):
         Up=self.model.start_control()
         Xp=self.trajectory(Up)
         Ip=self.model.I(Xp,Up)
@@ -367,7 +367,10 @@ class SeconOrderParOptProcess(ParOptProcess):
         Xpc=Xp[:-1]
 
         E=numpy.identity(self.model.M)
-        _a=alpha
+        if alpha==None:
+            _a=self.alpha
+        else:
+            _a=alpha
 
         while True:
             # Something done with alphas and
@@ -617,16 +620,16 @@ def test2d(so=True):
 
 def test_with_plot():
     m = LinModel1()
-    p1=ParOptProcess(m)
-    p2=SeconOrderParOptProcess(m)
+    p1=ParOptProcess(m, beta=75.)
+    p2=SeconOrderParOptProcess(m, alpha=0.001)
     iters=2000
     eps=0.001
     print ("First process:", end='')
     r1=I1, X1, U1, it1, _1 = p1.optimize(m.t, eps=eps, iters=iters)
-    print (I1)
+    print (I1, "iters:", it1)
     print ("Second process:")
     r2=I2, X2, U2, it2, _2 = p2.optimize(m.t, eps=eps, iters=iters)
-    print (I2)
+    print (I2, "iters:", it2)
 
     gnuplot("test_with_plt", r1,r2)
 
