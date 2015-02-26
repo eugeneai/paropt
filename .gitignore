@@ -8,3 +8,4 @@
 /restats.log
 python*/
 *.dat
+/my-plot.ps
