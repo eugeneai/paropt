@@ -6,8 +6,11 @@ from pprint import pprint
 import itertools
 from sympy import symbols, diff, Symbol
 import numpy.linalg
+import unittest
+from sympy.utilities.lambdify import lambdify
 
 TupleType=type((1,))
+ListType=type([])
 
 
 DEBUG = 20
@@ -15,6 +18,80 @@ DEBUG = 20
 PROFILE = False # True
 Ht = 0.01
 import time
+
+class VFCalc(object):
+    """ Class automizing differential convertions of
+    vector-functions.
+    """
+
+    def __init__(self, ):
+        """
+        """
+        self.cach=
+    def diff1(self, f, var):# derivation of one vector-variable
+        """This is method for figuring out of
+        functional differentials of vector-variable lists
+        """
+        if type(f) in [TupleType,ListType]: #f myght be a tuple(n-ka)
+            return tuple([self.diff1(fi, var) for fi in f])
+        return tuple([diff(f, vi) for vi in var])
+
+    def diff(self, f, *vars):
+        """This is method for figuring out of
+        functional differentials of vector-variable lists
+        """
+        cf=f#current func
+        for v in vars:
+            cf=self.diff1(cf, v)
+        return cf
+
+    def lambdify(self, f, *args):
+        """Compiles function f into a lambda-function
+        with args as its arguments.
+        """
+        return lambdify(args, f, "numpy")
+
+
+
+d=VFCalc()
+x1,x2=Symbol('x1'),Symbol('x2')
+u1,u2=Symbol('u1'),Symbol('u2')
+y1=x1**2*u1+x2*u2**2
+y2=x1**2*x2**2*u1**2*u2**2
+
+print ()
+print (d.diff1([y1,y2],[x1,x2]))
+#print (d.diff1([y1,y2],[u1,u2]))
+res=(d.diff([y1,y2], [x1,x2], [u1,u2]))
+pprint (res)
+
+X1=ones(10)
+X2=X1
+X2+=1
+U1=X1+2
+U2=U1+4
+
+fun=d.lambdify(res, x1,x2,u1,u2)
+
+print (fun)
+pprint (fun(X1,X2,U1,U2))
+
+quit()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def constant(function):
     if CACHING:
@@ -262,7 +339,7 @@ class ParOptModel(object):
         df=self.v.fn[vars]=_rdiff(fp, vars[-1])
         c=self.c.fn[vars]=_vcomp(df)
         if DEBUG>1:
-            print ("A derivative needed for:\n\t", vars, "\nand it is as follows:\n\t", df)
+            print ("A derivative for\n\t", vars, "=", df)
         return c
 
     def H(self, vars, T, X, U, Psi, alpha = 1.0):
@@ -624,10 +701,12 @@ def test_with_plot():
     p2=SeconOrderParOptProcess(m, alpha=0.001)
     iters=2000
     eps=0.001
-    print ("First process:", end='')
+    print ("First-order process:")
+    print ("-"*20)
     r1=I1, X1, U1, it1, _1 = p1.optimize(m.t, eps=eps, iters=iters)
     print (I1, "iters:", it1)
-    print ("Second process:")
+    print ("Second-oreder process:")
+    print ("-"*20)
     r2=I2, X2, U2, it2, _2 = p2.optimize(m.t, eps=eps, iters=iters)
     print (I2, "iters:", it2)
 
