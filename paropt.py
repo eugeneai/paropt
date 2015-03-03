@@ -27,7 +27,8 @@ class VFCalc(object):
     def __init__(self, ):
         """
         """
-        self.cach=
+        self.t=Symbol('t')
+
     def diff1(self, f, var):# derivation of one vector-variable
         """This is method for figuring out of
         functional differentials of vector-variable lists
@@ -51,32 +52,36 @@ class VFCalc(object):
         """
         return lambdify(args, f, "numpy")
 
+    def code(self, f, *vars):
+        # if not vars:
+        #     raise ValueError("no variables")
+        # try:
+        #     return self.c.fn[vars]
+        # except KeyError:
+        #     pass
+
+        # try:
+        #     c=self.c.fn[vars]=_vcomp(self.v.fn[vars])
+        #     return c
+        # except KeyError:
+        #     pass
+
+     #   vp=vars[:-1]
+     #   cp=self.get_code_for(vp)# what is doing this string?
+     #   fp=self.v.fn[vp]
+     #   df=self.v.fn[vars]=_rdiff(fp, vars[-1])
+     #   c=self.c.fn[vars]=_vcomp(df)
+        # calculate derivation of function
+        c=self.diff(f, *vars)
+        l=[self.t]
+        for v in vars:
+            l.extend(v)
+        c=self.lambdify(c, *l)
+        #if DEBUG>1:
+        #    print ("A derivative for\n\t", vars, "=", df)
+        return c
 
 
-d=VFCalc()
-x1,x2=Symbol('x1'),Symbol('x2')
-u1,u2=Symbol('u1'),Symbol('u2')
-y1=x1**2*u1+x2*u2**2
-y2=x1**2*x2**2*u1**2*u2**2
-
-print ()
-print (d.diff1([y1,y2],[x1,x2]))
-#print (d.diff1([y1,y2],[u1,u2]))
-res=(d.diff([y1,y2], [x1,x2], [u1,u2]))
-pprint (res)
-
-X1=ones(10)
-X2=X1
-X2+=1
-U1=X1+2
-U2=U1+4
-
-fun=d.lambdify(res, x1,x2,u1,u2)
-
-print (fun)
-pprint (fun(X1,X2,U1,U2))
-
-quit()
 
 
 
@@ -334,7 +339,7 @@ class ParOptModel(object):
             pass
 
         vp=vars[:-1]
-        cp=self.get_code_for(vp)
+        cp=self.get_code_for(vp)# what is doing this string?
         fp=self.v.fn[vp]
         df=self.v.fn[vars]=_rdiff(fp, vars[-1])
         c=self.c.fn[vars]=_vcomp(df)
@@ -724,6 +729,32 @@ def test2d1():
         print (x,u)
     print ("Result is:", I, "in", it, "iters")
     print (_)
+
+def test_VFCalc():
+    d=VFCalc()
+    x1,x2=Symbol('x1'),Symbol('x2')
+    u1,u2=Symbol('u1'),Symbol('u2')
+    y1=x1**2*u1+x2*u2**2
+    y2=x1**2*x2**2*u1**2*u2**2
+
+    print ()
+    print (d.diff1([y1,y2],[x1,x2]))
+    #print (d.diff1([y1,y2],[u1,u2]))
+    res=(d.diff([y1,y2], [x1,x2], [u1,u2]))
+    pprint (res)
+
+    X1=ones(10)
+    X2=X1
+    X2+=1
+    U1=X1+2
+    U2=U1+4
+
+    fun=d.lambdify(res, x1,x2,u1,u2)
+
+    print (fun)
+    pprint (fun(X1,X2,U1,U2))
+
+    quit()
 
 
 if __name__=="__main__":
