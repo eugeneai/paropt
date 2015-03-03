@@ -46,11 +46,20 @@ class VFCalc(object):
             cf=self.diff1(cf, v)
         return cf
 
-    def lambdify(self, f, *args):
+    def lambdify(self, f, T,X,U):
         """Compiles function f into a lambda-function
         with args as its arguments.
         """
-        return lambdify(args, f, "numpy")
+        xs=[Symbol('x'+str(i+1)) for i in range(len(X[0]))]
+        us=[Symbol('u'+str(i+1)) for i in range(len(U[0]))]
+        l=[t]
+        l.extend(xs)
+        l.extend(us)
+        f=lambdify(l, f, "numpy")
+        def rcf(T,X,U):
+            # Cut colums ...
+            return f(T, )
+        return rcf
 
     def code(self, f, *vars):
         # if not vars:
@@ -738,26 +747,30 @@ def test_VFCalc():
     y2=x1**2*x2**2*u1**2*u2**2
 
     print ()
-    print (d.diff1([y1,y2],[x1,x2]))
+    #print (d.diff1([y1,y2],[x1,x2]))
     #print (d.diff1([y1,y2],[u1,u2]))
-    res=(d.diff([y1,y2], [x1,x2], [u1,u2]))
-    pprint (res)
+    #res=(d.diff([y1,y2], [x1,x2], [u1,u2]))
+    #pprint (res)
 
     X1=ones(10)
     X2=X1
     X2+=1
     U1=X1+2
     U2=U1+4
+    T=linspace(start=0.0, stop=1.0, num=len(X1))
 
-    fun=d.lambdify(res, x1,x2,u1,u2)
+    fun=d.code([y1,y2], [x1,x2],[u1,u2])
 
     print (fun)
-    pprint (fun(X1,X2,U1,U2))
+    pprint (array(fun(T,X1,X2,U1,U2)))
 
     quit()
 
 
 if __name__=="__main__":
+    test_VFCalc()
+    raise SystemExit(0)
+
     print ("ok")
 
     TEST='test_with_plot'
