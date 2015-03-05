@@ -24,10 +24,12 @@ class VFCalc(object):
     vector-functions.
     """
 
-    def __init__(self, ):
+    def __init__(self, N,M):
         """
         """
         self.t=Symbol('t')
+        self.N=N
+        self.M=M
 
     def diff1(self, f, var):# derivation of one vector-variable
         """This is method for figuring out of
@@ -46,48 +48,42 @@ class VFCalc(object):
             cf=self.diff1(cf, v)
         return cf
 
-    def lambdify(self, f, T,X,U):
+    def subs(self, f, s):
+        if type(f) not in [TupleType,ListType]:
+            return f.subs(s) # common subs
+        return tuple([self.subs(fi,s) for fi in f])#local subs
+
+    def lambdify(self, f):
         """Compiles function f into a lambda-function
         with args as its arguments.
         """
-        xs=[Symbol('x'+str(i+1)) for i in range(len(X[0]))]
-        us=[Symbol('u'+str(i+1)) for i in range(len(U[0]))]
-        l=[t]
+        # l=[Symbol('t'),Symbol('X'),Symbol('U')]
+        l=[Symbol('t')]
+        # repx=[(Symbol('x'+str(i+1)),Symbol('X['+str(i)+']')) for i in range(self.N)]
+        # repu=[(Symbol('u'+str(i+1)),Symbol('U['+str(i)+']')) for i in range(self.M)]
+        # newf=self.subs(f,repx+repu)
+        xs=[Symbol('x'+str(i+1)) for i in range(self.N)]
+        us=[Symbol('u'+str(i+1)) for i in range(self.M)]
         l.extend(xs)
         l.extend(us)
+        print (l)
+        # print (newf)
         f=lambdify(l, f, "numpy")
-        def rcf(T,X,U):
-            # Cut colums ...
-            return f(T, )
-        return rcf
+        def _f(t, X, U):
+            xs=tuple(X)
+            us=tuple(U)
+            print (t,X,U)
+            args=(t,)+xs+us
+            ff=f(*args)
+            return array(ff)
+        #wrap=sympify('array(A)')
+        #A=wrap.subs(Symbol('A'),newf)
+        return _f
 
-    def code(self, f, *vars):
-        # if not vars:
-        #     raise ValueError("no variables")
-        # try:
-        #     return self.c.fn[vars]
-        # except KeyError:
-        #     pass
-
-        # try:
-        #     c=self.c.fn[vars]=_vcomp(self.v.fn[vars])
-        #     return c
-        # except KeyError:
-        #     pass
-
-     #   vp=vars[:-1]
-     #   cp=self.get_code_for(vp)# what is doing this string?
-     #   fp=self.v.fn[vp]
-     #   df=self.v.fn[vars]=_rdiff(fp, vars[-1])
-     #   c=self.c.fn[vars]=_vcomp(df)
-        # calculate derivation of function
-        c=self.diff(f, *vars)
-        l=[self.t]
-        for v in vars:
-            l.extend(v)
-        c=self.lambdify(c, *l)
-        #if DEBUG>1:
-        #    print ("A derivative for\n\t", vars, "=", df)
+    def code(self, f, *vars, debug=False):
+        f=self.diff(f, *vars)
+        c=self.lambdify(f)
+        if debug: return c, f
         return c
 
 
@@ -740,7 +736,7 @@ def test2d1():
     print (_)
 
 def test_VFCalc():
-    d=VFCalc()
+    d=VFCalc(2,2)
     x1,x2=Symbol('x1'),Symbol('x2')
     u1,u2=Symbol('u1'),Symbol('u2')
     y1=x1**2*u1+x2*u2**2
@@ -755,14 +751,23 @@ def test_VFCalc():
     X1=ones(10)
     X2=X1
     X2+=1
+    X=ndarray(shape=(10,2), dtype=float, order='F')
+    X[:,0]=X1
+    X[:,1]=X2
+
     U1=X1+2
     U2=U1+4
+    U=ndarray(shape=(10,2), dtype=float, order='F')
+    U[:,0]=U1
+    U[:,1]=U2
+
     T=linspace(start=0.0, stop=1.0, num=len(X1))
 
-    fun=d.code([y1,y2], [x1,x2],[u1,u2])
+    fun, f=d.code([y1,y2], [x1,x2],[u1,u2], debug=True)
 
-    print (fun)
-    pprint (array(fun(T,X1,X2,U1,U2)))
+    print (fun, f)
+    print ((T[0],X[0,:],U[0,:]))
+    pprint (fun(T[0],X[0,:],U[0,:]))
 
     quit()
 
