@@ -222,35 +222,36 @@ class ParOptModel(object):
     #------------ These functions must be defined for Second Order Improvement Process -----
 
 
-class ParOptProcess(object):
+class ParOptProcess(VFCalc):
     """This calss corresponds to a optimizational model.
     """
 
     def __init__(self, model, alpha=1.0, beta=1.0):
         """
         """
+        VFCalc.__init__(self, model.N, model.M)
         self.model=model
         self.alpha=alpha
         self.beta=beta
 
     def optimize(self, t, eps=0.001, iters=1000):
-        Up=self.model.start_control()
+        Up=self.model.U0
 
         Xp=self.trajectory(Up)
-        Ip=self.model.I(Xp,Up)
+        Ip=self.I(Xp,Up)
 
         it = 1
         while True:
             beta = self.beta
-            Psi=self.model.Psi(t, Xp, Up, self.alpha)
-            _H_u=self.model.H((self.model.v.u,), t[:-1], Xp[:-1], Up, Psi, alpha=1.0)
+            Psi=self.Psi(t, Xp, Up, self.alpha)
+            _H_u=self.H((self.model.v.u,), t[:-1], Xp[:-1], Up, Psi, alpha=1.0)
             while True:
                 print (it, beta)
                 _dU=_H_u*beta
                 Un = Up + _dU
                 Xn = self.trajectory(Un)
 
-                In = self.model.I(Xn, Un)
+                In = self.I(Xn, Un)
 
                 dI = Ip-In
                 if DEBUG>5:
@@ -279,15 +280,16 @@ class ParOptProcess(object):
         x0=self.model.X0
         X = [x0]
         for t, u in enumerate(U): # (0, u0), (1, u1)
-            xn=self.model.f(t, X[t], u)
+            xn=self.model.f(t, X[t], u) # FIXME: implement via code
             X.append(xn)
 
         return array(X)
 
     def I(self, X, U):
         def _add(acc, t):
-            return acc + self.f0(t, X[t], U[t])
-        return reduce(_add, range(len(X)-1), self.F(X[-1]))
+            return acc + self.model.f0(t, X[t], U[t]) # FIXME: implement via code
+        return reduce(_add, range(len(X)-1), self.model.F(X[-1])) # FIXME: implement via code
+
     def Psi(self, t, X, U, alpha):
 
         v=self.v
@@ -329,6 +331,7 @@ class ParOptProcess(object):
         psi=array(psi)
 
         return psi[::-1]
+
     def krot_d_dd(self, t, X, U, alpha=1.0):
         Psi=self.Psi(t, X, U, alpha=alpha)
         v=self.v
@@ -378,7 +381,7 @@ class ParOptProcess(object):
     #     else:
     #         return _teval(code, T, X, U, self.v)
 
-     def funnew(self, f, vars, T, X, U):
+     def fun(self, f, vars, T, X, U):
          # evaluate derivatives of f on vars and substitute t, X,U
          code=self.code(f, vars, False, False)
          if vars[0]==self.F:
@@ -386,28 +389,28 @@ class ParOptProcess(object):
          else:
              return _teval(code, T, X, U, self.v)
 
-    def get_code_for(self, vars):
-        if not vars:
-            raise ValueError("no variables")
-        try:
-            return self.c.fn[vars]
-        except KeyError:
-            pass
+    # def get_code_for(self, vars):
+    #     if not vars:
+    #         raise ValueError("no variables")
+    #     try:
+    #         return self.c.fn[vars]
+    #     except KeyError:
+    #         pass
 
-        try:
-            c=self.c.fn[vars]=_vcomp(self.v.fn[vars])
-            return c
-        except KeyError:
-            pass
+    #     try:
+    #         c=self.c.fn[vars]=_vcomp(self.v.fn[vars])
+    #         return c
+    #     except KeyError:
+    #         pass
 
-        vp=vars[:-1]
-        cp=self.get_code_for(vp)# what is doing this string?
-        fp=self.v.fn[vp]
-        df=self.v.fn[vars]=_rdiff(fp, vars[-1])
-        c=self.c.fn[vars]=_vcomp(df)
-        if DEBUG>1:
-            print ("A derivative for\n\t", vars, "=", df)
-        return c
+    #     vp=vars[:-1]
+    #     cp=self.get_code_for(vp)# what is doing this string?
+    #     fp=self.v.fn[vp]
+    #     df=self.v.fn[vars]=_rdiff(fp, vars[-1])
+    #     c=self.c.fn[vars]=_vcomp(df)
+    #     if DEBUG>1:
+    #         print ("A derivative for\n\t", vars, "=", df)
+    #     return c
 
     def H(self, vars, T, X, U, Psi, alpha = 1.0):
         # calculate H_v_v...(t.
