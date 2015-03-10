@@ -53,21 +53,16 @@ class VFCalc(object):
             return f.subs(s) # common subs
         return tuple([self.subs(fi,s) for fi in f])#local subs
 
-    def lambdify(self, f):
+    def lambdify(self, f, scalar=False):
         """Compiles function f into a lambda-function
         with args as its arguments.
         """
-        # l=[Symbol('t'),Symbol('X'),Symbol('U')]
         l=[Symbol('t')]
-        # repx=[(Symbol('x'+str(i+1)),Symbol('X['+str(i)+']')) for i in range(self.N)]
-        # repu=[(Symbol('u'+str(i+1)),Symbol('U['+str(i)+']')) for i in range(self.M)]
-        # newf=self.subs(f,repx+repu)
         xs=[Symbol('x'+str(i+1)) for i in range(self.N)]
         us=[Symbol('u'+str(i+1)) for i in range(self.M)]
         l.extend(xs)
         l.extend(us)
         print (l)
-        # print (newf)
         f=lambdify(l, f, "numpy")
         def _f(t, X, U):
             xs=tuple(X)
@@ -76,32 +71,23 @@ class VFCalc(object):
             args=(t,)+xs+us
             ff=f(*args)
             return array(ff)
-        #wrap=sympify('array(A)')
-        #A=wrap.subs(Symbol('A'),newf)
-        return _f
+        def _fscal(t, X, U):
+            xs=tuple(X)
+            us=tuple(U)
+            print (t,X,U)
+            args=(t,)+xs+us
+            ff=f(*args)
+            return ff
+        if scalar:
+            return _fscal
+        else:
+            return _f
 
-    def code(self, f, *vars, debug=False):
+    def code(self, f, *vars, debug=False, scalar=False):
         f=self.diff(f, *vars)
-        c=self.lambdify(f)
+        c=self.lambdify(f, scalar=scalar)
         if debug: return c, f
         return c
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 def constant(function):
     if CACHING:
@@ -167,210 +153,74 @@ class ParOptModel(object):
     See docs for individual methods on usage ways.
     """
 
-    def __init__(self, X0, N, M):
+    def __init__(self, N, M, X0, U0):
         self.N=N     # Dimention of x
         self.M=M     # Dimention of u
         self.X0=X0
-        self.v=Helper()
-        self.v.t=Symbol('t')
-        a=[]
-        for i in range(N):
-            a.append(Symbol('x%s' % i))
-        self.v.x=tuple(a)
-        a=[]
-        for i in range(M):
-            a.append(Symbol('u%s' % i))
-        self.v.u=tuple(a)
+        self.U0=U0
+        #self.v=Helper()
+        #self.t=Symbol('t')
+        # a=[]
+        # for i in range(N):
+        #     a.append(Symbol('x%s' % i))
+        # self.v.x=tuple(a)
+        # a=[]
+        # for i in range(M):
+        #     a.append(Symbol('u%s' % i))
+        # self.v.u=tuple(a)
 
-        v, t, x, u = self.v, self.v.t, self.v.x, self.v.u
+        # v, t, x, u = self.v, self.v.t, self.v.x, self.v.u
 
-        self.v.f=self.f(t, x, u)
-        self.v.f0=self.f0(t, x, u)
-        self.v.F=self.F(x)
+        # self.v.f=self.f(t, x, u)
+        # self.v.f0=self.f0(t, x, u)
+        # self.v.F=self.F(x)
 
-        self.c=Helper()
-        c=self.c
-        c.fn={}
-        v.fn={}
-        v.fn[(v.f,)]=v.f
-        v.fn[(v.f0,)]=v.f0
-        v.fn[(v.F,)]=v.F
+        # self.c=Helper()
+        # c=self.c
+        # c.fn={}
+        # v.fn={}
+        # v.fn[(v.f,)]=v.f
+        # v.fn[(v.f0,)]=v.f0
+        # v.fn[(v.F,)]=v.F
 
-        self.__cache__={}
-
-    def I(self, X, U):
-        def _add(acc, t):
-            return acc + self.f0(t, X[t], U[t])
-        return reduce(_add, range(len(X)-1), self.F(X[-1]))
+        # self.__cache__={}
 
     def F(self, x):
         """x - ending state of a trajectory
         """
-        raise RuntimeError("should be implemented by subclass")
+        return 0.0
 
     def f(self, t, x0, U, dt=1):
         raise RuntimeError("should be implemented by subclass")
 
     def f0(self, t, x, u, dt=1):
-        raise RuntimeError("should be implemented by subclass")
-
-    def Psi(self, t, X, U, alpha):
-
-        v=self.v
-
-        psie = -self.fun((v.F,v.x), None, X[-1], None)
-
-        psi=[psie]
-
-        #for the rest of the interval
-        X=X[:-1]
-        t=t[:-1]
-
-        _f0_x=self.fun((v.f0,v.x), t, X, U) # last element is useless
-        _f_x =self.fun((v.f,v.x), t, X, U) # last element is useless
+        return 0.0
 
 
-        j=len(t)-1
-        p=psie
+    # def H_u(self, t, X, U, Psi):
 
-        while j>=1:
-            i=t[j]
-            pp=p
-            _f_x_i = _f_x[i]
-            #_f0_x_t = transpose(_f0_x[i])
+    #     XX=X[:-1]
+    #     tt=t[:-1]
+    #     v=self.v
+    #     _f0_u=self.fun((v.f0,v.u), tt, XX, U)
+    #     _f_u =self.fun((v.f,v.u), tt, XX, U)
+    #     p=Psi
+    #     if DEBUG>10:
+    #         print ("f_u:", len(_f_u))
+    #         print ("psi:", len(p))
+    #         print ("f0_u", len(_f0_u))
 
-            pn = dot(pp,_f_x_i) - alpha*_f0_x[i]
+    #     _s=array([dot(p,fu) for p,fu in zip(Psi,_f_u)]) # Psi[i] is shifted left to 1 step.
+    #     #_s1=dot(f_u, Psi)
+    #     #_s=dot(Psi,_f_u)
 
-            #if j==1:
-            #    print (_f_x_t, pp, _f0_x_t, "=>", pn )
-            #    print (self.v[[0.4*x0], [0.4*x1]].f0_x)
-            psi.append(pn)
-            p=pn
-            j-=1
+    #     return _s - _f0_u # FIXME Check dot operation.
 
-        # ----
-
-
-
-        psi=array(psi)
-
-        return psi[::-1]
-
-    def H_u(self, t, X, U, Psi):
-
-        XX=X[:-1]
-        tt=t[:-1]
-        v=self.v
-        _f0_u=self.fun((v.f0,v.u), tt, XX, U)
-        _f_u =self.fun((v.f,v.u), tt, XX, U)
-        p=Psi
-        if DEBUG>10:
-            print ("f_u:", len(_f_u))
-            print ("psi:", len(p))
-            print ("f0_u", len(_f0_u))
-
-        _s=array([dot(p,fu) for p,fu in zip(Psi,_f_u)]) # Psi[i] is shifted left to 1 step.
-        #_s1=dot(f_u, Psi)
-        #_s=dot(Psi,_f_u)
-
-        return _s - _f0_u # FIXME Check dot operation.
-
-    def start_control(self):
-        raise RuntimeError("should be implemented by subclass")
+    # def start_control(self):
+    #    raise RuntimeError("should be implemented by subclass")
 
     #------------ These functions must be defined for Second Order Improvement Process -----
 
-    def krot_d_dd(self, t, X, U, alpha=1.0):
-        Psi=self.Psi(t, X, U, alpha=alpha)
-        v=self.v
-
-
-        sige  = -self.fun((v.F,v.x,v.x), 0, X[-1], 0)
-        Sig=[sige]
-
-        #for the rest of the interval
-        X=X[:-1]
-        t=t[:-1]
-
-
-        H_x_x=self.H((v.x,v.x), t, X,U, Psi, alpha=alpha)
-
-        _f0_x=self.fun((v.f0, v.x), t,X,U)
-        _f_x =self.fun((v.f, v.x), t, X, U)
-        _f0_x_x=self.fun((v.f0,v.x,v.x), t, X, U)
-        _f_x_x=self.fun((v.f,v.x,v.x), t, X, U)
-
-
-        j=len(t)-1
-        sp=sige
-
-
-        while j>=1:
-            i=t[j]
-            _f_x_i = _f_x[i]
-            _f_x_t = transpose(_f_x_i)
-
-            pn = Psi[i]
-
-            H_x_x_i = H_x_x[i]
-            sn = dot(dot(sp,_f_x_i), _f_x_i) + H_x_x_i
-            Sig.append(sn)
-            sp=sn
-            j-=1
-
-        Sig=array(Sig)
-        return Psi, Sig[::-1] # Really it is dPsidalpha
-                                    # Really it is dSigmadalpha
-
-    def fun(self, vars, T, X, U):
-        code=self.get_code_for(vars)
-        if vars[0]==self.v.F:
-            return eval(code, {'x':X, 'array':array})
-        else:
-            return _teval(code, T, X, U, self.v)
-
-    def get_code_for(self, vars):
-        if not vars:
-            raise ValueError("no variables")
-        try:
-            return self.c.fn[vars]
-        except KeyError:
-            pass
-
-        try:
-            c=self.c.fn[vars]=_vcomp(self.v.fn[vars])
-            return c
-        except KeyError:
-            pass
-
-        vp=vars[:-1]
-        cp=self.get_code_for(vp)# what is doing this string?
-        fp=self.v.fn[vp]
-        df=self.v.fn[vars]=_rdiff(fp, vars[-1])
-        c=self.c.fn[vars]=_vcomp(df)
-        if DEBUG>1:
-            print ("A derivative for\n\t", vars, "=", df)
-        return c
-
-    def H(self, vars, T, X, U, Psi, alpha = 1.0):
-        # calculate H_v_v...(t.
-        # print ("Evaluating H:", vars, len(T), len(X), len(U), len(Psi))
-        assert len(vars)>0
-        assert len(T) == len(X)
-        assert len(X)==len(U)
-        assert len(U)==len(Psi)
-
-
-        f=self.fun((self.v.f,)+vars, T, X, U)
-        f0=-self.fun((self.v.f0,)+vars, T, X, U)
-
-        H = alpha * f0
-
-        for psi,_H,_f,i in zip(Psi, H, f, range(len(H))):
-            _H += dot(psi,_f) # !
-            H[i]=_H
-
-        return H
 
 class ParOptProcess(object):
     """This calss corresponds to a optimizational model.
@@ -433,6 +283,152 @@ class ParOptProcess(object):
             X.append(xn)
 
         return array(X)
+
+    def I(self, X, U):
+        def _add(acc, t):
+            return acc + self.f0(t, X[t], U[t])
+        return reduce(_add, range(len(X)-1), self.F(X[-1]))
+    def Psi(self, t, X, U, alpha):
+
+        v=self.v
+
+        psie = -self.fun((v.F,v.x), None, X[-1], None)
+
+        psi=[psie]
+
+        #for the rest of the interval
+        X=X[:-1]
+        t=t[:-1]
+
+        _f0_x=self.fun((v.f0,v.x), t, X, U) # last element is useless
+        _f_x =self.fun((v.f,v.x), t, X, U) # last element is useless
+
+
+        j=len(t)-1
+        p=psie
+
+        while j>=1:
+            i=t[j]
+            pp=p
+            _f_x_i = _f_x[i]
+            #_f0_x_t = transpose(_f0_x[i])
+
+            pn = dot(pp,_f_x_i) - alpha*_f0_x[i]
+
+            #if j==1:
+            #    print (_f_x_t, pp, _f0_x_t, "=>", pn )
+            #    print (self.v[[0.4*x0], [0.4*x1]].f0_x)
+            psi.append(pn)
+            p=pn
+            j-=1
+
+        # ----
+
+
+
+        psi=array(psi)
+
+        return psi[::-1]
+    def krot_d_dd(self, t, X, U, alpha=1.0):
+        Psi=self.Psi(t, X, U, alpha=alpha)
+        v=self.v
+
+
+        sige  = -self.fun((v.F,v.x,v.x), 0, X[-1], 0)
+        Sig=[sige]
+
+        #for the rest of the interval
+        X=X[:-1]
+        t=t[:-1]
+
+
+        H_x_x=self.H((v.x,v.x), t, X,U, Psi, alpha=alpha)
+
+        _f0_x=self.fun((v.f0, v.x), t,X,U)
+        _f_x =self.fun((v.f, v.x), t, X, U)
+        _f0_x_x=self.fun((v.f0,v.x,v.x), t, X, U)
+        _f_x_x=self.fun((v.f,v.x,v.x), t, X, U)
+
+
+        j=len(t)-1
+        sp=sige
+
+
+        while j>=1:
+            i=t[j]
+            _f_x_i = _f_x[i]
+            _f_x_t = transpose(_f_x_i)
+
+            pn = Psi[i]
+
+            H_x_x_i = H_x_x[i]
+            sn = dot(dot(sp,_f_x_i), _f_x_i) + H_x_x_i
+            Sig.append(sn)
+            sp=sn
+            j-=1
+
+        Sig=array(Sig)
+        return Psi, Sig[::-1] # Really it is dPsidalpha
+                                    # Really it is dSigmadalpha
+
+    # def fun(self, vars, T, X, U):
+    #     code=self.get_code_for(vars)
+    #     if vars[0]==self.v.F:
+    #         return eval(code, {'x':X, 'array':array})
+    #     else:
+    #         return _teval(code, T, X, U, self.v)
+
+     def funnew(self, f, vars, T, X, U):
+         # evaluate derivatives of f on vars and substitute t, X,U
+         code=self.code(f, vars, False, False)
+         if vars[0]==self.F:
+             return eval(code, {'x':X, 'array':array})
+         else:
+             return _teval(code, T, X, U, self.v)
+
+    def get_code_for(self, vars):
+        if not vars:
+            raise ValueError("no variables")
+        try:
+            return self.c.fn[vars]
+        except KeyError:
+            pass
+
+        try:
+            c=self.c.fn[vars]=_vcomp(self.v.fn[vars])
+            return c
+        except KeyError:
+            pass
+
+        vp=vars[:-1]
+        cp=self.get_code_for(vp)# what is doing this string?
+        fp=self.v.fn[vp]
+        df=self.v.fn[vars]=_rdiff(fp, vars[-1])
+        c=self.c.fn[vars]=_vcomp(df)
+        if DEBUG>1:
+            print ("A derivative for\n\t", vars, "=", df)
+        return c
+
+    def H(self, vars, T, X, U, Psi, alpha = 1.0):
+        # calculate H_v_v...(t.
+        # print ("Evaluating H:", vars, len(T), len(X), len(U), len(Psi))
+        assert len(vars)>0
+        assert len(T) == len(X)
+        assert len(X)==len(U)
+        assert len(U)==len(Psi)
+
+
+        f=self.fun((self.v.f,)+vars, T, X, U)
+        f0=-self.fun((self.v.f0,)+vars, T, X, U)
+
+        H = alpha * f0
+
+        for psi,_H,_f,i in zip(Psi, H, f, range(len(H))):
+            _H += dot(psi,_f) # !
+            H[i]=_H
+
+        return H
+
 
 class SeconOrderParOptProcess(ParOptProcess):
     """A second order parametric optimization process
