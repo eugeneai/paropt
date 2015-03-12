@@ -16,8 +16,12 @@ ListType=type([])
 DEBUG = 20
 #DEBUG = 0
 PROFILE = False # True
-Ht = 0.01
+#Ht = 0.01
+Ht = 0.2
 import time
+
+class Helper():
+    pass
 
 class VFCalc(object):
     """ Class automizing differential convertions of
@@ -27,9 +31,12 @@ class VFCalc(object):
     def __init__(self, N,M):
         """
         """
-        self.t=Symbol('t')
         self.N=N
         self.M=M
+        self.v=Helper()
+        self.v.x=[Symbol('x'+str(i+1)) for i in range(self.N)]
+        self.v.u=[Symbol('u'+str(i+1)) for i in range(self.M)]
+        self.v.t=Symbol('t')
 
     def diff1(self, f, var):# derivation of one vector-variable
         """This is method for figuring out of
@@ -57,12 +64,10 @@ class VFCalc(object):
         """Compiles function f into a lambda-function
         with args as its arguments.
         """
-        l=[Symbol('t')]
-        xs=[Symbol('x'+str(i+1)) for i in range(self.N)]
-        us=[Symbol('u'+str(i+1)) for i in range(self.M)]
-        l.extend(xs)
-        l.extend(us)
-        print (l)
+        l=[self.v.t]
+        l.extend(self.v.x)
+        l.extend(self.v.u)
+        # print (l)
         f=lambdify(l, f, "numpy")
         def _f(t, X, U):
             xs=tuple(X)
@@ -74,7 +79,7 @@ class VFCalc(object):
         def _fscal(t, X, U):
             xs=tuple(X)
             us=tuple(U)
-            print (t,X,U)
+            #print (t,X,U)
             args=(t,)+xs+us
             ff=f(*args)
             return ff
@@ -145,19 +150,18 @@ def _teval(d, T,X,U, V): # d is a code of function to be evaluated at all T time
         rc.append(_eval(d, t, X[t], U[t], V))
     return array(rc)
 
-class Helper():
-    pass
-
 class ParOptModel(object):
     """Parametric Optimised model class.
     See docs for individual methods on usage ways.
     """
 
-    def __init__(self, N, M, X0, U0):
-        self.N=N     # Dimention of x
-        self.M=M     # Dimention of u
-        self.X0=X0
+    def __init__(self, X0, U0):
+        self.X0=array(X0)
         self.U0=U0
+        self.N=self.X0.shape[0]   # Dimention of x
+        self.M=U0.shape[1]   # Dimention of u
+        print ('X0:', X0)
+        print ('U0:', U0)
         #self.v=Helper()
         #self.t=Symbol('t')
         # a=[]
@@ -171,9 +175,7 @@ class ParOptModel(object):
 
         # v, t, x, u = self.v, self.v.t, self.v.x, self.v.u
 
-        # self.v.f=self.f(t, x, u)
-        # self.v.f0=self.f0(t, x, u)
-        # self.v.F=self.F(x)
+
 
         # self.c=Helper()
         # c=self.c
@@ -230,7 +232,11 @@ class ParOptProcess(VFCalc):
         """
         """
         VFCalc.__init__(self, model.N, model.M)
+        t,x,u=self.v.t,self.v.x,self.v.u
         self.model=model
+        self.v.f=model.f(t, x, u)
+        self.v.f0=model.f0(t, x, u)
+        self.v.F=model.F(x)
         self.alpha=alpha
         self.beta=beta
 
@@ -294,7 +300,12 @@ class ParOptProcess(VFCalc):
 
         v=self.v
 
-        psie = -self.fun((v.F,v.x), None, X[-1], None)
+        # import pudb; pu.db
+
+        print (v.F, X)
+        print ("-------", t[-1], X[-1], U[-1])
+
+        psie = -self.fun(v.F,(v.x,), t[-1], X[-1], U[-1], scalar=True)
 
         psi=[psie]
 
@@ -302,8 +313,8 @@ class ParOptProcess(VFCalc):
         X=X[:-1]
         t=t[:-1]
 
-        _f0_x=self.fun((v.f0,v.x), t, X, U) # last element is useless
-        _f_x =self.fun((v.f,v.x), t, X, U) # last element is useless
+        _f0_x=self.fun(v.f0, (v.x,), t, X, U, scalar=True) # last element is useless
+        _f_x =self.fun(v.f, (v.x,), t, X, U) # last element is useless
 
 
         j=len(t)-1
@@ -337,7 +348,7 @@ class ParOptProcess(VFCalc):
         v=self.v
 
 
-        sige  = -self.fun((v.F,v.x,v.x), 0, X[-1], 0)
+        sige  = -self.fun(v.F, (v.x,v.x), 0, X[-1], 0, scalar=True)
         Sig=[sige]
 
         #for the rest of the interval
@@ -347,10 +358,10 @@ class ParOptProcess(VFCalc):
 
         H_x_x=self.H((v.x,v.x), t, X,U, Psi, alpha=alpha)
 
-        _f0_x=self.fun((v.f0, v.x), t,X,U)
-        _f_x =self.fun((v.f, v.x), t, X, U)
-        _f0_x_x=self.fun((v.f0,v.x,v.x), t, X, U)
-        _f_x_x=self.fun((v.f,v.x,v.x), t, X, U)
+        _f0_x=self.fun(v.f0, (v.x,), t,X,U, scalar=True)
+        _f_x =self.fun(v.f, (v.x,), t, X, U)
+        _f0_x_x=self.fun(v.f0, (v.x,v.x), t, X, U, scalar=True)
+        _f_x_x=self.fun(v.f, (v.x,v.x), t, X, U)
 
 
         j=len(t)-1
@@ -374,20 +385,10 @@ class ParOptProcess(VFCalc):
         return Psi, Sig[::-1] # Really it is dPsidalpha
                                     # Really it is dSigmadalpha
 
-    # def fun(self, vars, T, X, U):
-    #     code=self.get_code_for(vars)
-    #     if vars[0]==self.v.F:
-    #         return eval(code, {'x':X, 'array':array})
-    #     else:
-    #         return _teval(code, T, X, U, self.v)
-
-     def fun(self, f, vars, T, X, U):
+    def fun(self, f, vars, T, X, U, scalar=False):
          # evaluate derivatives of f on vars and substitute t, X,U
-         code=self.code(f, vars, False, False)
-         if vars[0]==self.F:
-             return eval(code, {'x':X, 'array':array})
-         else:
-             return _teval(code, T, X, U, self.v)
+         code=self.code(f, *vars, scalar=False)
+         return code(T,X,U)
 
     # def get_code_for(self, vars):
     #     if not vars:
@@ -421,8 +422,8 @@ class ParOptProcess(VFCalc):
         assert len(U)==len(Psi)
 
 
-        f=self.fun((self.v.f,)+vars, T, X, U)
-        f0=-self.fun((self.v.f0,)+vars, T, X, U)
+        f=self.fun(self.v.f, vars, T, X, U)
+        f0=-self.fun(self.v.f0, vars, T, X, U, scalar=True)
 
         H = alpha * f0
 
@@ -461,33 +462,31 @@ class SeconOrderParOptProcess(ParOptProcess):
         while True:
             # Something done with alphas and
             Psi, Sigma = self.model.krot_d_dd(t, Xp, Up)
-
-
-            _f_u=self.model.fun((v.f,v.u), tc, Xpc, Up)
+            _f_u=self.fun(v.f, (v.u,), tc, Xpc, Up)
 
             _f_u_t=_f_u.transpose(0,2,1)
 
-            _f_x=self.model.fun((v.f,v.x), tc, Xpc, Up)
+            _f_x=self.fun(v.f, (v.x,), tc, Xpc, Up)
             _f_x_t=_f_x.transpose(0,2,1)
 
-            _f_u_u=self.model.fun((v.f,v.u,v.u), tc, Xpc, Up)
+            _f_u_u=self.fun(v.f,(v.u,v.u), tc, Xpc, Up)
             alpha=_a
 
             while True:
 
                 #import pudb; pu.db
-                f_part=self.model.H((v.u,v.u), tc, Xpc, Up, Psi, alpha=alpha)
+                f_part=self.H((v.u,v.u), tc, Xpc, Up, Psi, alpha=alpha)
 
                 for h, fut, fu, sik, k in zip(f_part, _f_u_t, _f_u, Sigma, range(len(f_part))):
                     h+=dot(dot(fut, alpha*sik),fu)-E
                     f_part[k]=-linalg.inv(h)
 
-                s_part=self.model.H((v.u,v.x), tc, Xpc, Up, Psi, alpha=alpha)
+                s_part=self.H((v.u,v.x), tc, Xpc, Up, Psi, alpha=alpha)
 
                 for h, fxt, sik, fu in zip(s_part, _f_x_t, Sigma, _f_u):
                     s_part[k]+=dot(dot(fxt, alpha*sik),fu)
 
-                H_u=H_u_a=self.model.H((v.u,), tc, Xpc,Up, Psi, alpha=alpha)
+                H_u=H_u_a=self.H((v.u,), tc, Xpc,Up, Psi, alpha=alpha)
 
                 Un = numpy.copy(Up)
                 #dU = numpy.copy(Up)
@@ -552,7 +551,7 @@ class LinModel1(ParOptModel):
             num=self.num
         )
         self.t = arange(len(self.T))
-        ParOptModel.__init__(self, X0=X0, N=1, M=1)
+        ParOptModel.__init__(self, X0=X0, U0=self.start_control())
 
     def start_control(self):
         U = [(0.0,) for t in self.t[:-1]]
@@ -592,7 +591,7 @@ class LinModel2d2du(ParOptModel):
             num=self.num
         )
         self.t = arange(len(self.T))
-        ParOptModel.__init__(self, X0=X0, N=2, M=2)
+        ParOptModel.__init__(self, X0=X0, U0=start_control())
 
     def start_control(self):
         U = [[0.0,0.0] for t in self.t[:-1]]
@@ -631,7 +630,7 @@ class LinModel2d2du1(ParOptModel):
             num=self.num
         )
         self.t = arange(len(self.T))
-        ParOptModel.__init__(self, X0=X0, N=2, M=2)
+        ParOptModel.__init__(self, X0=X0, U0=self.start_control())
 
     def start_control(self):
         U = [array([[0.0],[0.0]]) for t in self.t[:-1]]
@@ -714,7 +713,7 @@ def test_with_plot():
     print ("-"*20)
     r1=I1, X1, U1, it1, _1 = p1.optimize(m.t, eps=eps, iters=iters)
     print (I1, "iters:", it1)
-    print ("Second-oreder process:")
+    print ("Second-order process:")
     print ("-"*20)
     r2=I2, X2, U2, it2, _2 = p2.optimize(m.t, eps=eps, iters=iters)
     print (I2, "iters:", it2)
@@ -772,8 +771,8 @@ def test_VFCalc():
 
 
 if __name__=="__main__":
-    test_VFCalc()
-    raise SystemExit(0)
+    #test_VFCalc()
+    #raise SystemExit(0)
 
     print ("ok")
 
