@@ -68,7 +68,7 @@ class VFCalc(object):
         l.extend(self.v.x)
         l.extend(self.v.u)
         # print (l)
-        f=lambdify(l, f, "numpy")
+        fl=lambdify(l, f, "numpy")
         def _prepargs(t,X,U):
             if X.ndim>1:
                 return True,(t,)+tuple(X.T)+tuple(U.T)
@@ -76,12 +76,13 @@ class VFCalc(object):
                 return False,(t,)+tuple(X)+tuple(U)
         def _fgen(t, X, U, scalar=True):
             tr,args=_prepargs(t,X,U)
-            ff=f(*args)
+            ff=fl(*args)
             if not scalar:
                 ff=array(ff)
                 if X.shape[0]>ff.shape[0]:
 
-                    import pdb; pdb.set_trace()
+#                    import pdb; pdb.set_trace()
+
                     ff.resize((X.shape[0],ff.shape[1]))
                     ff[:]=ff[0]
             if tr and not scalar:
@@ -325,7 +326,7 @@ class ParOptProcess(VFCalc):
         j=len(t)-1
         p=psie
 
-        import pdb; pdb.set_trace()
+#        import pdb; pdb.set_trace()
 
         while j>=1:
             i=t[j]
