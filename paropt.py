@@ -79,7 +79,11 @@ class VFCalc(object):
             ff=f(*args)
             if not scalar:
                 ff=array(ff)
-                ff.resize((X.shape[0],ff.shape[1]))
+                if X.shape[0]>ff.shape[0]:
+
+                    import pdb; pdb.set_trace()
+                    ff.resize((X.shape[0],ff.shape[1]))
+                    ff[:]=ff[0]
             if tr and not scalar:
                 ff=ff.T
             return ff
@@ -316,8 +320,7 @@ class ParOptProcess(VFCalc):
         t=t[:-1]
 
         _f0_x=self.fun(v.f0, (v.x,), t, X, U, scalar=True) # last element is useless
-        _f_x =self.fun(v.f, (v.x,), t, X, U) # last element is useless
-
+        _f_x =self.fun(v.f, (v.x,), t, X, U) # last element is usele
 
         j=len(t)-1
         p=psie
