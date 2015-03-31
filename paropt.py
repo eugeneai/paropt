@@ -8,6 +8,7 @@ from sympy import symbols, diff, Symbol
 import numpy.linalg
 import unittest
 from sympy.utilities.lambdify import lambdify
+import os
 
 TupleType=type((1,))
 ListType=type([])
@@ -16,8 +17,8 @@ ListType=type([])
 DEBUG = 20
 #DEBUG = 0
 PROFILE = False # True
-#Ht = 0.01
-Ht = 0.2
+Ht = 0.01
+#Ht = 0.2
 import time
 
 class Helper():
@@ -44,7 +45,10 @@ class VFCalc(object):
         """
         if type(f) in [TupleType,ListType]: #f myght be a tuple(n-ka)
             return tuple([self.diff1(fi, var) for fi in f])
-        return tuple([diff(f, vi) for vi in var])
+        df=tuple([diff(f, vi) for vi in var])
+        if len(df)==1:
+            df=df[0]    # Original f is not a tuple or a list (!)
+        return df
 
     def diff(self, f, *vars):
         """This is method for figuring out of
@@ -78,11 +82,13 @@ class VFCalc(object):
             tr,args=_prepargs(t,X,U)
             ff=fl(*args)
             if not scalar:
-                ff=array(ff)
-                if X.shape[0]>ff.shape[0]:
-
-                    ff.resize((X.shape[0],ff.shape[1]))
-                    ff[:]=ff[0]
+                if type(ff) not in [numpy.ndarray]:
+                    nff=numpy.zeros(len(t),dtype=float)
+                    nff[:]=ff
+                #if X.shape[0]>ff.shape[0]:
+                #    ff.resize((X.shape[0],ff.shape[1]))
+                #    ff[:]=ff[0]
+                    ff=nff
             if tr and not scalar:
                 ff=ff.T
             return ff
@@ -94,9 +100,9 @@ class VFCalc(object):
             return _f
 
     def code(self, f, *vars, debug=False, scalar=False):
-        f=self.diff(f, *vars)
-        c=self.lambdify(f, scalar=scalar)
-        if debug: return c, f
+        df=self.diff(f, *vars)
+        c=self.lambdify(df, scalar=scalar)
+        if debug: return c, df, f
         return c
 
 def constant(function):
@@ -247,17 +253,17 @@ class Process(VFCalc):
 
     def optimize(self, t, eps=0.001, iters=1000):
 
-        import pdb; pdb.set_trace()
         Up=self.model.U0
 
         Xp=self.trajectory(Up)
         Ip=self.I(Xp,Up)
 
         it = 1
+
         while True:
             beta = self.beta
             Psi=self.Psi(t, Xp, Up, self.alpha)
-            _H_u=self.H((self.model.v.u,), t[:-1], Xp[:-1], Up, Psi, alpha=1.0)
+            _H_u=self.H((self.v.u,), t[:-1], Xp[:-1], Up, Psi, alpha=1.0)
             while True:
                 print (it, beta)
                 _dU=_H_u*beta
@@ -326,7 +332,6 @@ class Process(VFCalc):
         j=len(t)-1
         p=psie
 
-#        import pdb; pdb.set_trace()
 
         while j>=1:
             i=t[j]
@@ -349,7 +354,7 @@ class Process(VFCalc):
 
         psi=array(psi)
 
-        return psi[::-1]
+        return array([psi[::-1]]).T
 
     def krot_d_dd(self, t, X, U, alpha=1.0):
         Psi=self.Psi(t, X, U, alpha=alpha)
@@ -395,7 +400,7 @@ class Process(VFCalc):
 
     def fun(self, f, vars, T, X, U, scalar=False):
          # evaluate derivatives of f on vars and substitute t, X,U
-         code=self.code(f, *vars, scalar=False)
+         code=self.code(f, *vars, scalar=scalar)
          return code(T,X,U)
 
     # def get_code_for(self, vars):
@@ -439,7 +444,7 @@ class Process(VFCalc):
             _H += dot(psi,_f) # !
             H[i]=_H
 
-        return H
+        return array([H]).T
 
 
 class SeconOrderProcess(Process):
@@ -678,6 +683,8 @@ def gnuplot(fn, *args):
             o.write("\t".join([str(a) for a in u]))
             o.write("\n")
         o.close()
+    os.system('gnuplot test_with_plt1.p')
+    os.system('evince my-plot.ps')
 
 def test2(so=True):
     m = LinModel1()
@@ -712,7 +719,7 @@ def test2d(so=True):
 
 def test_with_plot():
     m = LinModel1()
-    p1=Process(m, beta=75.)
+    p1=Process(m, beta=1.0)
     p2=SeconOrderProcess(m, alpha=0.001)
     iters=2000
     eps=0.001
@@ -722,10 +729,11 @@ def test_with_plot():
     print (I1, "iters:", it1)
     print ("Second-order process:")
     print ("-"*20)
-    r2=I2, X2, U2, it2, _2 = p2.optimize(m.t, eps=eps, iters=iters)
-    print (I2, "iters:", it2)
+    #r2=I2, X2, U2, it2, _2 = p2.optimize(m.t, eps=eps, iters=iters)
+    #print (I2, "iters:", it2)
 
-    gnuplot("test_with_plt", r1,r2)
+    #gnuplot("test_with_plt", r1,r2)
+    gnuplot("test_with_plt", r1)
 
 def test2d1():
     m = LinModel2d2du1()
