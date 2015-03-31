@@ -81,8 +81,6 @@ class VFCalc(object):
                 ff=array(ff)
                 if X.shape[0]>ff.shape[0]:
 
-#                    import pdb; pdb.set_trace()
-
                     ff.resize((X.shape[0],ff.shape[1]))
                     ff[:]=ff[0]
             if tr and not scalar:
@@ -157,7 +155,7 @@ def _teval(d, T,X,U, V): # d is a code of function to be evaluated at all T time
         rc.append(_eval(d, t, X[t], U[t], V))
     return array(rc)
 
-class ParOptModel(object):
+class Model(object):
     """Parametric Optimised model class.
     See docs for individual methods on usage ways.
     """
@@ -165,8 +163,8 @@ class ParOptModel(object):
     def __init__(self, X0, U0):
         self.X0=array(X0)
         self.U0=U0
-        self.N=self.X0.shape[0]   # Dimention of x
-        self.M=U0.shape[1]   # Dimention of u
+        self.N=self.X0.shape[0]   # Dimention of X
+        self.M=U0.shape[1]   # Dimention of U
         print ('X0:', X0)
         print ('U0:', U0)
         #self.v=Helper()
@@ -199,7 +197,7 @@ class ParOptModel(object):
         """
         return 0.0
 
-    def f(self, t, x0, U, dt=1):
+    def f(self, t, x, U, dt=1):
         raise RuntimeError("should be implemented by subclass")
 
     def f0(self, t, x, u, dt=1):
@@ -231,7 +229,7 @@ class ParOptModel(object):
     #------------ These functions must be defined for Second Order Improvement Process -----
 
 
-class ParOptProcess(VFCalc):
+class Process(VFCalc):
     """This calss corresponds to a optimizational model.
     """
 
@@ -248,6 +246,8 @@ class ParOptProcess(VFCalc):
         self.beta=beta
 
     def optimize(self, t, eps=0.001, iters=1000):
+
+        import pdb; pdb.set_trace()
         Up=self.model.U0
 
         Xp=self.trajectory(Up)
@@ -321,7 +321,7 @@ class ParOptProcess(VFCalc):
         t=t[:-1]
 
         _f0_x=self.fun(v.f0, (v.x,), t, X, U, scalar=True) # last element is useless
-        _f_x =self.fun(v.f, (v.x,), t, X, U) # last element is usele
+        _f_x =self.fun(v.f, (v.x,), t, X, U) # last element is useless
 
         j=len(t)-1
         p=psie
@@ -442,13 +442,13 @@ class ParOptProcess(VFCalc):
         return H
 
 
-class SeconOrderParOptProcess(ParOptProcess):
+class SeconOrderProcess(Process):
     """A second order parametric optimization process
     """
     def __init__(self, model, **kwargs):
         X0=array([0.0, 0.0])
         self.t = arange(2)
-        ParOptProcess.__init__(self, model, **kwargs)
+        Process.__init__(self, model, **kwargs)
 
     def optimize(self, t, eps=0.001, iters=1000, alpha=None):
         Up=self.model.start_control()
@@ -543,7 +543,7 @@ class SeconOrderParOptProcess(ParOptProcess):
 
 # -------------------- tests -------------------------------------------------
 
-class LinModel1(ParOptModel):
+class LinModel1(Model):
     """Possibly simple linear test model.
     """
 
@@ -559,7 +559,7 @@ class LinModel1(ParOptModel):
             num=self.num
         )
         self.t = arange(len(self.T))
-        ParOptModel.__init__(self, X0=X0, U0=self.start_control())
+        Model.__init__(self, X0=X0, U0=self.start_control())
 
     def start_control(self):
         U = [(0.0,) for t in self.t[:-1]]
@@ -577,7 +577,6 @@ class LinModel1(ParOptModel):
         u0=u[0]
         return (x0+self.h*u0,)
 
-
     def f0(self, t, x, u, dt=1):
         """ X ia a vector of the previous state
         """
@@ -586,7 +585,7 @@ class LinModel1(ParOptModel):
         return self.h * (x0*x0+u0*u0)
 
 
-class LinModel2d2du(ParOptModel):
+class LinModel2d2du(Model):
     """Possibly not a simple linear test model.
     """
     def __init__(self):
@@ -599,7 +598,7 @@ class LinModel2d2du(ParOptModel):
             num=self.num
         )
         self.t = arange(len(self.T))
-        ParOptModel.__init__(self, X0=X0, U0=start_control())
+        Model.__init__(self, X0=X0, U0=start_control())
 
     def start_control(self):
         U = [[0.0,0.0] for t in self.t[:-1]]
@@ -625,7 +624,7 @@ class LinModel2d2du(ParOptModel):
         (u0,u1)=u
         return self.h * (x0*x0+x1*x1+u0*u0+u1*u1)
 
-class LinModel2d2du1(ParOptModel):
+class LinModel2d2du1(Model):
     """Possibly not a simple linear test model.
     """
     def __init__(self):
@@ -638,7 +637,7 @@ class LinModel2d2du1(ParOptModel):
             num=self.num
         )
         self.t = arange(len(self.T))
-        ParOptModel.__init__(self, X0=X0, U0=self.start_control())
+        Model.__init__(self, X0=X0, U0=self.start_control())
 
     def start_control(self):
         U = [array([[0.0],[0.0]]) for t in self.t[:-1]]
@@ -713,8 +712,8 @@ def test2d(so=True):
 
 def test_with_plot():
     m = LinModel1()
-    p1=ParOptProcess(m, beta=75.)
-    p2=SeconOrderParOptProcess(m, alpha=0.001)
+    p1=Process(m, beta=75.)
+    p2=SeconOrderProcess(m, alpha=0.001)
     iters=2000
     eps=0.001
     print ("First-order process:")
@@ -732,7 +731,7 @@ def test2d1():
     m = LinModel2d2du1()
     return
 
-    ip=ParOptProcess(m)
+    ip=Process(m)
     I, X, U, it, _ = ip.optimize(m.t, eps=0.001, iters=2000)
     print ("")
     print ("X,     U,   ")
