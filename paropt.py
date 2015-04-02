@@ -73,22 +73,28 @@ class VFCalc(object):
         l.extend(self.v.u)
         # print (l)
         fl=lambdify(l, f, "numpy")
-        def _prepargs(t,X,U):
+        def _preparegs(t,X,U):
             if X.ndim>1:
                 return True,(t,)+tuple(X.T)+tuple(U.T)
             else:
                 return False,(t,)+tuple(X)+tuple(U)
         def _fgen(t, X, U):
-            tr,args=_prepargs(t,X,U)
+            tr,args=_preparegs(t,X,U)
             ff=fl(*args)
             if type(t) in [numpy.ndarray]:
                 if type(ff) not in [numpy.ndarray]:
-                    nff=numpy.zeros(len(t),dtype=float)
+                    if type(ff) in [TupleType, ListType]:
+                        lff=len(ff)
+                    else:
+                        lff=1
+                    nff=numpy.zeros((len(t),lff),dtype=float)
                     nff[:]=ff
                     ff=nff
                 ff=ff.T
                 return ff
             else:
+                if type(ff) in [TupleType, ListType]:
+                    ff=array(ff)
                 return ff
         return _fgen
 
@@ -312,6 +318,8 @@ class Process(VFCalc):
         print ("-------", t[-1], X[-1], U[-1])
 
 
+
+        import pdb; pdb.set_trace()
         psie = -self.fun(v.F,(v.x,), t[-1], X[-1], U[-1])
 
         psi=[psie]
@@ -785,8 +793,8 @@ if __name__=="__main__":
 
     print ("ok")
 
-    TEST='test_with_plot'
-    #TEST='test2d'
+    #TEST='test_with_plot'
+    TEST='test2d'
     LOG='restats.log'
     if PROFILE:
         import cProfile, pstats
