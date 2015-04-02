@@ -64,7 +64,7 @@ class VFCalc(object):
             return f.subs(s) # common subs
         return tuple([self.subs(fi,s) for fi in f])#local subs
 
-    def lambdify(self, f, scalar=False):
+    def lambdify(self, f):
         """Compiles function f into a lambda-function
         with args as its arguments.
         """
@@ -78,30 +78,23 @@ class VFCalc(object):
                 return True,(t,)+tuple(X.T)+tuple(U.T)
             else:
                 return False,(t,)+tuple(X)+tuple(U)
-        def _fgen(t, X, U, scalar=True):
+        def _fgen(t, X, U):
             tr,args=_prepargs(t,X,U)
             ff=fl(*args)
-            if not scalar:
+            if type(t) in [numpy.ndarray]:
                 if type(ff) not in [numpy.ndarray]:
                     nff=numpy.zeros(len(t),dtype=float)
                     nff[:]=ff
-                #if X.shape[0]>ff.shape[0]:
-                #    ff.resize((X.shape[0],ff.shape[1]))
-                #    ff[:]=ff[0]
                     ff=nff
-            if tr and not scalar:
                 ff=ff.T
-            return ff
-        def _f(t, X, U):
-            return _fgen(t,X,U, scalar=False)
-        if scalar:
-            return _fgen
-        else:
-            return _f
+                return ff
+            else:
+                return ff
+        return _fgen
 
-    def code(self, f, *vars, debug=False, scalar=False):
+    def code(self, f, *vars, debug=False):
         df=self.diff(f, *vars)
-        c=self.lambdify(df, scalar=scalar)
+        c=self.lambdify(df)
         if debug: return c, df, f
         return c
 
@@ -318,7 +311,8 @@ class Process(VFCalc):
         print (v.F, X)
         print ("-------", t[-1], X[-1], U[-1])
 
-        psie = -self.fun(v.F,(v.x,), t[-1], X[-1], U[-1], scalar=True)
+
+        psie = -self.fun(v.F,(v.x,), t[-1], X[-1], U[-1])
 
         psi=[psie]
 
@@ -326,7 +320,7 @@ class Process(VFCalc):
         X=X[:-1]
         t=t[:-1]
 
-        _f0_x=self.fun(v.f0, (v.x,), t, X, U, scalar=True) # last element is useless
+        _f0_x=self.fun(v.f0, (v.x,), t, X, U) # last element is useless
         _f_x =self.fun(v.f, (v.x,), t, X, U) # last element is useless
 
         j=len(t)-1
@@ -361,7 +355,7 @@ class Process(VFCalc):
         v=self.v
 
 
-        sige  = -self.fun(v.F, (v.x,v.x), 0, X[-1], 0, scalar=True)
+        sige  = -self.fun(v.F, (v.x,v.x), 0, X[-1], 0)
         Sig=[sige]
 
         #for the rest of the interval
@@ -371,9 +365,9 @@ class Process(VFCalc):
 
         H_x_x=self.H((v.x,v.x), t, X,U, Psi, alpha=alpha)
 
-        _f0_x=self.fun(v.f0, (v.x,), t,X,U, scalar=True)
+        _f0_x=self.fun(v.f0, (v.x,), t,X,U)
         _f_x =self.fun(v.f, (v.x,), t, X, U)
-        _f0_x_x=self.fun(v.f0, (v.x,v.x), t, X, U, scalar=True)
+        _f0_x_x=self.fun(v.f0, (v.x,v.x), t, X, U)
         _f_x_x=self.fun(v.f, (v.x,v.x), t, X, U)
 
 
@@ -398,9 +392,9 @@ class Process(VFCalc):
         return Psi, Sig[::-1] # Really it is dPsidalpha
                                     # Really it is dSigmadalpha
 
-    def fun(self, f, vars, T, X, U, scalar=False):
+    def fun(self, f, vars, T, X, U):
          # evaluate derivatives of f on vars and substitute t, X,U
-         code=self.code(f, *vars, scalar=scalar)
+         code=self.code(f, *vars)
          return code(T,X,U)
 
     # def get_code_for(self, vars):
@@ -436,7 +430,7 @@ class Process(VFCalc):
 
 
         f=self.fun(self.v.f, vars, T, X, U)
-        f0=-self.fun(self.v.f0, vars, T, X, U, scalar=True)
+        f0=-self.fun(self.v.f0, vars, T, X, U)
 
         H = alpha * f0
 
@@ -603,7 +597,7 @@ class LinModel2d2du(Model):
             num=self.num
         )
         self.t = arange(len(self.T))
-        Model.__init__(self, X0=X0, U0=start_control())
+        Model.__init__(self, X0=X0, U0=self.start_control())
 
     def start_control(self):
         U = [[0.0,0.0] for t in self.t[:-1]]
@@ -702,13 +696,13 @@ def test2(so=True):
     print ("Result is:", I, "in", it, "iters")
     print (_)
 
-def test2d(so=True):
+def test2d(so=False):
     m = LinModel2d2du()
 
     if not so:
-        ip=ParOptProcess(m)
+        ip=Process(m)
     else:
-        ip=SeconOrderParOptProcess(m)
+        ip=SeconOrderProcess(m)
     I, X, U, it, _ = ip.optimize(m.t, eps=0.001, iters=200)
     print ("")
     print ("X,     U,   ")
@@ -792,6 +786,7 @@ if __name__=="__main__":
     print ("ok")
 
     TEST='test_with_plot'
+    #TEST='test2d'
     LOG='restats.log'
     if PROFILE:
         import cProfile, pstats
