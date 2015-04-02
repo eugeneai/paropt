@@ -17,8 +17,8 @@ ListType=type([])
 DEBUG = 20
 #DEBUG = 0
 PROFILE = False # True
-Ht = 0.01
-#Ht = 0.2
+#Ht = 0.01
+Ht = 0.2
 import time
 
 class Helper():
@@ -44,8 +44,9 @@ class VFCalc(object):
         functional differentials of vector-variable lists
         """
         if type(f) in [TupleType,ListType]: #f myght be a tuple(n-ka)
-            return tuple([self.diff1(fi, var) for fi in f])
-        df=tuple([diff(f, vi) for vi in var])
+            df=tuple([self.diff1(fi, var) for fi in f])
+        else:
+            df=tuple([diff(f, vi) for vi in var])
         if len(df)==1:
             df=df[0]    # Original f is not a tuple or a list (!)
         return df
@@ -73,92 +74,26 @@ class VFCalc(object):
         l.extend(self.v.u)
         # print (l)
         fl=lambdify(l, f, "numpy")
-        def _preparegs(t,X,U):
+        def _prepareags(t,X,U):
             if X.ndim>1:
                 return True,(t,)+tuple(X.T)+tuple(U.T)
             else:
                 return False,(t,)+tuple(X)+tuple(U)
         def _fgen(t, X, U):
-            tr,args=_preparegs(t,X,U)
+            tr,args=_prepareags(t,X,U)
             ff=fl(*args)
-            if type(t) in [numpy.ndarray]:
-                if type(ff) not in [numpy.ndarray]:
-                    if type(ff) in [TupleType, ListType]:
-                        lff=len(ff)
-                    else:
-                        lff=1
-                    nff=numpy.zeros((len(t),lff),dtype=float)
-                    nff[:]=ff
-                    ff=nff
-                ff=ff.T
-                return ff
-            else:
-                if type(ff) in [TupleType, ListType]:
-                    ff=array(ff)
-                return ff
+            if tr:
+                ff=array(ff)
+                return ff.T
+            return ff
         return _fgen
 
     def code(self, f, *vars, debug=False):
         df=self.diff(f, *vars)
         c=self.lambdify(df)
         if debug: return c, df, f
-        return c
+        return c,df
 
-def constant(function):
-    if CACHING:
-        def wrapper(self, *args, **kwargs):
-            c=self.__cache__
-            if function in c:
-                return c[function]
-            else:
-                rv = function(self, *args, **kwargs)
-                c[function] = rv
-                return rv
-        return wrapper
-    else:
-        return function
-
-def compile_method(name, f):
-    s="""
-def %s(self, t, x, u):
-    return %s
-    """ % (name, f)
-
-    f=compile(s, "<diffunctions>", 'exec')
-    f=exec(f)
-
-def _vcomp(exp):
-    sexp="array(%s)" % str(exp)
-    return compile(sexp, "<-%s->" % sexp, "eval")
-
-def _comp(exp):
-    sexp=str(exp)
-    return compile(sexp, "<-%s->" % sexp, "eval")
-
-def _eprep(t, xc, uc, V):
-    g={'t':t, 'array':array}
-    for i, x in enumerate(V.x):
-        g.setdefault(str(x),xc[i])
-    for i, u in enumerate(V.u):
-        g.setdefault(str(u),uc[i])
-    return g
-
-def _eval(f, t, xc, uc, V, g=None):
-    if g == None:
-        g=_eprep(t, xc, uc, V)
-    rc = eval(f, g)
-    return rc
-
-def _rdiff(F, V):
-    if type(F) == TupleType:
-        return tuple([_rdiff(f, V) for f in F])
-    return tuple([diff(F,v) for v in V])
-
-def _teval(d, T,X,U, V): # d is a code of function to be evaluated at all T time instance.
-    rc=[]
-    for t in T:
-        rc.append(_eval(d, t, X[t], U[t], V))
-    return array(rc)
 
 class Model(object):
     """Parametric Optimised model class.
@@ -209,27 +144,6 @@ class Model(object):
         return 0.0
 
 
-    # def H_u(self, t, X, U, Psi):
-
-    #     XX=X[:-1]
-    #     tt=t[:-1]
-    #     v=self.v
-    #     _f0_u=self.fun((v.f0,v.u), tt, XX, U)
-    #     _f_u =self.fun((v.f,v.u), tt, XX, U)
-    #     p=Psi
-    #     if DEBUG>10:
-    #         print ("f_u:", len(_f_u))
-    #         print ("psi:", len(p))
-    #         print ("f0_u", len(_f0_u))
-
-    #     _s=array([dot(p,fu) for p,fu in zip(Psi,_f_u)]) # Psi[i] is shifted left to 1 step.
-    #     #_s1=dot(f_u, Psi)
-    #     #_s=dot(Psi,_f_u)
-
-    #     return _s - _f0_u # FIXME Check dot operation.
-
-    # def start_control(self):
-    #    raise RuntimeError("should be implemented by subclass")
 
     #------------ These functions must be defined for Second Order Improvement Process -----
 
@@ -317,9 +231,6 @@ class Process(VFCalc):
         print (v.F, X)
         print ("-------", t[-1], X[-1], U[-1])
 
-
-
-        import pdb; pdb.set_trace()
         psie = -self.fun(v.F,(v.x,), t[-1], X[-1], U[-1])
 
         psi=[psie]
@@ -328,6 +239,7 @@ class Process(VFCalc):
         X=X[:-1]
         t=t[:-1]
 
+        import pdb; pdb.set_trace()
         _f0_x=self.fun(v.f0, (v.x,), t, X, U) # last element is useless
         _f_x =self.fun(v.f, (v.x,), t, X, U) # last element is useless
 
@@ -401,32 +313,17 @@ class Process(VFCalc):
                                     # Really it is dSigmadalpha
 
     def fun(self, f, vars, T, X, U):
-         # evaluate derivatives of f on vars and substitute t, X,U
-         code=self.code(f, *vars)
-         return code(T,X,U)
+        # evaluate derivatives of f on vars and substitute t, X,U
+        code,df=self.code(f, *vars)
+        rc=code(T,X,U)
+        if type(rc) is TupleType:
+            rc=array(rc)
+        if type(T)==numpy.ndarray and T.shape[0]!=rc.shape[0]:   # else it must be a tuple
+            nff=numpy.zeros((len(T),)+rc.shape,dtype=float)
+            nff[:]=rc
+            rc=nff
 
-    # def get_code_for(self, vars):
-    #     if not vars:
-    #         raise ValueError("no variables")
-    #     try:
-    #         return self.c.fn[vars]
-    #     except KeyError:
-    #         pass
-
-    #     try:
-    #         c=self.c.fn[vars]=_vcomp(self.v.fn[vars])
-    #         return c
-    #     except KeyError:
-    #         pass
-
-    #     vp=vars[:-1]
-    #     cp=self.get_code_for(vp)# what is doing this string?
-    #     fp=self.v.fn[vp]
-    #     df=self.v.fn[vars]=_rdiff(fp, vars[-1])
-    #     c=self.c.fn[vars]=_vcomp(df)
-    #     if DEBUG>1:
-    #         print ("A derivative for\n\t", vars, "=", df)
-    #     return c
+        return rc
 
     def H(self, vars, T, X, U, Psi, alpha = 1.0):
         # calculate H_v_v...(t.
@@ -447,7 +344,6 @@ class Process(VFCalc):
             H[i]=_H
 
         return array([H]).T
-
 
 class SeconOrderProcess(Process):
     """A second order parametric optimization process
@@ -793,8 +689,8 @@ if __name__=="__main__":
 
     print ("ok")
 
-    #TEST='test_with_plot'
-    TEST='test2d'
+    TEST='test_with_plot'
+    #TEST='test2d'
     LOG='restats.log'
     if PROFILE:
         import cProfile, pstats
