@@ -17,8 +17,8 @@ ListType=type([])
 DEBUG = 20
 #DEBUG = 0
 PROFILE = False # True
-Ht = 0.01
-#Ht = 0.2
+#Ht = 0.01
+Ht = 0.2
 import time
 
 class Helper():
@@ -308,12 +308,13 @@ class Process(VFCalc):
                 rc=rc.T
                 rc=rc[0]
         if type(T)==numpy.ndarray:
+            dm=False
             if type(rc)!=numpy.ndarray:
-                nff=numpy.zeros((len(T),1),dtype=float)
-                nff[:]=rc
-                rc=nff
-            elif T.shape[0]!=rc.shape[0]:   # else it must be a tuple
-                nff=numpy.zeros((len(T),)+rc.shape,dtype=float)
+                dm=(1,)
+            elif T.shape[0]!=rc.shape[0]:
+                dm=rc.shape
+            if dm:
+                nff=numpy.zeros((len(T),)+dm,dtype=float)
                 nff[:]=rc
                 rc=nff
         return rc
@@ -349,8 +350,8 @@ class SeconOrderProcess(Process):
     def optimize(self, t, eps=0.001, iters=1000, alpha=None):
         Up=self.model.start_control()
         Xp=self.trajectory(Up)
-        Ip=self.model.I(Xp,Up)
-        v=self.model.v
+        Ip=self.I(Xp,Up)
+        #v=self.model.v
 
 
         it = 1
@@ -365,7 +366,7 @@ class SeconOrderProcess(Process):
 
         while True:
             # Something done with alphas and
-            Psi, Sigma = self.model.krot_d_dd(t, Xp, Up)
+            Psi, Sigma = self.krot_d_dd(t, Xp, Up)
             _f_u=self.fun(v.f, (v.u,), tc, Xpc, Up)
 
             _f_u_t=_f_u.transpose(0,2,1)
@@ -574,7 +575,7 @@ def gnuplot(fn, *args):
             o.write("\t".join([str(a) for a in u]))
             o.write("\n")
         o.close()
-    os.system('gnuplot test_with_plt1.p')
+    os.system('gnuplot test_with_plt.p')
     os.system('evince my-plot.ps')
 
 def test2(so=True):
@@ -620,11 +621,11 @@ def test_with_plot():
     print (I1, "iters:", it1)
     print ("Second-order process:")
     print ("-"*20)
-    #r2=I2, X2, U2, it2, _2 = p2.optimize(m.t, eps=eps, iters=iters)
-    #print (I2, "iters:", it2)
+    r2=I2, X2, U2, it2, _2 = p2.optimize(m.t, eps=eps, iters=iters)
+    print (I2, "iters:", it2)
 
-    #gnuplot("test_with_plt", r1,r2)
-    gnuplot("test_with_plt", r1)
+    gnuplot("test_with_plt", r1,r2)
+    #gnuplot("test_with_plt", r1)
 
 def test2d1():
     m = LinModel2d2du1()
