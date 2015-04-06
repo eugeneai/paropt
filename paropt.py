@@ -239,7 +239,6 @@ class Process(VFCalc):
         X=X[:-1]
         t=t[:-1]
 
-        import pdb; pdb.set_trace()
         _f0_x=self.fun(v.f0, (v.x,), t, X, U) # last element is useless
         _f_x =self.fun(v.f, (v.x,), t, X, U) # last element is useless
 
@@ -318,11 +317,11 @@ class Process(VFCalc):
         rc=code(T,X,U)
         if type(rc) is TupleType:
             rc=array(rc)
-        if type(T)==numpy.ndarray and T.shape[0]!=rc.shape[0]:   # else it must be a tuple
-            nff=numpy.zeros((len(T),)+rc.shape,dtype=float)
-            nff[:]=rc
-            rc=nff
-
+        if type(T)==numpy.ndarray:
+            if len(rc.shape)==0 or T.shape[0]!=rc.shape[0]:   # else it must be a tuple
+                nff=numpy.zeros((len(T),)+rc.shape,dtype=float)
+                nff[:]=rc
+                rc=nff
         return rc
 
     def H(self, vars, T, X, U, Psi, alpha = 1.0):
