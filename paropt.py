@@ -17,8 +17,8 @@ ListType=type([])
 DEBUG = 20
 #DEBUG = 0
 PROFILE = False # True
-#Ht = 0.01
-Ht = 0.2
+Ht = 0.01
+#Ht = 0.2
 import time
 
 class Helper():
@@ -74,19 +74,21 @@ class VFCalc(object):
         l.extend(self.v.u)
         # print (l)
         fl=lambdify(l, f, "numpy")
+        """
         def _prepareags(t,X,U):
             if X.ndim>1:
-                return True,(t,)+tuple(X.T)+tuple(U.T)
+                Xs=[X[:,i:i+1] for i in range(X.shape[1])]
+                Us=[U[:,i:i+1] for i in range(U.shape[1])]
+                return (t,)+tuple(Xs+Us)
             else:
-                return False,(t,)+tuple(X)+tuple(U)
+                return (t,)+tuple(X)+tuple(U)
         def _fgen(t, X, U):
-            tr,args=_prepareags(t,X,U)
+            args=_prepareags(t,X,U)
             ff=fl(*args)
-            if tr:
-                ff=array(ff)
-                return ff.T
             return ff
         return _fgen
+        """
+        return fl
 
     def code(self, f, *vars, debug=False):
         df=self.diff(f, *vars)
@@ -107,30 +109,6 @@ class Model(object):
         self.M=U0.shape[1]   # Dimention of U
         print ('X0:', X0)
         print ('U0:', U0)
-        #self.v=Helper()
-        #self.t=Symbol('t')
-        # a=[]
-        # for i in range(N):
-        #     a.append(Symbol('x%s' % i))
-        # self.v.x=tuple(a)
-        # a=[]
-        # for i in range(M):
-        #     a.append(Symbol('u%s' % i))
-        # self.v.u=tuple(a)
-
-        # v, t, x, u = self.v, self.v.t, self.v.x, self.v.u
-
-
-
-        # self.c=Helper()
-        # c=self.c
-        # c.fn={}
-        # v.fn={}
-        # v.fn[(v.f,)]=v.f
-        # v.fn[(v.f0,)]=v.f0
-        # v.fn[(v.F,)]=v.F
-
-        # self.__cache__={}
 
     def F(self, x):
         """x - ending state of a trajectory
@@ -142,7 +120,6 @@ class Model(object):
 
     def f0(self, t, x, u, dt=1):
         return 0.0
-
 
 
     #------------ These functions must be defined for Second Order Improvement Process -----
@@ -175,6 +152,8 @@ class Process(VFCalc):
 
         while True:
             beta = self.beta
+
+
             Psi=self.Psi(t, Xp, Up, self.alpha)
             _H_u=self.H((self.v.u,), t[:-1], Xp[:-1], Up, Psi, alpha=1.0)
             while True:
@@ -231,6 +210,7 @@ class Process(VFCalc):
         print (v.F, X)
         print ("-------", t[-1], X[-1], U[-1])
 
+
         psie = -self.fun(v.F,(v.x,), t[-1], X[-1], U[-1])
 
         psi=[psie]
@@ -267,7 +247,8 @@ class Process(VFCalc):
 
         psi=array(psi)
 
-        return array([psi[::-1]]).T
+        #return array([psi[::-1]]).T
+        return psi[::-1]
 
     def krot_d_dd(self, t, X, U, alpha=1.0):
         Psi=self.Psi(t, X, U, alpha=alpha)
@@ -314,11 +295,24 @@ class Process(VFCalc):
     def fun(self, f, vars, T, X, U):
         # evaluate derivatives of f on vars and substitute t, X,U
         code,df=self.code(f, *vars)
-        rc=code(T,X,U)
+        if X.ndim>1:
+            Xs=[X[:,i:i+1] for i in range(X.shape[1])]
+            Us=[U[:,i:i+1] for i in range(U.shape[1])]
+            m,args=True,(T,)+tuple(Xs+Us)
+        else:
+            m,args=False,(T,)+tuple(X)+tuple(U)
+        rc=code(*args)
         if type(rc) is TupleType:
             rc=array(rc)
+            if m:
+                rc=rc.T
+                rc=rc[0]
         if type(T)==numpy.ndarray:
-            if len(rc.shape)==0 or T.shape[0]!=rc.shape[0]:   # else it must be a tuple
+            if type(rc)!=numpy.ndarray:
+                nff=numpy.zeros((len(T),1),dtype=float)
+                nff[:]=rc
+                rc=nff
+            elif T.shape[0]!=rc.shape[0]:   # else it must be a tuple
                 nff=numpy.zeros((len(T),)+rc.shape,dtype=float)
                 nff[:]=rc
                 rc=nff
@@ -342,7 +336,7 @@ class Process(VFCalc):
             _H += dot(psi,_f) # !
             H[i]=_H
 
-        return array([H]).T
+        return H
 
 class SeconOrderProcess(Process):
     """A second order parametric optimization process
