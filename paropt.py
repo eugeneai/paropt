@@ -307,6 +307,8 @@ class Process(VFCalc):
             m,args=False,(T,)+tuple(X)+tuple(U)
         rc=code(*args)
         rct=type(rc)
+
+        import pdb; pdb.set_trace()
         rc=numpy.atleast_1d(rc)
         if type(T)==numpy.ndarray:
             dm=False
@@ -314,11 +316,12 @@ class Process(VFCalc):
                 if rct in [TupleType,ListType]:
                     rc=rc.reshape(rc.shape[:-1])
                     rc=rc.T
+                    return rc
             except ValueError:
                 pass
-            if rct!=numpy.ndarray:
-                dm=(1,) # ???
-            elif T.shape[0]!=rc.shape[0]:
+#            if rct!=numpy.ndarray:
+#                dm=(1,) # ???
+            if T.shape[0]!=rc.shape[0]:
                 dm=rc.shape
             if dm:
                 nff=numpy.zeros((len(T),)+dm,dtype=float)
