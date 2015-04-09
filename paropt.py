@@ -153,7 +153,6 @@ class Process(VFCalc):
         while True:
             beta = self.beta
 
-
             Psi=self.Psi(t, Xp, Up, self.alpha)
             _H_u=self.H((self.v.u,), t[:-1], Xp[:-1], Up, Psi, alpha=1.0)
             while True:
@@ -251,11 +250,13 @@ class Process(VFCalc):
         return psi[::-1]
 
     def krot_d_dd(self, t, X, U, alpha=1.0):
+
         Psi=self.Psi(t, X, U, alpha=alpha)
         v=self.v
 
 
-        sige  = -self.fun(v.F, (v.x,v.x), 0, X[-1], 0)
+
+        sige  = -self.fun(v.F, (v.x,v.x), t[-1], X[-1], U[-1])
         Sig=[sige]
 
         #for the rest of the interval
@@ -295,6 +296,9 @@ class Process(VFCalc):
     def fun(self, f, vars, T, X, U):
         # evaluate derivatives of f on vars and substitute t, X,U
         code,df=self.code(f, *vars)
+        #T=numpy.atleast_1d(T)
+        X=numpy.atleast_1d(X)
+        U=numpy.atleast_1d(U)
         if X.ndim>1:
             Xs=[X[:,i:i+1] for i in range(X.shape[1])]
             Us=[U[:,i:i+1] for i in range(U.shape[1])]
@@ -302,15 +306,18 @@ class Process(VFCalc):
         else:
             m,args=False,(T,)+tuple(X)+tuple(U)
         rc=code(*args)
-        if type(rc) is TupleType:
-            rc=array(rc)
-            if m:
-                rc=rc.T
-                rc=rc[0]
+        rct=type(rc)
+        rc=numpy.atleast_1d(rc)
         if type(T)==numpy.ndarray:
             dm=False
-            if type(rc)!=numpy.ndarray:
-                dm=(1,)
+            try:
+                if rct in [TupleType,ListType]:
+                    rc=rc.reshape(rc.shape[:-1])
+                    rc=rc.T
+            except ValueError:
+                pass
+            if rct!=numpy.ndarray:
+                dm=(1,) # ???
             elif T.shape[0]!=rc.shape[0]:
                 dm=rc.shape
             if dm:
@@ -326,7 +333,6 @@ class Process(VFCalc):
         assert len(T) == len(X)
         assert len(X)==len(U)
         assert len(U)==len(Psi)
-
 
         f=self.fun(self.v.f, vars, T, X, U)
         f0=-self.fun(self.v.f0, vars, T, X, U)
@@ -347,11 +353,20 @@ class SeconOrderProcess(Process):
         self.t = arange(2)
         Process.__init__(self, model, **kwargs)
 
+    def time_transpose(self, a):
+        # the axis 0 mist be conserved, other axes reversed.
+        ash=len(a.shape)
+        a1=range(ash)
+        a2=list(a1[1:])
+        a2.reverse()
+        axes=(0,)+tuple(a2)
+        return numpy.transpose(a,axes)
+
     def optimize(self, t, eps=0.001, iters=1000, alpha=None):
         Up=self.model.start_control()
         Xp=self.trajectory(Up)
         Ip=self.I(Xp,Up)
-        #v=self.model.v
+        v=self.v
 
 
         it = 1
@@ -369,10 +384,10 @@ class SeconOrderProcess(Process):
             Psi, Sigma = self.krot_d_dd(t, Xp, Up)
             _f_u=self.fun(v.f, (v.u,), tc, Xpc, Up)
 
-            _f_u_t=_f_u.transpose(0,2,1)
+            _f_u_t=self.time_transpose(_f_u)
 
             _f_x=self.fun(v.f, (v.x,), tc, Xpc, Up)
-            _f_x_t=_f_x.transpose(0,2,1)
+            _f_x_t=self.time_transpose(_f_x)
 
             _f_u_u=self.fun(v.f,(v.u,v.u), tc, Xpc, Up)
             alpha=_a
@@ -410,7 +425,7 @@ class SeconOrderProcess(Process):
                     #dU_i=dot((H_u_a[i]+dot(dX_i,s_part[i])),f_part[i])
                     #dU_i=dot(H_u_a[i],f_part[i])
                     dU_i=H_u_a[i]
-                    Un_i = Up_i + dU_i
+                    Un_i = Up_i + dUn_i
 
                     Xnn_i=self.model.f(t[i], Xn_i, Un_i)
 
@@ -420,7 +435,7 @@ class SeconOrderProcess(Process):
                     Xn_i=Xnn_i
 
 
-                In = self.model.I(Xn, Un)
+                In = self.I(Xn, Un)
                 dI = Ip-In
                 if DEBUG>=0:
                     print ("Ip:", Ip, "In:", In,  "DI:", dI)
