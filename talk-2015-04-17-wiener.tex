@@ -3,6 +3,35 @@
 \usepackage{mathrsfs}
 \usepackage{xcolor}
 \usepackage{listings}
+\usepackage{hyperref}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{language=Python,
+  basicstyle=\footnotesize\ttfamily,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+%  frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{blue},       % keyword style
+%  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=2,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=2,                       % sets default tabsize to 2 spaces
+%  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of
+}
 
 \usetheme{Warsaw}
 \usecolortheme{crane}
@@ -38,8 +67,11 @@
 
 \graphicspath{{pics/}}
 
+
+% --------------------------
+
 \begin{document}
-\title[КОМПЬЮТЕРНАЯ АЛГЕБРА В ОПТИМИЗАЦИИ]{ПРИМЕНЕНИЕ КОМПЬЮТЕРНОЙ АЛГЕБРЫ\\
+\title[КОМПЬЮТЕРНАЯ АЛГЕБРА В ЗАДАЧАХ ОПТИМИЗАЦИИ]{ПРИМЕНЕНИЕ КОМПЬЮТЕРНОЙ АЛГЕБРЫ\\
 В РЕАЛИЗАЦИИ АЛГОРИТМОВ УЛУЧШЕНИЯ}
 \author{Черкашин Е.А., Бадмацыренова С.Б.}
 \institute[ИДСТУ СО РАН, ИРНИТУ, ИМЭИ ИГУ]{\normalsize  ИДСТУ СО РАН, ИРНИТУ, ИМЭИ ИГУ}
@@ -124,33 +156,66 @@ I(\mathbf{x}^{I\!I},\mathbf{u}^{I\!I}) < I(\mathbf{x}^I,\mathbf{u}^I).
 \end{frame}
 % ----------------------------------------------------------------
 
-\begin{frame}[fragile]
-\frametitle{Source code}
+\begin{frame}[fragile]{Задание модели}
+\begin{lstlisting}
+class LinModel1(Model):
+    def __init__(self):
+        X0=(1.0,)
+        self.h = Ht
+        self.num = int((1.0-0.0) / self.h)
+        self.T = linspace(start=0.0, stop=1.0, num=self.num)
+        self.t = arange(len(self.T))
+        Model.__init__(self, X0=X0, U0=self.start_control())
 
-\begin{lstlisting}[caption=First C example]
-int main()
-{
-    printf("Hello World!");
-    return 0;
-}
+    def start_control(self):
+        U = [(0.0,) for t in self.t[:-1]]
+        return array(U)
+
+    def F(self, x):
+        return 0.0
+
+    def f(self, t, x, u):
+        x0=x[0]; u0=u[0]
+        return (x0+self.h*u0,)
+
+    def f0(self, t, x, u):
+        x0=x[0]; u0=u[0]
+        return self.h * (x0*x0+u0*u0)
 \end{lstlisting}
-
-\begin{itemize}
-  \item This one is always shown
-  \item<1-> The first time (i.e. as soon as the slide loads)
-  \item<2-> The second time
-  \item<1-> Also the first time
-  \only<1-1> {This one is shown at the first time, but it will hide soon (on the next event after the slide loads).}
-\end{itemize}
 \end{frame}
 
-
+%------------ Conclusion ----------------------------------------
+\begin{frame}{Заключение}
+  \begin{block}{Результаты}
+    \begin{itemize}
+    \item Разработана первая версия библиотеки дифференцирования
+      вектор-функций, поддерживающей библиотеки \texttt{numpy}
+      и \texttt{scipy};
+    \item Использование библиотеки продемонстрировано на примере;
+    \item Осуществляется реализация метода второго порядка.
+    \end{itemize}
+    Использование библиотеки позволяет повысить и точность и
+    производительность вычислений.
+  \end{block}
+\begin{block}{Задачи на будущее}
+  \begin{itemize}
+  \item На основе методов \texttt{diff}, \texttt{lambdify} и \texttt{fun} реализовать генераторы кода разных вариантов $\f$, $\f^0$, $\F$.
+  \item Разработать эффективные процедуры для вычисления $\bpsi$, $\H_\u$ и $\x$.
+  \item Разработать методику представления схемы алгоритма улучшения и странслировать ее реализацию в компилируемый язык (C, C++, Fortran и т.~п.).
+  \end{itemize}
+\end{block}
+\end{frame}
 
 \begin{frame}{}
+\vfill\vfill\vfill
+\vfill
 \begin{center}
-\Huge\textbf{Спасибо за внимание!}
+  {\Huge\textbf{Спасибо за внимание!}}
+\vspace{8em}
+  \begin{block}{}
+    Постоянный адрес презентации:\url{http://github.com/}
+  \end{block}
 \end{center}
-
 \end{frame}
 % ----------------------------------------------------------------
 
