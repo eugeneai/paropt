@@ -2,9 +2,11 @@
 \usepackage{amsmath,amssymb,longtable,hhline}
 \usepackage{mathrsfs}
 \usepackage{xcolor}
+\usepackage{listings}
 
 \usetheme{Warsaw}
 \usecolortheme{crane}
+\beamertemplatenavigationsymbolsempty
 
 \usepackage{iftex,ifxetex}
 \ifPDFTeX
@@ -29,27 +31,32 @@
   \fi
 \fi
 
+%\useoutertheme{split}
+%\useinnertheme{rounded}
+\setbeamertemplate{background canvas}[vertical shading][bottom=white!80!cyan!20,top=cyan!10]
+%\setbeamertemplate{sidebar canvas left}[horizontal shading][left=white!40!black,right=black]
+
 \graphicspath{{pics/}}
 
 \begin{document}
-\title{ПРИМЕНЕНИЕ КОМПЬЮТЕРНОЙ АЛГЕБРЫ\\
+\title[КОМПЬЮТЕРНАЯ АЛГЕБРА В ОПТИМИЗАЦИИ]{ПРИМЕНЕНИЕ КОМПЬЮТЕРНОЙ АЛГЕБРЫ\\
 В РЕАЛИЗАЦИИ АЛГОРИТМОВ УЛУЧШЕНИЯ}
 \author{Черкашин Е.А., Бадмацыренова С.Б.}
-\institute[ИДСТУ СО РАН, ИРНИТУ]{\normalsize  ИДСТУ СО РАН, ИРНИТУ}
-\date[2015]{<<Винеровские чтения --- 2015>>
-\\[0.3cm]
-16 -- 18 апреля 2015 г.,\\
+\institute[ИДСТУ СО РАН, ИРНИТУ, ИМЭИ ИГУ]{\normalsize  ИДСТУ СО РАН, ИРНИТУ, ИМЭИ ИГУ}
+\date[2015]{{}\\[1.5cm]
+<<Винеровские чтения --- 2015>>\\
+16 -- 18 апреля 2015 г.,
 Иркутск
 }
 %\date{\today}
 \maketitle
 
 % ----------------------------------------------------------------
-\begin{frame}{\textbf{Вектор-функция} }
+\begin{frame}[plain]{\textbf{Вектор-функция} }
 
 %\begin{block}{}
   \begin{columns}[t]
-    \begin{column}{0.75\textwidth}
+    \begin{column}{0.65\textwidth}
       \def\xyz{$x_1,x_2,x_3$} \def\yaw{$x_6$} \def\pitch{$x_5$}
       \def\roll{$x_4$} \def\lift{$x_9$} \def\down{$\quad\! x_7$}
       \def\thrust{$u_1$} \def\rudder{$u_5$} \def\drag{$x_8$}
@@ -59,58 +66,85 @@
     \end{column}
     \begin{column}{0.35\textwidth}
       \begin{block}{Состояние, управление}%
-        \begin{gather*}
-          \vec{x}=\mathbf{x}=\langle x_1,x_2,\ldots,x_n\rangle,\\
-          n=9,\\
-          \vec{u}=\mathbf{u}=\langle u_1,u_2,\ldots,u_m\rangle,\\
-          m=5,\\
-        \end{gather*}
+        \begin{align*}
+          &\vec{x}=\mathbf{x}=\langle x_1,x_2,\ldots,x_n\rangle,\\
+          &n=9,\\
+          &\vec{u}=\mathbf{u}=\langle u_1,u_2,\ldots,u_m\rangle,\\
+          &m=5,\\
+          &\vec{f}=\mathbf{f}.
+        \end{align*}
       \end{block}
     \end{column}
   \end{columns}
 %\end{block}
-\begin{block}{}
-  \begin{gather}
-x(t+1)=f(t,x(t),u(t)),\quad t \in T=\{t_0,t_0+1,...,t_1\},
-	\label{eq100} \\
-x(t_0)=x_0,\quad x(t)\in R^n,\; u(t) \in R^m,\quad t\in T,\label{eq100a} \\
-I(x,u)=F(x(t_1))+ \sum_{t_0}^{t_1-1}f^0(t,x(t),u(t)) \to \min.
-  \label{eq103}
-  \end{gather}
+\begin{block}{Уравнение движения}
+  \begin{align*}
+&\mathbf{x}(t)=\mathbf{f}(t,\mathbf{x}(t),\mathbf{u}(t)),\quad t \in T=[t_0,t_1], \\
+&\mathbf{x}(t_0)=\mathbf{x}_0,\quad \mathbf{x}(t)\in \mathbb{R}^n,\; \mathbf{u}(t) \in \mathbb{R}^m,\quad t\in T, \\
+&I(\mathbf{x},\mathbf{u})=\int\limits_{t_0}^{t_1}f^0(t,\mathbf{x}(t),\mathbf{u}(t)) \to \min.
+  \end{align*}
 \end{block}
 \end{frame}
 \begin{frame}{\textbf{Постановка задачи} }
-\begin{block}{}
-  \begin{gather}
-x(t+1)=f(t,x(t),u(t)),\quad t \in T=\{t_0,t_0+1,...,t_1\},
+\begin{block}{Уравнение движения (дискретный вариант)}
+  \begin{align}
+&\mathbf{x}(t+1)=\mathbf{f}(t,\mathbf{x}(t),\mathbf{u}(t)),\quad t \in T=\{t_0,t_0+1,...,t_1\},
 	\label{eq100} \\
-x(t_0)=x_0,\quad x(t)\in R^n,\; u(t) \in R^m,\quad t\in T,\label{eq100a} \\
-I(x,u)=F(x(t_1))+ \sum_{t_0}^{t_1-1}f^0(t,x(t),u(t)) \to \min.
+&\mathbf{x}(t_0)=\mathbf{x}_0,\quad \mathbf{x}(t)\in \mathbb{R}^n,\; \mathbf{u}(t) \in \mathbb{R}^m,\quad t\in T,\label{eq100a} \\
+&I(\mathbf{x},\mathbf{u})=F(\mathbf{x}(t_1))+ \sum_{t_0}^{t_1-1}f^0(t,\mathbf{x}(t),\mathbf{u}(t)) \to \min.
   \label{eq103}
-  \end{gather}
+  \end{align}
 \end{block}
 \begin{block}{Задача улучшения}
-  Пусть заданы управление $u^I(t)$ и соответствующее состояние $x^I(t)$. Требуется найти $x^{I\!I}(t),\; u^{I\!I}(t)$ такие, что
+  Пусть заданы управление $\mathbf{u}^I(t)$ и соответствующее состояние $\mathbf{x}^I(t)$. Требуется найти $\mathbf{x}^{I\!I}(t),$ $\mathbf{u}^{I\!I}(t)$ такие, что
 \[
-I(x^{I\!I},u^{I\!I}) < I(x^I,u^I).
+I(\mathbf{x}^{I\!I},\mathbf{u}^{I\!I}) < I(\mathbf{x}^I,\mathbf{u}^I).
 \]
  \end{block}
 \end{frame}
 % ---------------------------------------------------------
+\def\H{\mathbf{H}}
+\def\x{\mathbf{x}}
+\def\u{\mathbf{u}}
+\def\f{\mathbf{f}}
+\def\F{\mathbf{F}}
+\def\bpsi{\mathbf{\psi}}
 % ----------------------------------------------------------------
-\begin{frame}{\textbf{Алгоритм первого порядка} }
-\begin{block}{}
+\begin{frame}[shrink]{\textbf{Алгоритм первого порядка} }
+%\begin{block}{}
 \begin{enumerate}
- \item[1.] Задается начальное управление $u^I(t)$, из уравнения \eqref{eq100} и условий \eqref{eq100a} определяется $x^I(t)$. Вычисляется $I(x^I,u^I).$
- \item[2.] Из системы $\psi(t)=H_x,\;\psi(t_1)=-F_x,$ находим $\psi(t),$\\ где $\psi(t) - n$ - вектор, $H(t,x,\psi(t+1),u)=\psi'(t+1)f(t,x,u)-f^{0}(t,x,u),\;$ производные функции $H$ находятся в точке $\left(t,x^{I}(t),\psi \left(t+1 \right),u^{I}(t)\right)$, <<$'$>> означает операцию  транспонирования.
- \item[3.] Из системы $x(t+1)=f(t,x(t),u^{I\!I}(t)), x(t_0)=x_0,$ где $u^{I\!I}(t)=u^{I}(t)+\alpha H_u,$ вычисляется $x^{I\!I}(t).$
- \item[4.] Новое управление и значение параметра $\alpha$ подсчитываются из решения задачи одномерной минимизации для функционала $I(x^{I\!I},u^{I\!I})\to \min\limits_{\alpha}.$
- \item[5.] Сравниваются значения функционалов $I\left(x^{I\!I},u^{I\!I}\right) \mbox{и}\quad
-I\left(x^{I},u^{I}\right)$, если улучшения не произошло, то уменьшаем $\alpha$ и переходим к следующей итерации, начиная с пункта~3.
+ \item[1.] Задается начальное управление $\mathbf{u}^I(t)$, из уравнения \eqref{eq100} и условий \eqref{eq100a} определяется $\mathbf{x}^I(t)$. Вычисляется $I(\mathbf{x}^I,\mathbf{u}^I).$
+ \item[2.] Из системы $\mathbf{\psi}(t)=\mathbf{H}_\mathbf{x},\;\bpsi(t_1)=-\F_\x,$ находим $\bpsi(t),$\\ где $\bpsi(t)$ --- $n$-вектор, $\H_\u(t,\x,\bpsi(t+1),\u)=\bpsi^{T}(t+1)\times\f(t,\x,\u)-f^{0}(t,\x,\u),$ производные функции $H$ по $\u$ ($\H_\u$) находятся в точке $\left(t,\x^{I}(t),\bpsi \left(t+1 \right),\u^{I}(t)\right)$. Задается параметр $\alpha$.
+ \item[3.] Из системы $\x(t+1)=\f(t,\x(t),\u^{I\!I}(t)), \x(t_0)=\x_0,$ где $\u^{I\!I}(t)=\u^{I}(t)+\alpha \H_\u,$ вычисляется $\x^{I\!I}(t).$
+ \item[4.] Новое управление и значение параметра $\alpha$ подсчитываются из решения задачи одномерной минимизации для функционала $I(\x^{I\!I},\u^{I\!I})\to \min\limits_{\alpha}.$
+ \item[5.] Если $I\left(\x^{I\!I},\u^{I\!I}\right)\geq I\left(\x^{I},\u^{I}\right)$ (улучшение не произошло), то уменьшаем $\alpha$ и переходим к следующей итерации, начиная с пункта~3.
+ \item[6.] Иначе, если $I\left(\x^{I\!I},\u^{I\!I}\right) - I\left(\x^{I},\u^{I}\right)>\epsilon$, то переходим к следующей итерации, начиная с пункта~2. Значение $\epsilon$ --- параметр точности.
 \end{enumerate}
-\end{block}
+%\end{block}
 \end{frame}
 % ----------------------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Source code}
+
+\begin{lstlisting}[caption=First C example]
+int main()
+{
+    printf("Hello World!");
+    return 0;
+}
+\end{lstlisting}
+
+\begin{itemize}
+  \item This one is always shown
+  \item<1-> The first time (i.e. as soon as the slide loads)
+  \item<2-> The second time
+  \item<1-> Also the first time
+  \only<1-1> {This one is shown at the first time, but it will hide soon (on the next event after the slide loads).}
+\end{itemize}
+\end{frame}
+
+
 
 \begin{frame}{}
 \begin{center}
