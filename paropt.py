@@ -74,20 +74,7 @@ class VFCalc(object):
         l.extend(self.v.u)
         # print (l)
         fl=lambdify(l, f, "numpy")
-        """
-        def _prepareags(t,X,U):
-            if X.ndim>1:
-                Xs=[X[:,i:i+1] for i in range(X.shape[1])]
-                Us=[U[:,i:i+1] for i in range(U.shape[1])]
-                return (t,)+tuple(Xs+Us)
-            else:
-                return (t,)+tuple(X)+tuple(U)
-        def _fgen(t, X, U):
-            args=_prepareags(t,X,U)
-            ff=fl(*args)
-            return ff
-        return _fgen
-        """
+
         return fl
 
     def code(self, f, *vars, debug=False):
@@ -111,7 +98,7 @@ class Model(object):
         print ('U0:', U0)
 
     def F(self, x):
-        """x - ending state of a trajectory
+        """x is the ending state of a trajectory
         """
         return 0.0
 
