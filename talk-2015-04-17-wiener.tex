@@ -20,8 +20,16 @@
     \setmathfont{Latin Modern Math}
     \setsansfont{Linux Biolinum O}
     \usefonttheme{professionalfonts}
+    \setmathfont[
+        Ligatures=TeX,
+        Scale=MatchLowercase,
+        math-style=upright,
+        vargreek-shape=unicode
+        ]{euler.otf}
   \fi
 \fi
+
+\graphicspath{{pics/}}
 
 \begin{document}
 \title{ПРИМЕНЕНИЕ КОМПЬЮТЕРНОЙ АЛГЕБРЫ\\
@@ -37,6 +45,40 @@
 \maketitle
 
 % ----------------------------------------------------------------
+\begin{frame}{\textbf{Вектор-функция} }
+
+%\begin{block}{}
+  \begin{columns}[t]
+    \begin{column}{0.75\textwidth}
+      \def\xyz{$x_1,x_2,x_3$} \def\yaw{$x_6$} \def\pitch{$x_5$}
+      \def\roll{$x_4$} \def\lift{$x_9$} \def\down{$\quad\! x_7$}
+      \def\thrust{$u_1$} \def\rudder{$u_5$} \def\drag{$x_8$}
+      \def\flaps{$u_2$} \def\aeleron{$u_3$} \def\engine{}
+      \def\elevator{$u_4$} \def\svgwidth{\columnwidth}
+      \input{pics/Cessna-Plane.pdf_tex}
+    \end{column}
+    \begin{column}{0.35\textwidth}
+      \begin{block}{Состояние, управление}%
+        \begin{gather*}
+          \vec{x}=\mathbf{x}=\langle x_1,x_2,\ldots,x_n\rangle,\\
+          n=9,\\
+          \vec{u}=\mathbf{u}=\langle u_1,u_2,\ldots,u_m\rangle,\\
+          m=5,\\
+        \end{gather*}
+      \end{block}
+    \end{column}
+  \end{columns}
+%\end{block}
+\begin{block}{}
+  \begin{gather}
+x(t+1)=f(t,x(t),u(t)),\quad t \in T=\{t_0,t_0+1,...,t_1\},
+	\label{eq100} \\
+x(t_0)=x_0,\quad x(t)\in R^n,\; u(t) \in R^m,\quad t\in T,\label{eq100a} \\
+I(x,u)=F(x(t_1))+ \sum_{t_0}^{t_1-1}f^0(t,x(t),u(t)) \to \min.
+  \label{eq103}
+  \end{gather}
+\end{block}
+\end{frame}
 \begin{frame}{\textbf{Постановка задачи} }
 \begin{block}{}
   \begin{gather}
@@ -48,7 +90,7 @@ I(x,u)=F(x(t_1))+ \sum_{t_0}^{t_1-1}f^0(t,x(t),u(t)) \to \min.
   \end{gather}
 \end{block}
 \begin{block}{Задача улучшения}
-  Пусть заданы управление $u^I(t)$ и соответствующее состояние $x^I(t)$. Требуется найти $x^{I\!I}(t),\; u^{I\!I}(t)$ такие, что 
+  Пусть заданы управление $u^I(t)$ и соответствующее состояние $x^I(t)$. Требуется найти $x^{I\!I}(t),\; u^{I\!I}(t)$ такие, что
 \[
 I(x^{I\!I},u^{I\!I}) < I(x^I,u^I).
 \]
@@ -60,7 +102,7 @@ I(x^{I\!I},u^{I\!I}) < I(x^I,u^I).
 \begin{block}{}
 \begin{enumerate}
  \item[1.] Задается начальное управление $u^I(t)$, из уравнения \eqref{eq100} и условий \eqref{eq100a} определяется $x^I(t)$. Вычисляется $I(x^I,u^I).$
- \item[2.] Из системы $\psi(t)=H_x,\;\psi(t_1)=-F_x,$ находим $\psi(t),$\\ где $\psi(t) - n$ - вектор, $H(t,x,\psi(t+1),u)=\psi'(t+1)f(t,x,u)-f^{0}(t,x,u),\;$ производные функции $H$ находятся в точке $\left(t,x^{I}(t),\psi \left( t+1 \right),u^{I}(t)\right),$ \glqq$'$\grqq означает операцию  транспонирования. 
+ \item[2.] Из системы $\psi(t)=H_x,\;\psi(t_1)=-F_x,$ находим $\psi(t),$\\ где $\psi(t) - n$ - вектор, $H(t,x,\psi(t+1),u)=\psi'(t+1)f(t,x,u)-f^{0}(t,x,u),\;$ производные функции $H$ находятся в точке $\left(t,x^{I}(t),\psi \left(t+1 \right),u^{I}(t)\right)$, <<$'$>> означает операцию  транспонирования.
  \item[3.] Из системы $x(t+1)=f(t,x(t),u^{I\!I}(t)), x(t_0)=x_0,$ где $u^{I\!I}(t)=u^{I}(t)+\alpha H_u,$ вычисляется $x^{I\!I}(t).$
  \item[4.] Новое управление и значение параметра $\alpha$ подсчитываются из решения задачи одномерной минимизации для функционала $I(x^{I\!I},u^{I\!I})\to \min\limits_{\alpha}.$
  \item[5.] Сравниваются значения функционалов $I\left(x^{I\!I},u^{I\!I}\right) \mbox{и}\quad

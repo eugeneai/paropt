@@ -1,0 +1,69 @@
+%% Creator: Inkscape inkscape 0.91, www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'Cessna-Plane.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%%
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{380.73503418bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.46817057)%
+    \put(0,0){\includegraphics[width=\unitlength]{Cessna-Plane.pdf}}%
+    \put(0.02010727,0.18364614){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{}}}%
+%    \put(0,0){\includegraphics[width=\unitlength,page=2]{Cessna-Plane.pdf}}%
+    \put(0.49483014,0.34859676){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\xyz}}}%
+    \put(0.49778434,0.0310192){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\yaw}}}%
+    \put(0.12112262,0.10192023){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\roll}}}%
+    \put(0.14180206,0.43426882){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\pitch}}}%
+    \put(0.47267358,0.42245199){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\lift}}}%
+    \put(0.41506647,0.09601183){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\down}}}%
+    \put(0.01329395,0.18611522){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\thrust}}}%
+    \put(0.91580501,0.35302806){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\drag}}}%
+    \put(0.6706056,0.19350074){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\flaps}}}%
+    \put(0.79911377,0.13293946){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\aeleron}}}%
+    \put(0.12703102,0.2703102){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\engine}}}%
+    \put(0.87365574,0.41654357){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\rudder}}}%
+    \put(0.90444605,0.27326441){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\elevator}}}%
+  \end{picture}%
+\endgroup%
