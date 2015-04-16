@@ -1,0 +1,691 @@
+\documentclass[a4paper]{article}
+\usepackage[a4paper,margin=2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{color}
+\usepackage{alltt}
+\usepackage{times}
+\setlength{\fboxsep}{0pt}
+\newcommand{\scitea}[1]{\noindent{\ttfamily{\textcolor[rgb]{0.5, 0.5, 0.5}{\colorbox[rgb]{1.0, 1.0, 1.0}{#1}}}}}
+\newcommand{\sciteb}[1]{\noindent{\ttfamily{\textcolor[rgb]{0.0, 0.5, 0.0}{\colorbox[rgb]{1.0, 1.0, 1.0}{#1}}}}}
+\newcommand{\scitec}[1]{\noindent{\ttfamily{\textcolor[rgb]{0.0, 0.5, 0.5}{\colorbox[rgb]{1.0, 1.0, 1.0}{#1}}}}}
+\newcommand{\scited}[1]{\noindent{\ttfamily{\textcolor[rgb]{0.5, 0.0, 0.5}{\colorbox[rgb]{1.0, 1.0, 1.0}{#1}}}}}
+\newcommand{\scitee}[1]{\noindent{\ttfamily{\textcolor[rgb]{0.5, 0.0, 0.5}{\colorbox[rgb]{1.0, 1.0, 1.0}{#1}}}}}
+\newcommand{\scitef}[1]{\noindent{\ttfamily{\textbf{\textcolor[rgb]{0.0, 0.0, 0.5}{\colorbox[rgb]{1.0, 1.0, 1.0}{#1}}}}}}
+\newcommand{\sciteh}[1]{\noindent{\ttfamily{\textcolor[rgb]{0.5, 0.0, 0.0}{\colorbox[rgb]{1.0, 1.0, 1.0}{#1}}}}}
+\newcommand{\scitei}[1]{\noindent{\ttfamily{\textbf{\textcolor[rgb]{0.0, 0.0, 1.0}{\colorbox[rgb]{1.0, 1.0, 1.0}{#1}}}}}}
+\newcommand{\scitej}[1]{\noindent{\ttfamily{\textbf{\textcolor[rgb]{0.0, 0.5, 0.5}{\colorbox[rgb]{1.0, 1.0, 1.0}{#1}}}}}}
+\newcommand{\scitek}[1]{\noindent{\ttfamily{\textbf{\textcolor[rgb]{0.0, 0.0, 0.0}{\colorbox[rgb]{1.0, 1.0, 1.0}{#1}}}}}}
+\newcommand{\scitel}[1]{\noindent{\ttfamily{\textcolor[rgb]{0.0, 0.0, 0.0}{\colorbox[rgb]{1.0, 1.0, 1.0}{#1}}}}}
+\newcommand{\sciteib}[1]{\noindent{\ttfamily{\textcolor[rgb]{0.0, 0.0, 0.0}{\colorbox[rgb]{1.0, 1.0, 1.0}{#1}}}}}
+\begin{document}
+
+Source File: paropt.py
+
+\noindent
+\small{
+\scitef{import}\scitea{ }\scitel{math}\scitea{} \\
+\scitef{import}\scitea{ }\scitel{numpy}\scitek{,}\scitea{ }\scitel{sympy}\scitea{} \\
+\scitef{from}\scitea{ }\scitel{numpy}\scitea{ }\scitef{import}\scitea{ }\scitek{*}\scitea{} \\
+\scitef{from}\scitea{ }\scitel{functools}\scitea{ }\scitef{import}\scitea{ }\scitel{reduce}\scitea{} \\
+\scitef{from}\scitea{ }\scitel{pprint}\scitea{ }\scitef{import}\scitea{ }\scitel{pprint}\scitea{} \\
+\scitef{import}\scitea{ }\scitel{itertools}\scitea{} \\
+\scitef{from}\scitea{ }\scitel{sympy}\scitea{ }\scitef{import}\scitea{ }\scitel{symbols}\scitek{,}\scitea{ }\scitel{diff}\scitek{,}\scitea{ }\scitel{Symbol}\scitea{} \\
+\scitef{import}\scitea{ }\scitel{numpy}\scitek{.}\scitel{linalg}\scitea{} \\
+\scitea{} \\
+\scitel{TupleType}\scitek{=}\scitel{type}\scitek{((}\scitec{1}\scitek{,))}\scitea{} \\
+\scitea{} \\
+\scitea{} \\
+\scitel{DEBUG}\scitea{ }\scitek{=}\scitea{ }\scitec{20}\scitea{} \\
+\sciteb{\#DEBUG = 0}\scitea{} \\
+\scitel{PROFILE}\scitea{ }\scitek{=}\scitea{ }\scitel{False}\scitea{ }\sciteb{\# True}\scitea{} \\
+\scitel{Ht}\scitea{ }\scitek{=}\scitea{ }\scitec{0.01}\scitea{} \\
+\scitef{import}\scitea{ }\scitel{time}\scitea{} \\
+\scitea{} \\
+\scitef{def}\scitea{ }\scitej{constant}\scitek{(}\scitel{function}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{if}\scitea{ }\scitel{CACHING}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{wrapper}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitek{*}\scitel{args}\scitek{,}\scitea{ }\scitek{**}\scitel{kwargs}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{c}\scitek{=}\scitel{self}\scitek{.}\scitel{\_\_cache\_\_}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{if}\scitea{ }\scitel{function}\scitea{ }\scitef{in}\scitea{ }\scitel{c}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{c}\scitek{[}\scitel{function}\scitek{]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{else}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{rv}\scitea{ }\scitek{=}\scitea{ }\scitel{function}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitek{*}\scitel{args}\scitek{,}\scitea{ }\scitek{**}\scitel{kwargs}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{c}\scitek{[}\scitel{function}\scitek{]}\scitea{ }\scitek{=}\scitea{ }\scitel{rv}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{rv}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{wrapper}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{else}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{function}\scitea{} \\
+\scitea{} \\
+\scitef{def}\scitea{ }\scitej{compile\_method}\scitek{(}\scitel{name}\scitek{,}\scitea{ }\scitel{f}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{s}\scitek{=}\sciteh{"""} \\
+\sciteh{def \%s(self, t, x, u):} \\
+\sciteh{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} return \%s} \\
+\sciteh{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} """}\scitea{ }\scitek{\%}\scitea{ }\scitek{(}\scitel{name}\scitek{,}\scitea{ }\scitel{f}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{f}\scitek{=}\scitel{compile}\scitek{(}\scitel{s}\scitek{,}\scitea{ }\scited{"$<$diffunctions$>$"}\scitek{,}\scitea{ }\scitee{'exec'}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{f}\scitek{=}\scitef{exec}\scitek{(}\scitel{f}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitef{def}\scitea{ }\scitej{\_vcomp}\scitek{(}\scitel{exp}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{sexp}\scitek{=}\scited{"array(\%s)"}\scitea{ }\scitek{\%}\scitea{ }\scitel{str}\scitek{(}\scitel{exp}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{compile}\scitek{(}\scitel{sexp}\scitek{,}\scitea{ }\scited{"$<$-\%s-$>$"}\scitea{ }\scitek{\%}\scitea{ }\scitel{sexp}\scitek{,}\scitea{ }\scited{"eval"}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitef{def}\scitea{ }\scitej{\_comp}\scitek{(}\scitel{exp}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{sexp}\scitek{=}\scitel{str}\scitek{(}\scitel{exp}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{compile}\scitek{(}\scitel{sexp}\scitek{,}\scitea{ }\scited{"$<$-\%s-$>$"}\scitea{ }\scitek{\%}\scitea{ }\scitel{sexp}\scitek{,}\scitea{ }\scited{"eval"}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitef{def}\scitea{ }\scitej{\_eprep}\scitek{(}\scitel{t}\scitek{,}\scitea{ }\scitel{xc}\scitek{,}\scitea{ }\scitel{uc}\scitek{,}\scitea{ }\scitel{V}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{g}\scitek{=\{}\scitee{'t'}\scitek{:}\scitel{t}\scitek{,}\scitea{ }\scitee{'array'}\scitek{:}\scitel{array}\scitek{\}}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{for}\scitea{ }\scitel{i}\scitek{,}\scitea{ }\scitel{x}\scitea{ }\scitef{in}\scitea{ }\scitel{enumerate}\scitek{(}\scitel{V}\scitek{.}\scitel{x}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{g}\scitek{.}\scitel{setdefault}\scitek{(}\scitel{str}\scitek{(}\scitel{x}\scitek{),}\scitel{xc}\scitek{[}\scitel{i}\scitek{])}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{for}\scitea{ }\scitel{i}\scitek{,}\scitea{ }\scitel{u}\scitea{ }\scitef{in}\scitea{ }\scitel{enumerate}\scitek{(}\scitel{V}\scitek{.}\scitel{u}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{g}\scitek{.}\scitel{setdefault}\scitek{(}\scitel{str}\scitek{(}\scitel{u}\scitek{),}\scitel{uc}\scitek{[}\scitel{i}\scitek{])}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{g}\scitea{} \\
+\scitea{} \\
+\scitef{def}\scitea{ }\scitej{\_eval}\scitek{(}\scitel{f}\scitek{,}\scitea{ }\scitel{t}\scitek{,}\scitea{ }\scitel{xc}\scitek{,}\scitea{ }\scitel{uc}\scitek{,}\scitea{ }\scitel{V}\scitek{,}\scitea{ }\scitel{g}\scitek{=}\scitel{None}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{if}\scitea{ }\scitel{g}\scitea{ }\scitek{==}\scitea{ }\scitel{None}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{g}\scitek{=}\scitel{\_eprep}\scitek{(}\scitel{t}\scitek{,}\scitea{ }\scitel{xc}\scitek{,}\scitea{ }\scitel{uc}\scitek{,}\scitea{ }\scitel{V}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{rc}\scitea{ }\scitek{=}\scitea{ }\scitel{eval}\scitek{(}\scitel{f}\scitek{,}\scitea{ }\scitel{g}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{rc}\scitea{} \\
+\scitea{} \\
+\scitef{def}\scitea{ }\scitej{\_rdiff}\scitek{(}\scitel{F}\scitek{,}\scitea{ }\scitel{V}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{if}\scitea{ }\scitel{type}\scitek{(}\scitel{F}\scitek{)}\scitea{ }\scitek{==}\scitea{ }\scitel{TupleType}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{tuple}\scitek{([}\scitel{\_rdiff}\scitek{(}\scitel{f}\scitek{,}\scitea{ }\scitel{V}\scitek{)}\scitea{ }\scitef{for}\scitea{ }\scitel{f}\scitea{ }\scitef{in}\scitea{ }\scitel{F}\scitek{])}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{tuple}\scitek{([}\scitel{diff}\scitek{(}\scitel{F}\scitek{,}\scitel{v}\scitek{)}\scitea{ }\scitef{for}\scitea{ }\scitel{v}\scitea{ }\scitef{in}\scitea{ }\scitel{V}\scitek{])}\scitea{} \\
+\scitea{} \\
+\scitef{def}\scitea{ }\scitej{\_teval}\scitek{(}\scitel{d}\scitek{,}\scitea{ }\scitel{T}\scitek{,}\scitel{X}\scitek{,}\scitel{U}\scitek{,}\scitea{ }\scitel{V}\scitek{):}\scitea{ }\sciteb{\# d is a code of function to be evaluated at all T time instance.}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{rc}\scitek{=[]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{for}\scitea{ }\scitel{t}\scitea{ }\scitef{in}\scitea{ }\scitel{T}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{rc}\scitek{.}\scitel{append}\scitek{(}\scitel{\_eval}\scitek{(}\scitel{d}\scitek{,}\scitea{ }\scitel{t}\scitek{,}\scitea{ }\scitel{X}\scitek{[}\scitel{t}\scitek{],}\scitea{ }\scitel{U}\scitek{[}\scitel{t}\scitek{],}\scitea{ }\scitel{V}\scitek{))}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{array}\scitek{(}\scitel{rc}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitef{class}\scitea{ }\scitei{Helper}\scitek{():}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{pass}\scitea{} \\
+\scitea{} \\
+\scitef{class}\scitea{ }\scitei{ParOptModel}\scitek{(}\scitel{object}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteh{"""Parametric Optimised model class.} \\
+\sciteh{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} See docs for individual methods on usage ways.} \\
+\sciteh{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} """}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{\_\_init\_\_}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{X0}\scitek{,}\scitea{ }\scitel{N}\scitek{,}\scitea{ }\scitel{M}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{N}\scitek{=}\scitel{N}\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\# Dimention of x}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{M}\scitek{=}\scitel{M}\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\# Dimention of u}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{X0}\scitek{=}\scitel{X0}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{v}\scitek{=}\scitel{Helper}\scitek{()}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{v}\scitek{.}\scitel{t}\scitek{=}\scitel{Symbol}\scitek{(}\scitee{'t'}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{a}\scitek{=[]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{for}\scitea{ }\scitel{i}\scitea{ }\scitef{in}\scitea{ }\scitel{range}\scitek{(}\scitel{N}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{a}\scitek{.}\scitel{append}\scitek{(}\scitel{Symbol}\scitek{(}\scitee{'x\%s'}\scitea{ }\scitek{\%}\scitea{ }\scitel{i}\scitek{))}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{v}\scitek{.}\scitel{x}\scitek{=}\scitel{tuple}\scitek{(}\scitel{a}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{a}\scitek{=[]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{for}\scitea{ }\scitel{i}\scitea{ }\scitef{in}\scitea{ }\scitel{range}\scitek{(}\scitel{M}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{a}\scitek{.}\scitel{append}\scitek{(}\scitel{Symbol}\scitek{(}\scitee{'u\%s'}\scitea{ }\scitek{\%}\scitea{ }\scitel{i}\scitek{))}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{v}\scitek{.}\scitel{u}\scitek{=}\scitel{tuple}\scitek{(}\scitel{a}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{v}\scitek{,}\scitea{ }\scitel{t}\scitek{,}\scitea{ }\scitel{x}\scitek{,}\scitea{ }\scitel{u}\scitea{ }\scitek{=}\scitea{ }\scitel{self}\scitek{.}\scitel{v}\scitek{,}\scitea{ }\scitel{self}\scitek{.}\scitel{v}\scitek{.}\scitel{t}\scitek{,}\scitea{ }\scitel{self}\scitek{.}\scitel{v}\scitek{.}\scitel{x}\scitek{,}\scitea{ }\scitel{self}\scitek{.}\scitel{v}\scitek{.}\scitel{u}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{v}\scitek{.}\scitel{f}\scitek{=}\scitel{self}\scitek{.}\scitel{f}\scitek{(}\scitel{t}\scitek{,}\scitea{ }\scitel{x}\scitek{,}\scitea{ }\scitel{u}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{v}\scitek{.}\scitel{f0}\scitek{=}\scitel{self}\scitek{.}\scitel{f0}\scitek{(}\scitel{t}\scitek{,}\scitea{ }\scitel{x}\scitek{,}\scitea{ }\scitel{u}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{v}\scitek{.}\scitel{F}\scitek{=}\scitel{self}\scitek{.}\scitel{F}\scitek{(}\scitel{x}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{c}\scitek{=}\scitel{Helper}\scitek{()}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{c}\scitek{=}\scitel{self}\scitek{.}\scitel{c}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{c}\scitek{.}\scitel{fn}\scitek{=\{\}}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{v}\scitek{.}\scitel{fn}\scitek{=\{\}}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{v}\scitek{.}\scitel{fn}\scitek{[(}\scitel{v}\scitek{.}\scitel{f}\scitek{,)]=}\scitel{v}\scitek{.}\scitel{f}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{v}\scitek{.}\scitel{fn}\scitek{[(}\scitel{v}\scitek{.}\scitel{f0}\scitek{,)]=}\scitel{v}\scitek{.}\scitel{f0}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{v}\scitek{.}\scitel{fn}\scitek{[(}\scitel{v}\scitek{.}\scitel{F}\scitek{,)]=}\scitel{v}\scitek{.}\scitel{F}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{\_\_cache\_\_}\scitek{=\{\}}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{I}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{X}\scitek{,}\scitea{ }\scitel{U}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{\_add}\scitek{(}\scitel{acc}\scitek{,}\scitea{ }\scitel{t}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{acc}\scitea{ }\scitek{+}\scitea{ }\scitel{self}\scitek{.}\scitel{f0}\scitek{(}\scitel{t}\scitek{,}\scitea{ }\scitel{X}\scitek{[}\scitel{t}\scitek{],}\scitea{ }\scitel{U}\scitek{[}\scitel{t}\scitek{])}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{reduce}\scitek{(}\scitel{\_add}\scitek{,}\scitea{ }\scitel{range}\scitek{(}\scitel{len}\scitek{(}\scitel{X}\scitek{)-}\scitec{1}\scitek{),}\scitea{ }\scitel{self}\scitek{.}\scitel{F}\scitek{(}\scitel{X}\scitek{[-}\scitec{1}\scitek{]))}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{F}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{x}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteh{"""x - ending state of a trajectory} \\
+\sciteh{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} """}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{raise}\scitea{ }\scitel{RuntimeError}\scitek{(}\scited{"should be implemented by subclass"}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{f}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{t}\scitek{,}\scitea{ }\scitel{x0}\scitek{,}\scitea{ }\scitel{U}\scitek{,}\scitea{ }\scitel{dt}\scitek{=}\scitec{1}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{raise}\scitea{ }\scitel{RuntimeError}\scitek{(}\scited{"should be implemented by subclass"}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{f0}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{t}\scitek{,}\scitea{ }\scitel{x}\scitek{,}\scitea{ }\scitel{u}\scitek{,}\scitea{ }\scitel{dt}\scitek{=}\scitec{1}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{raise}\scitea{ }\scitel{RuntimeError}\scitek{(}\scited{"should be implemented by subclass"}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{Psi}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{t}\scitek{,}\scitea{ }\scitel{X}\scitek{,}\scitea{ }\scitel{U}\scitek{,}\scitea{ }\scitel{alpha}\scitek{):}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{v}\scitek{=}\scitel{self}\scitek{.}\scitel{v}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{psie}\scitea{ }\scitek{=}\scitea{ }\scitek{-}\scitel{self}\scitek{.}\scitel{fun}\scitek{((}\scitel{v}\scitek{.}\scitel{F}\scitek{,}\scitel{v}\scitek{.}\scitel{x}\scitek{),}\scitea{ }\scitel{None}\scitek{,}\scitea{ }\scitel{X}\scitek{[-}\scitec{1}\scitek{],}\scitea{ }\scitel{None}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{psi}\scitek{=[}\scitel{psie}\scitek{]}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\#for the rest of the interval}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{X}\scitek{=}\scitel{X}\scitek{[:-}\scitec{1}\scitek{]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{t}\scitek{=}\scitel{t}\scitek{[:-}\scitec{1}\scitek{]}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{\_f0\_x}\scitek{=}\scitel{self}\scitek{.}\scitel{fun}\scitek{((}\scitel{v}\scitek{.}\scitel{f0}\scitek{,}\scitel{v}\scitek{.}\scitel{x}\scitek{),}\scitea{ }\scitel{t}\scitek{,}\scitea{ }\scitel{X}\scitek{,}\scitea{ }\scitel{U}\scitek{)}\scitea{ }\sciteb{\# last element is useless}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{\_f\_x}\scitea{ }\scitek{=}\scitel{self}\scitek{.}\scitel{fun}\scitek{((}\scitel{v}\scitek{.}\scitel{f}\scitek{,}\scitel{v}\scitek{.}\scitel{x}\scitek{),}\scitea{ }\scitel{t}\scitek{,}\scitea{ }\scitel{X}\scitek{,}\scitea{ }\scitel{U}\scitek{)}\scitea{ }\sciteb{\# last element is useless}\scitea{} \\
+\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{j}\scitek{=}\scitel{len}\scitek{(}\scitel{t}\scitek{)-}\scitec{1}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{p}\scitek{=}\scitel{psie}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{while}\scitea{ }\scitel{j}\scitek{$>$=}\scitec{1}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{i}\scitek{=}\scitel{t}\scitek{[}\scitel{j}\scitek{]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{pp}\scitek{=}\scitel{p}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{\_f\_x\_i}\scitea{ }\scitek{=}\scitea{ }\scitel{\_f\_x}\scitek{[}\scitel{i}\scitek{]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\#\_f0\_x\_t = transpose(\_f0\_x[i])}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{pn}\scitea{ }\scitek{=}\scitea{ }\scitel{dot}\scitek{(}\scitel{pp}\scitek{,}\scitel{\_f\_x\_i}\scitek{)}\scitea{ }\scitek{-}\scitea{ }\scitel{alpha}\scitek{*}\scitel{\_f0\_x}\scitek{[}\scitel{i}\scitek{]}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\#if j==1:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\#{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} print (\_f\_x\_t, pp, \_f0\_x\_t, "=$>$", pn )}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\#{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} print (self.v[[0.4*x0], [0.4*x1]].f0\_x)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{psi}\scitek{.}\scitel{append}\scitek{(}\scitel{pn}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{p}\scitek{=}\scitel{pn}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{j}\scitek{-=}\scitec{1}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\# ----}\scitea{} \\
+\scitea{} \\
+\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{psi}\scitek{=}\scitel{array}\scitek{(}\scitel{psi}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{psi}\scitek{[::-}\scitec{1}\scitek{]}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{H\_u}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{t}\scitek{,}\scitea{ }\scitel{X}\scitek{,}\scitea{ }\scitel{U}\scitek{,}\scitea{ }\scitel{Psi}\scitek{):}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{XX}\scitek{=}\scitel{X}\scitek{[:-}\scitec{1}\scitek{]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{tt}\scitek{=}\scitel{t}\scitek{[:-}\scitec{1}\scitek{]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{v}\scitek{=}\scitel{self}\scitek{.}\scitel{v}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{\_f0\_u}\scitek{=}\scitel{self}\scitek{.}\scitel{fun}\scitek{((}\scitel{v}\scitek{.}\scitel{f0}\scitek{,}\scitel{v}\scitek{.}\scitel{u}\scitek{),}\scitea{ }\scitel{tt}\scitek{,}\scitea{ }\scitel{XX}\scitek{,}\scitea{ }\scitel{U}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{\_f\_u}\scitea{ }\scitek{=}\scitel{self}\scitek{.}\scitel{fun}\scitek{((}\scitel{v}\scitek{.}\scitel{f}\scitek{,}\scitel{v}\scitek{.}\scitel{u}\scitek{),}\scitea{ }\scitel{tt}\scitek{,}\scitea{ }\scitel{XX}\scitek{,}\scitea{ }\scitel{U}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{p}\scitek{=}\scitel{Psi}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{if}\scitea{ }\scitel{DEBUG}\scitek{$>$}\scitec{10}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scited{"f\_u:"}\scitek{,}\scitea{ }\scitel{len}\scitek{(}\scitel{\_f\_u}\scitek{))}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scited{"psi:"}\scitek{,}\scitea{ }\scitel{len}\scitek{(}\scitel{p}\scitek{))}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scited{"f0\_u"}\scitek{,}\scitea{ }\scitel{len}\scitek{(}\scitel{\_f0\_u}\scitek{))}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{\_s}\scitek{=}\scitel{array}\scitek{([}\scitel{dot}\scitek{(}\scitel{p}\scitek{,}\scitel{fu}\scitek{)}\scitea{ }\scitef{for}\scitea{ }\scitel{p}\scitek{,}\scitel{fu}\scitea{ }\scitef{in}\scitea{ }\scitel{zip}\scitek{(}\scitel{Psi}\scitek{,}\scitel{\_f\_u}\scitek{)])}\scitea{ }\sciteb{\# Psi[i] is shifted left to 1 step.}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\#\_s1=dot(f\_u, Psi)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\#\_s=dot(Psi,\_f\_u)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{\_s}\scitea{ }\scitek{-}\scitea{ }\scitel{\_f0\_u}\scitea{ }\sciteb{\# FIXME Check dot operation.}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{start\_control}\scitek{(}\scitel{self}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{raise}\scitea{ }\scitel{RuntimeError}\scitek{(}\scited{"should be implemented by subclass"}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\#------------ These functions must be defined for Second Order Improvement Process -----}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{krot\_d\_dd}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{t}\scitek{,}\scitea{ }\scitel{X}\scitek{,}\scitea{ }\scitel{U}\scitek{,}\scitea{ }\scitel{alpha}\scitek{=}\scitec{1.0}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Psi}\scitek{=}\scitel{self}\scitek{.}\scitel{Psi}\scitek{(}\scitel{t}\scitek{,}\scitea{ }\scitel{X}\scitek{,}\scitea{ }\scitel{U}\scitek{,}\scitea{ }\scitel{alpha}\scitek{=}\scitel{alpha}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{v}\scitek{=}\scitel{self}\scitek{.}\scitel{v}\scitea{} \\
+\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{sige}\scitea{{\hspace*{1em}} }\scitek{=}\scitea{ }\scitek{-}\scitel{self}\scitek{.}\scitel{fun}\scitek{((}\scitel{v}\scitek{.}\scitel{F}\scitek{,}\scitel{v}\scitek{.}\scitel{x}\scitek{,}\scitel{v}\scitek{.}\scitel{x}\scitek{),}\scitea{ }\scitec{0}\scitek{,}\scitea{ }\scitel{X}\scitek{[-}\scitec{1}\scitek{],}\scitea{ }\scitec{0}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Sig}\scitek{=[}\scitel{sige}\scitek{]}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\#for the rest of the interval}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{X}\scitek{=}\scitel{X}\scitek{[:-}\scitec{1}\scitek{]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{t}\scitek{=}\scitel{t}\scitek{[:-}\scitec{1}\scitek{]}\scitea{} \\
+\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{H\_x\_x}\scitek{=}\scitel{self}\scitek{.}\scitel{H}\scitek{((}\scitel{v}\scitek{.}\scitel{x}\scitek{,}\scitel{v}\scitek{.}\scitel{x}\scitek{),}\scitea{ }\scitel{t}\scitek{,}\scitea{ }\scitel{X}\scitek{,}\scitel{U}\scitek{,}\scitea{ }\scitel{Psi}\scitek{,}\scitea{ }\scitel{alpha}\scitek{=}\scitel{alpha}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{\_f0\_x}\scitek{=}\scitel{self}\scitek{.}\scitel{fun}\scitek{((}\scitel{v}\scitek{.}\scitel{f0}\scitek{,}\scitea{ }\scitel{v}\scitek{.}\scitel{x}\scitek{),}\scitea{ }\scitel{t}\scitek{,}\scitel{X}\scitek{,}\scitel{U}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{\_f\_x}\scitea{ }\scitek{=}\scitel{self}\scitek{.}\scitel{fun}\scitek{((}\scitel{v}\scitek{.}\scitel{f}\scitek{,}\scitea{ }\scitel{v}\scitek{.}\scitel{x}\scitek{),}\scitea{ }\scitel{t}\scitek{,}\scitea{ }\scitel{X}\scitek{,}\scitea{ }\scitel{U}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{\_f0\_x\_x}\scitek{=}\scitel{self}\scitek{.}\scitel{fun}\scitek{((}\scitel{v}\scitek{.}\scitel{f0}\scitek{,}\scitel{v}\scitek{.}\scitel{x}\scitek{,}\scitel{v}\scitek{.}\scitel{x}\scitek{),}\scitea{ }\scitel{t}\scitek{,}\scitea{ }\scitel{X}\scitek{,}\scitea{ }\scitel{U}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{\_f\_x\_x}\scitek{=}\scitel{self}\scitek{.}\scitel{fun}\scitek{((}\scitel{v}\scitek{.}\scitel{f}\scitek{,}\scitel{v}\scitek{.}\scitel{x}\scitek{,}\scitel{v}\scitek{.}\scitel{x}\scitek{),}\scitea{ }\scitel{t}\scitek{,}\scitea{ }\scitel{X}\scitek{,}\scitea{ }\scitel{U}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{j}\scitek{=}\scitel{len}\scitek{(}\scitel{t}\scitek{)-}\scitec{1}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{sp}\scitek{=}\scitel{sige}\scitea{} \\
+\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{while}\scitea{ }\scitel{j}\scitek{$>$=}\scitec{1}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{i}\scitek{=}\scitel{t}\scitek{[}\scitel{j}\scitek{]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{\_f\_x\_i}\scitea{ }\scitek{=}\scitea{ }\scitel{\_f\_x}\scitek{[}\scitel{i}\scitek{]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{\_f\_x\_t}\scitea{ }\scitek{=}\scitea{ }\scitel{transpose}\scitek{(}\scitel{\_f\_x\_i}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{pn}\scitea{ }\scitek{=}\scitea{ }\scitel{Psi}\scitek{[}\scitel{i}\scitek{]}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{H\_x\_x\_i}\scitea{ }\scitek{=}\scitea{ }\scitel{H\_x\_x}\scitek{[}\scitel{i}\scitek{]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{sn}\scitea{ }\scitek{=}\scitea{ }\scitel{dot}\scitek{(}\scitel{dot}\scitek{(}\scitel{sp}\scitek{,}\scitel{\_f\_x\_i}\scitek{),}\scitea{ }\scitel{\_f\_x\_i}\scitek{)}\scitea{ }\scitek{+}\scitea{ }\scitel{H\_x\_x\_i}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Sig}\scitek{.}\scitel{append}\scitek{(}\scitel{sn}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{sp}\scitek{=}\scitel{sn}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{j}\scitek{-=}\scitec{1}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Sig}\scitek{=}\scitel{array}\scitek{(}\scitel{Sig}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{Psi}\scitek{,}\scitea{ }\scitel{Sig}\scitek{[::-}\scitec{1}\scitek{]}\scitea{ }\sciteb{\# Really it is dPsidalpha}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\# Really it is dSigmadalpha}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{fun}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{vars}\scitek{,}\scitea{ }\scitel{T}\scitek{,}\scitea{ }\scitel{X}\scitek{,}\scitea{ }\scitel{U}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{code}\scitek{=}\scitel{self}\scitek{.}\scitel{get\_code\_for}\scitek{(}\scitel{vars}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{if}\scitea{ }\scitel{vars}\scitek{[}\scitec{0}\scitek{]==}\scitel{self}\scitek{.}\scitel{v}\scitek{.}\scitel{F}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{eval}\scitek{(}\scitel{code}\scitek{,}\scitea{ }\scitek{\{}\scitee{'x'}\scitek{:}\scitel{X}\scitek{,}\scitea{ }\scitee{'array'}\scitek{:}\scitel{array}\scitek{\})}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{else}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{\_teval}\scitek{(}\scitel{code}\scitek{,}\scitea{ }\scitel{T}\scitek{,}\scitea{ }\scitel{X}\scitek{,}\scitea{ }\scitel{U}\scitek{,}\scitea{ }\scitel{self}\scitek{.}\scitel{v}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{get\_code\_for}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{vars}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{if}\scitea{ }\scitef{not}\scitea{ }\scitel{vars}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{raise}\scitea{ }\scitel{ValueError}\scitek{(}\scited{"no variables"}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{try}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{self}\scitek{.}\scitel{c}\scitek{.}\scitel{fn}\scitek{[}\scitel{vars}\scitek{]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{except}\scitea{ }\scitel{KeyError}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{pass}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{try}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{c}\scitek{=}\scitel{self}\scitek{.}\scitel{c}\scitek{.}\scitel{fn}\scitek{[}\scitel{vars}\scitek{]=}\scitel{\_vcomp}\scitek{(}\scitel{self}\scitek{.}\scitel{v}\scitek{.}\scitel{fn}\scitek{[}\scitel{vars}\scitek{])}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{c}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{except}\scitea{ }\scitel{KeyError}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{pass}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{vp}\scitek{=}\scitel{vars}\scitek{[:-}\scitec{1}\scitek{]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{cp}\scitek{=}\scitel{self}\scitek{.}\scitel{get\_code\_for}\scitek{(}\scitel{vp}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{fp}\scitek{=}\scitel{self}\scitek{.}\scitel{v}\scitek{.}\scitel{fn}\scitek{[}\scitel{vp}\scitek{]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{df}\scitek{=}\scitel{self}\scitek{.}\scitel{v}\scitek{.}\scitel{fn}\scitek{[}\scitel{vars}\scitek{]=}\scitel{\_rdiff}\scitek{(}\scitel{fp}\scitek{,}\scitea{ }\scitel{vars}\scitek{[-}\scitec{1}\scitek{])}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{c}\scitek{=}\scitel{self}\scitek{.}\scitel{c}\scitek{.}\scitel{fn}\scitek{[}\scitel{vars}\scitek{]=}\scitel{\_vcomp}\scitek{(}\scitel{df}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{if}\scitea{ }\scitel{DEBUG}\scitek{$>$}\scitec{1}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scited{"A derivative needed for:{\textbackslash}n{\textbackslash}t"}\scitek{,}\scitea{ }\scitel{vars}\scitek{,}\scitea{ }\scited{"{\textbackslash}nand it is as follows:{\textbackslash}n{\textbackslash}t"}\scitek{,}\scitea{ }\scitel{df}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{c}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{H}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{vars}\scitek{,}\scitea{ }\scitel{T}\scitek{,}\scitea{ }\scitel{X}\scitek{,}\scitea{ }\scitel{U}\scitek{,}\scitea{ }\scitel{Psi}\scitek{,}\scitea{ }\scitel{alpha}\scitea{ }\scitek{=}\scitea{ }\scitec{1.0}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\# calculate H\_v\_v...(t.}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\# print ("Evaluating H:", vars, len(T), len(X), len(U), len(Psi))}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{assert}\scitea{ }\scitel{len}\scitek{(}\scitel{vars}\scitek{)$>$}\scitec{0}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{assert}\scitea{ }\scitel{len}\scitek{(}\scitel{T}\scitek{)}\scitea{ }\scitek{==}\scitea{ }\scitel{len}\scitek{(}\scitel{X}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{assert}\scitea{ }\scitel{len}\scitek{(}\scitel{X}\scitek{)==}\scitel{len}\scitek{(}\scitel{U}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{assert}\scitea{ }\scitel{len}\scitek{(}\scitel{U}\scitek{)==}\scitel{len}\scitek{(}\scitel{Psi}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{f}\scitek{=}\scitel{self}\scitek{.}\scitel{fun}\scitek{((}\scitel{self}\scitek{.}\scitel{v}\scitek{.}\scitel{f}\scitek{,)+}\scitel{vars}\scitek{,}\scitea{ }\scitel{T}\scitek{,}\scitea{ }\scitel{X}\scitek{,}\scitea{ }\scitel{U}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{f0}\scitek{=-}\scitel{self}\scitek{.}\scitel{fun}\scitek{((}\scitel{self}\scitek{.}\scitel{v}\scitek{.}\scitel{f0}\scitek{,)+}\scitel{vars}\scitek{,}\scitea{ }\scitel{T}\scitek{,}\scitea{ }\scitel{X}\scitek{,}\scitea{ }\scitel{U}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{H}\scitea{ }\scitek{=}\scitea{ }\scitel{alpha}\scitea{ }\scitek{*}\scitea{ }\scitel{f0}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{for}\scitea{ }\scitel{psi}\scitek{,}\scitel{\_H}\scitek{,}\scitel{\_f}\scitek{,}\scitel{i}\scitea{ }\scitef{in}\scitea{ }\scitel{zip}\scitek{(}\scitel{Psi}\scitek{,}\scitea{ }\scitel{H}\scitek{,}\scitea{ }\scitel{f}\scitek{,}\scitea{ }\scitel{range}\scitek{(}\scitel{len}\scitek{(}\scitel{H}\scitek{))):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{\_H}\scitea{ }\scitek{+=}\scitea{ }\scitel{dot}\scitek{(}\scitel{psi}\scitek{,}\scitel{\_f}\scitek{)}\scitea{ }\sciteb{\# !}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{H}\scitek{[}\scitel{i}\scitek{]=}\scitel{\_H}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{H}\scitea{} \\
+\scitea{} \\
+\scitef{class}\scitea{ }\scitei{ParOptProcess}\scitek{(}\scitel{object}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteh{"""This calss corresponds to a optimizational model.} \\
+\sciteh{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} """}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{\_\_init\_\_}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{model}\scitek{,}\scitea{ }\scitel{alpha}\scitek{=}\scitec{1.0}\scitek{,}\scitea{ }\scitel{beta}\scitek{=}\scitec{1.0}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteh{"""} \\
+\sciteh{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} """}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{model}\scitek{=}\scitel{model}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{alpha}\scitek{=}\scitel{alpha}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{beta}\scitek{=}\scitel{beta}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{optimize}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{t}\scitek{,}\scitea{ }\scitel{eps}\scitek{=}\scitec{0.001}\scitek{,}\scitea{ }\scitel{iters}\scitek{=}\scitec{1000}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Up}\scitek{=}\scitel{self}\scitek{.}\scitel{model}\scitek{.}\scitel{start\_control}\scitek{()}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Xp}\scitek{=}\scitel{self}\scitek{.}\scitel{trajectory}\scitek{(}\scitel{Up}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Ip}\scitek{=}\scitel{self}\scitek{.}\scitel{model}\scitek{.}\scitel{I}\scitek{(}\scitel{Xp}\scitek{,}\scitel{Up}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{it}\scitea{ }\scitek{=}\scitea{ }\scitec{1}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{while}\scitea{ }\scitel{True}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{beta}\scitea{ }\scitek{=}\scitea{ }\scitel{self}\scitek{.}\scitel{beta}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Psi}\scitek{=}\scitel{self}\scitek{.}\scitel{model}\scitek{.}\scitel{Psi}\scitek{(}\scitel{t}\scitek{,}\scitea{ }\scitel{Xp}\scitek{,}\scitea{ }\scitel{Up}\scitek{,}\scitea{ }\scitel{self}\scitek{.}\scitel{alpha}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{\_H\_u}\scitek{=}\scitel{self}\scitek{.}\scitel{model}\scitek{.}\scitel{H}\scitek{((}\scitel{self}\scitek{.}\scitel{model}\scitek{.}\scitel{v}\scitek{.}\scitel{u}\scitek{,),}\scitea{ }\scitel{t}\scitek{[:-}\scitec{1}\scitek{],}\scitea{ }\scitel{Xp}\scitek{[:-}\scitec{1}\scitek{],}\scitea{ }\scitel{Up}\scitek{,}\scitea{ }\scitel{Psi}\scitek{,}\scitea{ }\scitel{alpha}\scitek{=}\scitec{1.0}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{while}\scitea{ }\scitel{True}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scitel{it}\scitek{,}\scitea{ }\scitel{beta}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{\_dU}\scitek{=}\scitel{\_H\_u}\scitek{*}\scitel{beta}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Un}\scitea{ }\scitek{=}\scitea{ }\scitel{Up}\scitea{ }\scitek{+}\scitea{ }\scitel{\_dU}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Xn}\scitea{ }\scitek{=}\scitea{ }\scitel{self}\scitek{.}\scitel{trajectory}\scitek{(}\scitel{Un}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{In}\scitea{ }\scitek{=}\scitea{ }\scitel{self}\scitek{.}\scitel{model}\scitek{.}\scitel{I}\scitek{(}\scitel{Xn}\scitek{,}\scitea{ }\scitel{Un}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{dI}\scitea{ }\scitek{=}\scitea{ }\scitel{Ip}\scitek{-}\scitel{In}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{if}\scitea{ }\scitel{DEBUG}\scitek{$>$}\scitec{5}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scited{"DI:"}\scitek{,}\scitea{ }\scitel{dI}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{if}\scitea{ }\scitel{DEBUG}\scitek{$>$}\scitec{6}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scited{"Xn:"}\scitek{,}\scitea{ }\scitel{Xn}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scited{"Un:"}\scitek{,}\scitea{ }\scitel{Un}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{if}\scitea{ }\scitel{abs}\scitek{(}\scitel{dI}\scitek{)$<$}\scitel{eps}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{In}\scitek{,}\scitea{ }\scitel{Xn}\scitek{,}\scitea{ }\scitel{Un}\scitek{,}\scitea{ }\scitel{it}\scitek{,}\scitea{ }\scited{"Opt"}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{if}\scitea{ }\scitel{iters}\scitek{$<$=}\scitec{0}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{In}\scitek{,}\scitea{ }\scitel{Xn}\scitek{,}\scitea{ }\scitel{Un}\scitek{,}\scitea{ }\scitel{it}\scitek{,}\scitea{ }\scited{"Nonoptimal"}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{iters}\scitek{-=}\scitec{1}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{it}\scitek{+=}\scitec{1}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{if}\scitea{ }\scitel{In}\scitek{$>$=}\scitel{Ip}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{beta}\scitek{/=}\scitec{2}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{continue}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{else}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Xp}\scitek{,}\scitea{ }\scitel{Up}\scitek{,}\scitea{ }\scitel{Ip}\scitea{ }\scitek{=}\scitea{ }\scitel{Xn}\scitek{,}\scitea{ }\scitel{Un}\scitek{,}\scitea{ }\scitel{In}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{break}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{raise}\scitea{ }\scitel{RuntimeError}\scitek{(}\scited{"this should be not reached"}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{trajectory}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{U}\scitek{):}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{x0}\scitek{=}\scitel{self}\scitek{.}\scitel{model}\scitek{.}\scitel{X0}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{X}\scitea{ }\scitek{=}\scitea{ }\scitek{[}\scitel{x0}\scitek{]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{for}\scitea{ }\scitel{t}\scitek{,}\scitea{ }\scitel{u}\scitea{ }\scitef{in}\scitea{ }\scitel{enumerate}\scitek{(}\scitel{U}\scitek{):}\scitea{ }\sciteb{\# (0, u0), (1, u1)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{xn}\scitek{=}\scitel{self}\scitek{.}\scitel{model}\scitek{.}\scitel{f}\scitek{(}\scitel{t}\scitek{,}\scitea{ }\scitel{X}\scitek{[}\scitel{t}\scitek{],}\scitea{ }\scitel{u}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{X}\scitek{.}\scitel{append}\scitek{(}\scitel{xn}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{array}\scitek{(}\scitel{X}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitef{class}\scitea{ }\scitei{SeconOrderParOptProcess}\scitek{(}\scitel{ParOptProcess}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteh{"""A second order parametric optimization process} \\
+\sciteh{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} """}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{\_\_init\_\_}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{model}\scitek{,}\scitea{ }\scitek{**}\scitel{kwargs}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{X0}\scitek{=}\scitel{array}\scitek{([}\scitec{0.0}\scitek{,}\scitea{ }\scitec{0.0}\scitek{])}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{t}\scitea{ }\scitek{=}\scitea{ }\scitel{arange}\scitek{(}\scitec{2}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{ParOptProcess}\scitek{.}\scitel{\_\_init\_\_}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{model}\scitek{,}\scitea{ }\scitek{**}\scitel{kwargs}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{optimize}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{t}\scitek{,}\scitea{ }\scitel{eps}\scitek{=}\scitec{0.001}\scitek{,}\scitea{ }\scitel{iters}\scitek{=}\scitec{1000}\scitek{,}\scitea{ }\scitel{alpha}\scitek{=}\scitel{None}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Up}\scitek{=}\scitel{self}\scitek{.}\scitel{model}\scitek{.}\scitel{start\_control}\scitek{()}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Xp}\scitek{=}\scitel{self}\scitek{.}\scitel{trajectory}\scitek{(}\scitel{Up}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Ip}\scitek{=}\scitel{self}\scitek{.}\scitel{model}\scitek{.}\scitel{I}\scitek{(}\scitel{Xp}\scitek{,}\scitel{Up}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{v}\scitek{=}\scitel{self}\scitek{.}\scitel{model}\scitek{.}\scitel{v}\scitea{} \\
+\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{it}\scitea{ }\scitek{=}\scitea{ }\scitec{1}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{tc}\scitea{ }\scitek{=}\scitel{t}\scitek{[:-}\scitec{1}\scitek{]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Xpc}\scitek{=}\scitel{Xp}\scitek{[:-}\scitec{1}\scitek{]}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{E}\scitek{=}\scitel{numpy}\scitek{.}\scitel{identity}\scitek{(}\scitel{self}\scitek{.}\scitel{model}\scitek{.}\scitel{M}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{if}\scitea{ }\scitel{alpha}\scitek{==}\scitel{None}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{\_a}\scitek{=}\scitel{self}\scitek{.}\scitel{alpha}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{else}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{\_a}\scitek{=}\scitel{alpha}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{while}\scitea{ }\scitel{True}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\# Something done with alphas and}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Psi}\scitek{,}\scitea{ }\scitel{Sigma}\scitea{ }\scitek{=}\scitea{ }\scitel{self}\scitek{.}\scitel{model}\scitek{.}\scitel{krot\_d\_dd}\scitek{(}\scitel{t}\scitek{,}\scitea{ }\scitel{Xp}\scitek{,}\scitea{ }\scitel{Up}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{\_f\_u}\scitek{=}\scitel{self}\scitek{.}\scitel{model}\scitek{.}\scitel{fun}\scitek{((}\scitel{v}\scitek{.}\scitel{f}\scitek{,}\scitel{v}\scitek{.}\scitel{u}\scitek{),}\scitea{ }\scitel{tc}\scitek{,}\scitea{ }\scitel{Xpc}\scitek{,}\scitea{ }\scitel{Up}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{\_f\_u\_t}\scitek{=}\scitel{\_f\_u}\scitek{.}\scitel{transpose}\scitek{(}\scitec{0}\scitek{,}\scitec{2}\scitek{,}\scitec{1}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{\_f\_x}\scitek{=}\scitel{self}\scitek{.}\scitel{model}\scitek{.}\scitel{fun}\scitek{((}\scitel{v}\scitek{.}\scitel{f}\scitek{,}\scitel{v}\scitek{.}\scitel{x}\scitek{),}\scitea{ }\scitel{tc}\scitek{,}\scitea{ }\scitel{Xpc}\scitek{,}\scitea{ }\scitel{Up}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{\_f\_x\_t}\scitek{=}\scitel{\_f\_x}\scitek{.}\scitel{transpose}\scitek{(}\scitec{0}\scitek{,}\scitec{2}\scitek{,}\scitec{1}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{\_f\_u\_u}\scitek{=}\scitel{self}\scitek{.}\scitel{model}\scitek{.}\scitel{fun}\scitek{((}\scitel{v}\scitek{.}\scitel{f}\scitek{,}\scitel{v}\scitek{.}\scitel{u}\scitek{,}\scitel{v}\scitek{.}\scitel{u}\scitek{),}\scitea{ }\scitel{tc}\scitek{,}\scitea{ }\scitel{Xpc}\scitek{,}\scitea{ }\scitel{Up}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{alpha}\scitek{=}\scitel{\_a}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{while}\scitea{ }\scitel{True}\scitek{:}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\#import pudb; pu.db}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{f\_part}\scitek{=}\scitel{self}\scitek{.}\scitel{model}\scitek{.}\scitel{H}\scitek{((}\scitel{v}\scitek{.}\scitel{u}\scitek{,}\scitel{v}\scitek{.}\scitel{u}\scitek{),}\scitea{ }\scitel{tc}\scitek{,}\scitea{ }\scitel{Xpc}\scitek{,}\scitea{ }\scitel{Up}\scitek{,}\scitea{ }\scitel{Psi}\scitek{,}\scitea{ }\scitel{alpha}\scitek{=}\scitel{alpha}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{for}\scitea{ }\scitel{h}\scitek{,}\scitea{ }\scitel{fut}\scitek{,}\scitea{ }\scitel{fu}\scitek{,}\scitea{ }\scitel{sik}\scitek{,}\scitea{ }\scitel{k}\scitea{ }\scitef{in}\scitea{ }\scitel{zip}\scitek{(}\scitel{f\_part}\scitek{,}\scitea{ }\scitel{\_f\_u\_t}\scitek{,}\scitea{ }\scitel{\_f\_u}\scitek{,}\scitea{ }\scitel{Sigma}\scitek{,}\scitea{ }\scitel{range}\scitek{(}\scitel{len}\scitek{(}\scitel{f\_part}\scitek{))):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{h}\scitek{+=}\scitel{dot}\scitek{(}\scitel{dot}\scitek{(}\scitel{fut}\scitek{,}\scitea{ }\scitel{alpha}\scitek{*}\scitel{sik}\scitek{),}\scitel{fu}\scitek{)-}\scitel{E}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{f\_part}\scitek{[}\scitel{k}\scitek{]=-}\scitel{linalg}\scitek{.}\scitel{inv}\scitek{(}\scitel{h}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{s\_part}\scitek{=}\scitel{self}\scitek{.}\scitel{model}\scitek{.}\scitel{H}\scitek{((}\scitel{v}\scitek{.}\scitel{u}\scitek{,}\scitel{v}\scitek{.}\scitel{x}\scitek{),}\scitea{ }\scitel{tc}\scitek{,}\scitea{ }\scitel{Xpc}\scitek{,}\scitea{ }\scitel{Up}\scitek{,}\scitea{ }\scitel{Psi}\scitek{,}\scitea{ }\scitel{alpha}\scitek{=}\scitel{alpha}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{for}\scitea{ }\scitel{h}\scitek{,}\scitea{ }\scitel{fxt}\scitek{,}\scitea{ }\scitel{sik}\scitek{,}\scitea{ }\scitel{fu}\scitea{ }\scitef{in}\scitea{ }\scitel{zip}\scitek{(}\scitel{s\_part}\scitek{,}\scitea{ }\scitel{\_f\_x\_t}\scitek{,}\scitea{ }\scitel{Sigma}\scitek{,}\scitea{ }\scitel{\_f\_u}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{s\_part}\scitek{[}\scitel{k}\scitek{]+=}\scitel{dot}\scitek{(}\scitel{dot}\scitek{(}\scitel{fxt}\scitek{,}\scitea{ }\scitel{alpha}\scitek{*}\scitel{sik}\scitek{),}\scitel{fu}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{H\_u}\scitek{=}\scitel{H\_u\_a}\scitek{=}\scitel{self}\scitek{.}\scitel{model}\scitek{.}\scitel{H}\scitek{((}\scitel{v}\scitek{.}\scitel{u}\scitek{,),}\scitea{ }\scitel{tc}\scitek{,}\scitea{ }\scitel{Xpc}\scitek{,}\scitel{Up}\scitek{,}\scitea{ }\scitel{Psi}\scitek{,}\scitea{ }\scitel{alpha}\scitek{=}\scitel{alpha}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Un}\scitea{ }\scitek{=}\scitea{ }\scitel{numpy}\scitek{.}\scitel{copy}\scitek{(}\scitel{Up}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\#dU = numpy.copy(Up)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Xn}\scitea{ }\scitek{=}\scitea{ }\scitel{numpy}\scitek{.}\scitel{copy}\scitek{(}\scitel{Xp}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\#dX = numpy.copy(Xp)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Xn}\scitek{[}\scitec{0}\scitek{]=}\scitel{Xp}\scitek{[}\scitec{0}\scitek{]}\scitea{ }\sciteb{\# In reality it is already copied.}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Xn\_i}\scitek{=}\scitel{Xp}\scitek{[}\scitec{0}\scitek{]}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{for}\scitea{ }\scitel{i}\scitek{,}\scitea{ }\scitel{psi}\scitea{ }\scitef{in}\scitea{ }\scitel{enumerate}\scitek{(}\scitel{Psi}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Xp\_i}\scitek{=}\scitel{Xp}\scitek{[}\scitel{i}\scitek{]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Up\_i}\scitek{=}\scitel{Up}\scitek{[}\scitel{i}\scitek{]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{H\_u\_i}\scitek{=}\scitel{H\_u}\scitek{[}\scitel{i}\scitek{]}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{dX\_i}\scitek{=}\scitel{Xn\_i}\scitek{-}\scitel{Xp\_i}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\#dU\_i=dot((H\_u\_a[i]+dot(dX\_i,s\_part[i])),f\_part[i])}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\#dU\_i=dot(H\_u\_a[i],f\_part[i])}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{dU\_i}\scitek{=}\scitel{H\_u\_a}\scitek{[}\scitel{i}\scitek{]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Un\_i}\scitea{ }\scitek{=}\scitea{ }\scitel{Up\_i}\scitea{ }\scitek{+}\scitea{ }\scitel{dU\_i}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Xnn\_i}\scitek{=}\scitel{self}\scitek{.}\scitel{model}\scitek{.}\scitel{f}\scitek{(}\scitel{t}\scitek{[}\scitel{i}\scitek{],}\scitea{ }\scitel{Xn\_i}\scitek{,}\scitea{ }\scitel{Un\_i}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Un}\scitek{[}\scitel{i}\scitek{]=}\scitel{Un\_i}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Xn}\scitek{[}\scitel{i}\scitek{+}\scitec{1}\scitek{]=}\scitel{Xnn\_i}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Xn\_i}\scitek{=}\scitel{Xnn\_i}\scitea{} \\
+\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{In}\scitea{ }\scitek{=}\scitea{ }\scitel{self}\scitek{.}\scitel{model}\scitek{.}\scitel{I}\scitek{(}\scitel{Xn}\scitek{,}\scitea{ }\scitel{Un}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{dI}\scitea{ }\scitek{=}\scitea{ }\scitel{Ip}\scitek{-}\scitel{In}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{if}\scitea{ }\scitel{DEBUG}\scitek{$>$=}\scitec{0}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scited{"Ip:"}\scitek{,}\scitea{ }\scitel{Ip}\scitek{,}\scitea{ }\scited{"In:"}\scitek{,}\scitea{ }\scitel{In}\scitek{,}\scitea{{\hspace*{1em}} }\scited{"DI:"}\scitek{,}\scitea{ }\scitel{dI}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{if}\scitea{ }\scitel{abs}\scitek{(}\scitel{dI}\scitek{)$<$}\scitel{eps}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{In}\scitek{,}\scitea{ }\scitel{Xn}\scitek{,}\scitea{ }\scitel{Un}\scitek{,}\scitea{ }\scitel{it}\scitek{,}\scitea{ }\scited{"Opt"}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{if}\scitea{ }\scitel{iters}\scitek{$<$=}\scitec{0}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{In}\scitek{,}\scitea{ }\scitel{Xn}\scitek{,}\scitea{ }\scitel{Un}\scitek{,}\scitea{ }\scitel{it}\scitek{,}\scitea{ }\scited{"Nonoptimal"}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{iters}\scitek{-=}\scitec{1}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{it}\scitek{+=}\scitec{1}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{if}\scitea{ }\scitel{In}\scitek{$>$}\scitel{Ip}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{alpha}\scitek{*=}\scitec{0.7}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{continue}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{else}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{Xp}\scitek{,}\scitea{ }\scitel{Up}\scitek{,}\scitea{ }\scitel{Ip}\scitea{ }\scitek{=}\scitea{ }\scitel{Xn}\scitek{,}\scitea{ }\scitel{Un}\scitek{,}\scitea{ }\scitel{In}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{break}\scitea{} \\
+\scitea{} \\
+\sciteb{\# -------------------- tests -------------------------------------------------}\scitea{} \\
+\scitea{} \\
+\scitef{class}\scitea{ }\scitei{LinModel1}\scitek{(}\scitel{ParOptModel}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteh{"""Possibly simple linear test model.} \\
+\sciteh{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} """}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{\_\_init\_\_}\scitek{(}\scitel{self}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{X0}\scitek{=(}\scitec{1.0}\scitek{,)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{h}\scitea{ }\scitek{=}\scitea{ }\scitel{Ht}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\# self.h = 0.001}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\# self.h = 0.2}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{num}\scitea{ }\scitek{=}\scitea{ }\scitel{int}\scitek{((}\scitec{1.0}\scitek{-}\scitec{0.0}\scitek{)}\scitea{ }\scitek{/}\scitea{ }\scitel{self}\scitek{.}\scitel{h}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{T}\scitea{ }\scitek{=}\scitea{ }\scitel{linspace}\scitek{(}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{start}\scitek{=}\scitec{0.0}\scitek{,}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{stop}\scitek{=}\scitec{1.0}\scitek{,}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{num}\scitek{=}\scitel{self}\scitek{.}\scitel{num}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{t}\scitea{ }\scitek{=}\scitea{ }\scitel{arange}\scitek{(}\scitel{len}\scitek{(}\scitel{self}\scitek{.}\scitel{T}\scitek{))}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{ParOptModel}\scitek{.}\scitel{\_\_init\_\_}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{X0}\scitek{=}\scitel{X0}\scitek{,}\scitea{ }\scitel{N}\scitek{=}\scitec{1}\scitek{,}\scitea{ }\scitel{M}\scitek{=}\scitec{1}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{start\_control}\scitek{(}\scitel{self}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{U}\scitea{ }\scitek{=}\scitea{ }\scitek{[(}\scitec{0.0}\scitek{,)}\scitea{ }\scitef{for}\scitea{ }\scitel{t}\scitea{ }\scitef{in}\scitea{ }\scitel{self}\scitek{.}\scitel{t}\scitek{[:-}\scitec{1}\scitek{]]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{array}\scitek{(}\scitel{U}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{F}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{x}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteh{""" X and U are lists of vectors (arrays)} \\
+\sciteh{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} """}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitec{0.0}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{f}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{t}\scitek{,}\scitea{ }\scitel{x}\scitek{,}\scitea{ }\scitel{u}\scitek{,}\scitea{ }\scitel{dt}\scitek{=}\scitec{1}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteh{""" X ia a vector of the previous state} \\
+\sciteh{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} """}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{x0}\scitek{=}\scitel{x}\scitek{[}\scitec{0}\scitek{]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{u0}\scitek{=}\scitel{u}\scitek{[}\scitec{0}\scitek{]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitek{(}\scitel{x0}\scitek{+}\scitel{self}\scitek{.}\scitel{h}\scitek{*}\scitel{u0}\scitek{,)}\scitea{} \\
+\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{f0}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{t}\scitek{,}\scitea{ }\scitel{x}\scitek{,}\scitea{ }\scitel{u}\scitek{,}\scitea{ }\scitel{dt}\scitek{=}\scitec{1}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteh{""" X ia a vector of the previous state} \\
+\sciteh{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} """}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{x0}\scitek{=}\scitel{x}\scitek{[}\scitec{0}\scitek{]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{u0}\scitek{=}\scitel{u}\scitek{[}\scitec{0}\scitek{]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{self}\scitek{.}\scitel{h}\scitea{ }\scitek{*}\scitea{ }\scitek{(}\scitel{x0}\scitek{*}\scitel{x0}\scitek{+}\scitel{u0}\scitek{*}\scitel{u0}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{} \\
+\scitef{class}\scitea{ }\scitei{LinModel2d2du}\scitek{(}\scitel{ParOptModel}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteh{"""Possibly not a simple linear test model.} \\
+\sciteh{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} """}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{\_\_init\_\_}\scitek{(}\scitel{self}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{X0}\scitek{=(}\scitec{1.0}\scitek{,}\scitec{1.0}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{h}\scitea{ }\scitek{=}\scitea{ }\scitel{Ht}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{num}\scitea{ }\scitek{=}\scitea{ }\scitel{int}\scitek{((}\scitec{1.0}\scitek{-}\scitec{0.0}\scitek{)}\scitea{ }\scitek{/}\scitea{ }\scitel{self}\scitek{.}\scitel{h}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{T}\scitea{ }\scitek{=}\scitea{ }\scitel{linspace}\scitek{(}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{start}\scitek{=}\scitec{0.0}\scitek{,}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{stop}\scitek{=}\scitec{1.0}\scitek{,}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{num}\scitek{=}\scitel{self}\scitek{.}\scitel{num}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{t}\scitea{ }\scitek{=}\scitea{ }\scitel{arange}\scitek{(}\scitel{len}\scitek{(}\scitel{self}\scitek{.}\scitel{T}\scitek{))}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{ParOptModel}\scitek{.}\scitel{\_\_init\_\_}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{X0}\scitek{=}\scitel{X0}\scitek{,}\scitea{ }\scitel{N}\scitek{=}\scitec{2}\scitek{,}\scitea{ }\scitel{M}\scitek{=}\scitec{2}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{start\_control}\scitek{(}\scitel{self}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{U}\scitea{ }\scitek{=}\scitea{ }\scitek{[[}\scitec{0.0}\scitek{,}\scitec{0.0}\scitek{]}\scitea{ }\scitef{for}\scitea{ }\scitel{t}\scitea{ }\scitef{in}\scitea{ }\scitel{self}\scitek{.}\scitel{t}\scitek{[:-}\scitec{1}\scitek{]]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{array}\scitek{(}\scitel{U}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{F}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{x}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteh{""" X and U are lists of vectors (arrays)} \\
+\sciteh{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} """}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitec{0.0}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{f}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{t}\scitek{,}\scitea{ }\scitel{x}\scitek{,}\scitea{ }\scitel{u}\scitek{,}\scitea{ }\scitel{dt}\scitek{=}\scitec{1}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteh{""" X ia a vector of the previous state} \\
+\sciteh{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} """}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitek{(}\scitel{x0}\scitek{,}\scitel{x1}\scitek{)=}\scitel{x}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitek{(}\scitel{u0}\scitek{,}\scitel{u1}\scitek{)=}\scitel{u}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitek{(}\scitel{x0}\scitek{+}\scitel{self}\scitek{.}\scitel{h}\scitek{*}\scitel{u0}\scitek{,}\scitea{ }\scitel{x1}\scitek{+}\scitel{self}\scitek{.}\scitel{h}\scitek{*}\scitel{u1}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{f0}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{t}\scitek{,}\scitea{ }\scitel{x}\scitek{,}\scitea{ }\scitel{u}\scitek{,}\scitea{ }\scitel{dt}\scitek{=}\scitec{1}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteh{""" X ia a vector of the previous state} \\
+\sciteh{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} """}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitek{(}\scitel{x0}\scitek{,}\scitel{x1}\scitek{)=}\scitel{x}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitek{(}\scitel{u0}\scitek{,}\scitel{u1}\scitek{)=}\scitel{u}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{self}\scitek{.}\scitel{h}\scitea{ }\scitek{*}\scitea{ }\scitek{(}\scitel{x0}\scitek{*}\scitel{x0}\scitek{+}\scitel{x1}\scitek{*}\scitel{x1}\scitek{+}\scitel{u0}\scitek{*}\scitel{u0}\scitek{+}\scitel{u1}\scitek{*}\scitel{u1}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitef{class}\scitea{ }\scitei{LinModel2d2du1}\scitek{(}\scitel{ParOptModel}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteh{"""Possibly not a simple linear test model.} \\
+\sciteh{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} """}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{\_\_init\_\_}\scitek{(}\scitel{self}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{X0}\scitek{=}\scitel{array}\scitek{([[}\scitec{1.0}\scitek{],[}\scitec{1.0}\scitek{]])}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{h}\scitea{ }\scitek{=}\scitea{ }\scitel{Ht}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{num}\scitea{ }\scitek{=}\scitea{ }\scitel{int}\scitek{((}\scitec{1.0}\scitek{-}\scitec{0.0}\scitek{)}\scitea{ }\scitek{/}\scitea{ }\scitel{self}\scitek{.}\scitel{h}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{T}\scitea{ }\scitek{=}\scitea{ }\scitel{linspace}\scitek{(}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{start}\scitek{=}\scitec{0.0}\scitek{,}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{stop}\scitek{=}\scitec{1.0}\scitek{,}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{num}\scitek{=}\scitel{self}\scitek{.}\scitel{num}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{self}\scitek{.}\scitel{t}\scitea{ }\scitek{=}\scitea{ }\scitel{arange}\scitek{(}\scitel{len}\scitek{(}\scitel{self}\scitek{.}\scitel{T}\scitek{))}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{ParOptModel}\scitek{.}\scitel{\_\_init\_\_}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{X0}\scitek{=}\scitel{X0}\scitek{,}\scitea{ }\scitel{N}\scitek{=}\scitec{2}\scitek{,}\scitea{ }\scitel{M}\scitek{=}\scitec{2}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{start\_control}\scitek{(}\scitel{self}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{U}\scitea{ }\scitek{=}\scitea{ }\scitek{[}\scitel{array}\scitek{([[}\scitec{0.0}\scitek{],[}\scitec{0.0}\scitek{]])}\scitea{ }\scitef{for}\scitea{ }\scitel{t}\scitea{ }\scitef{in}\scitea{ }\scitel{self}\scitek{.}\scitel{t}\scitek{[:-}\scitec{1}\scitek{]]}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{array}\scitek{(}\scitel{U}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{F}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{x}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteh{""" X and U are lists of vectors (arrays)} \\
+\sciteh{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} """}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitec{0.0}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{f}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{t}\scitek{,}\scitea{ }\scitel{x}\scitek{,}\scitea{ }\scitel{u}\scitek{,}\scitea{ }\scitel{dt}\scitek{=}\scitec{1}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteh{""" X ia a vector of the previous state} \\
+\sciteh{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} """}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitek{((}\scitel{x0}\scitek{,),(}\scitel{x1}\scitek{,))=}\scitel{x}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitek{((}\scitel{u0}\scitek{,),(}\scitel{u1}\scitek{,))=}\scitel{u}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitek{((}\scitel{x0}\scitek{**}\scitec{5}\scitek{+}\scitel{self}\scitek{.}\scitel{h}\scitek{*}\scitel{u0}\scitek{,),(}\scitel{x1}\scitek{**}\scitec{5}\scitek{+}\scitel{self}\scitek{.}\scitel{h}\scitek{*}\scitel{u1}\scitek{,))}\scitea{} \\
+\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{def}\scitea{ }\scitej{f0}\scitek{(}\scitel{self}\scitek{,}\scitea{ }\scitel{t}\scitek{,}\scitea{ }\scitel{x}\scitek{,}\scitea{ }\scitel{u}\scitek{,}\scitea{ }\scitel{dt}\scitek{=}\scitec{1}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteh{""" X ia a vector of the previous state} \\
+\sciteh{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} """}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitek{((}\scitel{x0}\scitek{,),(}\scitel{x1}\scitek{,))=}\scitel{x}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitek{((}\scitel{u0}\scitek{,),(}\scitel{u1}\scitek{,))=}\scitel{u}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{ }\scitel{self}\scitek{.}\scitel{h}\scitea{ }\scitek{*}\scitea{ }\scitek{(}\scitel{x0}\scitek{*}\scitel{x0}\scitek{+}\scitel{x1}\scitek{*}\scitel{x1}\scitek{+}\scitel{u0}\scitek{*}\scitel{u0}\scitek{+}\scitel{u1}\scitek{*}\scitel{u1}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitef{def}\scitea{ }\scitej{gnuplot}\scitek{(}\scitel{fn}\scitek{,}\scitea{ }\scitek{*}\scitel{args}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\sciteb{\# args are I, X, U, it, \_ (result: Opt, etc.)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{for}\scitea{ }\scitel{i}\scitek{,}\scitea{ }\scitek{(}\scitel{I}\scitek{,}\scitea{ }\scitel{X}\scitek{,}\scitea{ }\scitel{U}\scitek{,}\scitea{ }\scitel{it}\scitek{,}\scitea{ }\scitel{\_}\scitek{)}\scitea{ }\scitef{in}\scitea{ }\scitel{enumerate}\scitek{(}\scitel{args}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{o}\scitek{=}\scitel{open}\scitek{(}\scitel{fn}\scitek{+}\scitel{str}\scitek{(}\scitel{i}\scitek{)+}\scited{".dat"}\scitek{,}\scitea{ }\scited{"w"}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{lx}\scitek{=}\scitel{len}\scitek{(}\scitel{X}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{for}\scitea{ }\scitel{i}\scitek{,}\scitel{x}\scitek{,}\scitel{u}\scitea{ }\scitef{in}\scitea{ }\scitel{zip}\scitek{(}\scitel{range}\scitek{(}\scitel{lx}\scitek{-}\scitec{1}\scitek{),}\scitea{ }\scitel{X}\scitek{[:-}\scitec{1}\scitek{],}\scitel{U}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{t}\scitek{=}\scitel{i}\scitek{/}\scitel{lx}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{o}\scitek{.}\scitel{write}\scitek{(}\scitel{str}\scitek{(}\scitel{t}\scitek{)+}\scited{"{\textbackslash}t"}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{o}\scitek{.}\scitel{write}\scitek{(}\scited{"{\textbackslash}t"}\scitek{.}\scitel{join}\scitek{([}\scitel{str}\scitek{(}\scitel{a}\scitek{)}\scitea{ }\scitef{for}\scitea{ }\scitel{a}\scitea{ }\scitef{in}\scitea{ }\scitel{x}\scitek{]))}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{o}\scitek{.}\scitel{write}\scitek{(}\scited{"{\textbackslash}t"}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{o}\scitek{.}\scitel{write}\scitek{(}\scited{"{\textbackslash}t"}\scitek{.}\scitel{join}\scitek{([}\scitel{str}\scitek{(}\scitel{a}\scitek{)}\scitea{ }\scitef{for}\scitea{ }\scitel{a}\scitea{ }\scitef{in}\scitea{ }\scitel{u}\scitek{]))}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{o}\scitek{.}\scitel{write}\scitek{(}\scited{"{\textbackslash}n"}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{o}\scitek{.}\scitel{close}\scitek{()}\scitea{} \\
+\scitea{} \\
+\scitef{def}\scitea{ }\scitej{test2}\scitek{(}\scitel{so}\scitek{=}\scitel{True}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{m}\scitea{ }\scitek{=}\scitea{ }\scitel{LinModel1}\scitek{()}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{if}\scitea{ }\scitef{not}\scitea{ }\scitel{so}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{ip}\scitek{=}\scitel{ParOptProcess}\scitek{(}\scitel{m}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{else}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{ip}\scitek{=}\scitel{SeconOrderParOptProcess}\scitek{(}\scitel{m}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{I}\scitek{,}\scitea{ }\scitel{X}\scitek{,}\scitea{ }\scitel{U}\scitek{,}\scitea{ }\scitel{it}\scitek{,}\scitea{ }\scitel{\_}\scitea{ }\scitek{=}\scitea{ }\scitel{ip}\scitek{.}\scitel{optimize}\scitek{(}\scitel{m}\scitek{.}\scitel{t}\scitek{,}\scitea{ }\scitel{eps}\scitek{=}\scitec{0.001}\scitek{,}\scitea{ }\scitel{iters}\scitek{=}\scitec{2000}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scited{""}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scited{"X,{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} U,{\hspace*{1em}}{\hspace*{1em}} "}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{for}\scitea{ }\scitel{x}\scitek{,}\scitel{u}\scitea{ }\scitef{in}\scitea{ }\scitel{zip}\scitek{(}\scitel{X}\scitek{,}\scitel{U}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scitel{x}\scitek{,}\scitel{u}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scited{"Result is:"}\scitek{,}\scitea{ }\scitel{I}\scitek{,}\scitea{ }\scited{"in"}\scitek{,}\scitea{ }\scitel{it}\scitek{,}\scitea{ }\scited{"iters"}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scitel{\_}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitef{def}\scitea{ }\scitej{test2d}\scitek{(}\scitel{so}\scitek{=}\scitel{True}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{m}\scitea{ }\scitek{=}\scitea{ }\scitel{LinModel2d2du}\scitek{()}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{if}\scitea{ }\scitef{not}\scitea{ }\scitel{so}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{ip}\scitek{=}\scitel{ParOptProcess}\scitek{(}\scitel{m}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{else}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{ip}\scitek{=}\scitel{SeconOrderParOptProcess}\scitek{(}\scitel{m}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{I}\scitek{,}\scitea{ }\scitel{X}\scitek{,}\scitea{ }\scitel{U}\scitek{,}\scitea{ }\scitel{it}\scitek{,}\scitea{ }\scitel{\_}\scitea{ }\scitek{=}\scitea{ }\scitel{ip}\scitek{.}\scitel{optimize}\scitek{(}\scitel{m}\scitek{.}\scitel{t}\scitek{,}\scitea{ }\scitel{eps}\scitek{=}\scitec{0.001}\scitek{,}\scitea{ }\scitel{iters}\scitek{=}\scitec{200}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scited{""}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scited{"X,{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} U,{\hspace*{1em}}{\hspace*{1em}} "}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{for}\scitea{ }\scitel{x}\scitek{,}\scitel{u}\scitea{ }\scitef{in}\scitea{ }\scitel{zip}\scitek{(}\scitel{X}\scitek{,}\scitel{U}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scitel{x}\scitek{,}\scitel{u}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scited{"Result is:"}\scitek{,}\scitea{ }\scitel{I}\scitek{,}\scitea{ }\scited{"in"}\scitek{,}\scitea{ }\scitel{it}\scitek{,}\scitea{ }\scited{"iters"}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scitel{\_}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitef{def}\scitea{ }\scitej{test\_with\_plot}\scitek{():}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{m}\scitea{ }\scitek{=}\scitea{ }\scitel{LinModel1}\scitek{()}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{p1}\scitek{=}\scitel{ParOptProcess}\scitek{(}\scitel{m}\scitek{,}\scitea{ }\scitel{beta}\scitek{=}\scitec{75.}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{p2}\scitek{=}\scitel{SeconOrderParOptProcess}\scitek{(}\scitel{m}\scitek{,}\scitea{ }\scitel{alpha}\scitek{=}\scitec{0.001}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{iters}\scitek{=}\scitec{2000}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{eps}\scitek{=}\scitec{0.001}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scited{"First process:"}\scitek{,}\scitea{ }\scitel{end}\scitek{=}\scitee{''}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{r1}\scitek{=}\scitel{I1}\scitek{,}\scitea{ }\scitel{X1}\scitek{,}\scitea{ }\scitel{U1}\scitek{,}\scitea{ }\scitel{it1}\scitek{,}\scitea{ }\scitel{\_1}\scitea{ }\scitek{=}\scitea{ }\scitel{p1}\scitek{.}\scitel{optimize}\scitek{(}\scitel{m}\scitek{.}\scitel{t}\scitek{,}\scitea{ }\scitel{eps}\scitek{=}\scitel{eps}\scitek{,}\scitea{ }\scitel{iters}\scitek{=}\scitel{iters}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scitel{I1}\scitek{,}\scitea{ }\scited{"iters:"}\scitek{,}\scitea{ }\scitel{it1}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scited{"Second process:"}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{r2}\scitek{=}\scitel{I2}\scitek{,}\scitea{ }\scitel{X2}\scitek{,}\scitea{ }\scitel{U2}\scitek{,}\scitea{ }\scitel{it2}\scitek{,}\scitea{ }\scitel{\_2}\scitea{ }\scitek{=}\scitea{ }\scitel{p2}\scitek{.}\scitel{optimize}\scitek{(}\scitel{m}\scitek{.}\scitel{t}\scitek{,}\scitea{ }\scitel{eps}\scitek{=}\scitel{eps}\scitek{,}\scitea{ }\scitel{iters}\scitek{=}\scitel{iters}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scitel{I2}\scitek{,}\scitea{ }\scited{"iters:"}\scitek{,}\scitea{ }\scitel{it2}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{gnuplot}\scitek{(}\scited{"test\_with\_plt"}\scitek{,}\scitea{ }\scitel{r1}\scitek{,}\scitel{r2}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitef{def}\scitea{ }\scitej{test2d1}\scitek{():}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{m}\scitea{ }\scitek{=}\scitea{ }\scitel{LinModel2d2du1}\scitek{()}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{return}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{ip}\scitek{=}\scitel{ParOptProcess}\scitek{(}\scitel{m}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{I}\scitek{,}\scitea{ }\scitel{X}\scitek{,}\scitea{ }\scitel{U}\scitek{,}\scitea{ }\scitel{it}\scitek{,}\scitea{ }\scitel{\_}\scitea{ }\scitek{=}\scitea{ }\scitel{ip}\scitek{.}\scitel{optimize}\scitek{(}\scitel{m}\scitek{.}\scitel{t}\scitek{,}\scitea{ }\scitel{eps}\scitek{=}\scitec{0.001}\scitek{,}\scitea{ }\scitel{iters}\scitek{=}\scitec{2000}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scited{""}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scited{"X,{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} U,{\hspace*{1em}}{\hspace*{1em}} "}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{for}\scitea{ }\scitel{x}\scitek{,}\scitel{u}\scitea{ }\scitef{in}\scitea{ }\scitel{zip}\scitek{(}\scitel{X}\scitek{,}\scitel{U}\scitek{):}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scitel{x}\scitek{,}\scitel{u}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scited{"Result is:"}\scitek{,}\scitea{ }\scitel{I}\scitek{,}\scitea{ }\scited{"in"}\scitek{,}\scitea{ }\scitel{it}\scitek{,}\scitea{ }\scited{"iters"}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scitel{\_}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{} \\
+\scitef{if}\scitea{ }\scitel{\_\_name\_\_}\scitek{==}\scited{"\_\_main\_\_"}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{print}\scitea{ }\scitek{(}\scited{"ok"}\scitek{)}\scitea{} \\
+\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{TEST}\scitek{=}\scitee{'test\_with\_plot'}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{LOG}\scitek{=}\scitee{'restats.log'}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{if}\scitea{ }\scitel{PROFILE}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{import}\scitea{ }\scitel{cProfile}\scitek{,}\scitea{ }\scitel{pstats}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{cProfile}\scitek{.}\scitel{run}\scitek{(}\scitel{TEST}\scitek{+}\scited{"()"}\scitek{,}\scitea{ }\scitel{LOG}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{p}\scitek{=}\scitel{pstats}\scitek{.}\scitel{Stats}\scitek{(}\scitel{LOG}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{p}\scitek{.}\scitel{strip\_dirs}\scitek{().}\scitel{sort\_stats}\scitek{(}\scitee{'time'}\scitek{,}\scitee{'cumulative'}\scitek{).}\scitel{print\_stats}\scitek{()}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitef{else}\scitek{:}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{eval}\scitek{(}\scitel{TEST}\scitek{+}\scited{"()"}\scitek{)}\scitea{} \\
+\scitea{{\hspace*{1em}}{\hspace*{1em}}{\hspace*{1em}} }\scitel{quit}\scitek{()}\scitea{} \\
+\scitea{}
+} %end small
+
+\end{document}
