@@ -1,28 +1,43 @@
 \documentclass[10pt]{beamer}
-\usepackage[cp1251]{inputenc}
-\usepackage[russian]{babel}
 \usepackage{amsmath,amssymb,longtable,hhline}
 \usepackage{mathrsfs}
 \usepackage{xcolor}
 
 \usetheme{Warsaw}
 \usecolortheme{crane}
-\usefonttheme{serif}
+
+\usepackage{iftex,ifxetex}
+\ifPDFTeX
+  \usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+  \usepackage[russian]{babel}
+  \usepackage{lmodern}
+  \usefonttheme{serif}
+\else
+  \ifluatex
+    \usepackage{unicode-math}
+    \defaultfontfeatures{Ligatures=TeX,Numbers=OldStyle}
+    \setmathfont{Latin Modern Math}
+    \setsansfont{Linux Biolinum O}
+    \usefonttheme{professionalfonts}
+  \fi
+\fi
+
 \begin{document}
-\title{ПРИМЕНЕНИЕ КОМПЬЮТЕРНОЙ АЛГЕБРЫ\\
-В РЕАЛИЗАЦИИ АЛГОРИТМОВ УЛУЧШЕНИЯ}
-\author{Черкашин Е.А., Бадмацыренова С.Б.}
-\institute[ИДСТУ СО РАН, ИРНИТУ]{\normalsize  ИДСТУ СО РАН, ИРНИТУ}
-\date[2015]{<<Винеровские чтения --- 2015>>
+\title{РџР РРњР•РќР•РќРР• РљРћРњРџР¬Р®РўР•Р РќРћР™ РђР›Р“Р•Р‘Р Р«\\
+Р’ Р Р•РђР›РР—РђР¦РР РђР›Р“РћР РРўРњРћР’ РЈР›РЈР§РЁР•РќРРЇ}
+\author{Р§РµСЂРєР°С€РёРЅ Р•.Рђ., Р‘Р°РґРјР°С†С‹СЂРµРЅРѕРІР° РЎ.Р‘.}
+\institute[РР”РЎРўРЈ РЎРћ Р РђРќ, РР РќРРўРЈ]{\normalsize  РР”РЎРўРЈ РЎРћ Р РђРќ, РР РќРРўРЈ}
+\date[2015]{<<Р’РёРЅРµСЂРѕРІСЃРєРёРµ С‡С‚РµРЅРёСЏ --- 2015>>
 \\[0.3cm]
-16 -- 18 апреля 2015 г.,\\
-Иркутск
+16 -- 18 Р°РїСЂРµР»СЏ 2015 Рі.,\\
+РСЂРєСѓС‚СЃРє
 }
 %\date{\today}
 \maketitle
 
 % ----------------------------------------------------------------
-\begin{frame}{\textbf{Постановка задачи} }
+\begin{frame}{\textbf{РџРѕСЃС‚Р°РЅРѕРІРєР° Р·Р°РґР°С‡Рё} }
 \begin{block}{}
   \begin{gather}
 x(t+1)=f(t,x(t),u(t)),\quad t \in T=\{t_0,t_0+1,...,t_1\},
@@ -32,8 +47,8 @@ I(x,u)=F(x(t_1))+ \sum_{t_0}^{t_1-1}f^0(t,x(t),u(t)) \to \min.
   \label{eq103}
   \end{gather}
 \end{block}
-\begin{block}{Задача улучшения}
-  Пусть заданы управление $u^I(t)$ и соответствующее состояние $x^I(t)$. Требуется найти $x^{I\!I}(t),\; u^{I\!I}(t)$ такие, что
+\begin{block}{Р—Р°РґР°С‡Р° СѓР»СѓС‡С€РµРЅРёСЏ}
+  РџСѓСЃС‚СЊ Р·Р°РґР°РЅС‹ СѓРїСЂР°РІР»РµРЅРёРµ $u^I(t)$ Рё СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РµРµ СЃРѕСЃС‚РѕСЏРЅРёРµ $x^I(t)$. РўСЂРµР±СѓРµС‚СЃСЏ РЅР°Р№С‚Рё $x^{I\!I}(t),\; u^{I\!I}(t)$ С‚Р°РєРёРµ, С‡С‚Рѕ
 \[
 I(x^{I\!I},u^{I\!I}) < I(x^I,u^I).
 \]
@@ -42,7 +57,7 @@ I(x^{I\!I},u^{I\!I}) < I(x^I,u^I).
 % ---------------------------------------------------------
 \begin{frame}{}
 \begin{center}
-\Huge\textbf{Спасибо за внимание!}
+\Huge\textbf{РЎРїР°СЃРёР±Рѕ Р·Р° РІРЅРёРјР°РЅРёРµ!}
 \end{center}
 
 \end{frame}
