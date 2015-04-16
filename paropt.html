@@ -1,0 +1,726 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>paropt.py</title>
+<meta name="Generator" content="SciTE - www.Scintilla.org" />
+<style type="text/css">
+.S0 {
+	color: #808080;
+	font-size: 10pt;
+}
+.S1 {
+	font-family: 'Bitstream Vera Serif';
+	color: #007F00;
+	font-size: 9pt;
+}
+.S2 {
+	color: #007F7F;
+	font-size: 10pt;
+}
+.S3 {
+	font-family: 'Bitstream Vera Sans Mono';
+	color: #7F007F;
+	font-size: 9pt;
+}
+.S4 {
+	font-family: 'Bitstream Vera Sans Mono';
+	color: #7F007F;
+	font-size: 9pt;
+}
+.S5 {
+	font-weight: bold;
+	color: #00007F;
+	font-size: 10pt;
+}
+.S7 {
+	color: #7F0000;
+	font-size: 10pt;
+}
+.S8 {
+	font-weight: bold;
+	color: #0000FF;
+	font-size: 10pt;
+}
+.S9 {
+	font-weight: bold;
+	color: #007F7F;
+	font-size: 10pt;
+}
+.S10 {
+	font-weight: bold;
+	color: #000000;
+	font-size: 10pt;
+}
+span {
+	font-family: 'Bitstream Vera Sans';
+	color: #000000;
+	font-size: 9pt;
+}
+</style>
+</head>
+<body bgcolor="#FFFFFF">
+<span><span class="S5">import</span><span class="S0"> </span>math<br />
+<span class="S5">import</span><span class="S0"> </span>numpy<span class="S10">,</span><span class="S0"> </span>sympy<br />
+<span class="S5">from</span><span class="S0"> </span>numpy<span class="S0"> </span><span class="S5">import</span><span class="S0"> </span><span class="S10">*</span><br />
+<span class="S5">from</span><span class="S0"> </span>functools<span class="S0"> </span><span class="S5">import</span><span class="S0"> </span>reduce<br />
+<span class="S5">from</span><span class="S0"> </span>pprint<span class="S0"> </span><span class="S5">import</span><span class="S0"> </span>pprint<br />
+<span class="S5">import</span><span class="S0"> </span>itertools<br />
+<span class="S5">from</span><span class="S0"> </span>sympy<span class="S0"> </span><span class="S5">import</span><span class="S0"> </span>symbols<span class="S10">,</span><span class="S0"> </span>diff<span class="S10">,</span><span class="S0"> </span>Symbol<br />
+<span class="S5">import</span><span class="S0"> </span>numpy<span class="S10">.</span>linalg<br />
+<br />
+TupleType<span class="S10">=</span>type<span class="S10">((</span><span class="S2">1</span><span class="S10">,))</span><br />
+<br />
+<br />
+DEBUG<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S2">20</span><br />
+<span class="S1">#DEBUG = 0</span><br />
+PROFILE<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>False<span class="S0"> </span><span class="S1"># True</span><br />
+Ht<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S2">0.01</span><br />
+<span class="S5">import</span><span class="S0"> </span>time<br />
+<br />
+<span class="S5">def</span><span class="S0"> </span><span class="S9">constant</span><span class="S10">(</span>function<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">if</span><span class="S0"> </span>CACHING<span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">wrapper</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span><span class="S10">*</span>args<span class="S10">,</span><span class="S0"> </span><span class="S10">**</span>kwargs<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>c<span class="S10">=</span>self<span class="S10">.</span>__cache__<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">if</span><span class="S0"> </span>function<span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>c<span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>c<span class="S10">[</span>function<span class="S10">]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">else</span><span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>rv<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>function<span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span><span class="S10">*</span>args<span class="S10">,</span><span class="S0"> </span><span class="S10">**</span>kwargs<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>c<span class="S10">[</span>function<span class="S10">]</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>rv<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>rv<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>wrapper<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">else</span><span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>function<br />
+<br />
+<span class="S5">def</span><span class="S0"> </span><span class="S9">compile_method</span><span class="S10">(</span>name<span class="S10">,</span><span class="S0"> </span>f<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>s<span class="S10">=</span><span class="S7">"""</span><br />
+<span class="S7">def %s(self, t, x, u):</span><br />
+<span class="S7">&nbsp;&nbsp;&nbsp;&nbsp;return %s</span><br />
+<span class="S7">&nbsp;&nbsp;&nbsp;&nbsp;"""</span><span class="S0"> </span><span class="S10">%</span><span class="S0"> </span><span class="S10">(</span>name<span class="S10">,</span><span class="S0"> </span>f<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>f<span class="S10">=</span>compile<span class="S10">(</span>s<span class="S10">,</span><span class="S0"> </span><span class="S3">"&lt;diffunctions&gt;"</span><span class="S10">,</span><span class="S0"> </span><span class="S4">'exec'</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>f<span class="S10">=</span><span class="S5">exec</span><span class="S10">(</span>f<span class="S10">)</span><br />
+<br />
+<span class="S5">def</span><span class="S0"> </span><span class="S9">_vcomp</span><span class="S10">(</span>exp<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>sexp<span class="S10">=</span><span class="S3">"array(%s)"</span><span class="S0"> </span><span class="S10">%</span><span class="S0"> </span>str<span class="S10">(</span>exp<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>compile<span class="S10">(</span>sexp<span class="S10">,</span><span class="S0"> </span><span class="S3">"&lt;-%s-&gt;"</span><span class="S0"> </span><span class="S10">%</span><span class="S0"> </span>sexp<span class="S10">,</span><span class="S0"> </span><span class="S3">"eval"</span><span class="S10">)</span><br />
+<br />
+<span class="S5">def</span><span class="S0"> </span><span class="S9">_comp</span><span class="S10">(</span>exp<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>sexp<span class="S10">=</span>str<span class="S10">(</span>exp<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>compile<span class="S10">(</span>sexp<span class="S10">,</span><span class="S0"> </span><span class="S3">"&lt;-%s-&gt;"</span><span class="S0"> </span><span class="S10">%</span><span class="S0"> </span>sexp<span class="S10">,</span><span class="S0"> </span><span class="S3">"eval"</span><span class="S10">)</span><br />
+<br />
+<span class="S5">def</span><span class="S0"> </span><span class="S9">_eprep</span><span class="S10">(</span>t<span class="S10">,</span><span class="S0"> </span>xc<span class="S10">,</span><span class="S0"> </span>uc<span class="S10">,</span><span class="S0"> </span>V<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>g<span class="S10">={</span><span class="S4">'t'</span><span class="S10">:</span>t<span class="S10">,</span><span class="S0"> </span><span class="S4">'array'</span><span class="S10">:</span>array<span class="S10">}</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">for</span><span class="S0"> </span>i<span class="S10">,</span><span class="S0"> </span>x<span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>enumerate<span class="S10">(</span>V<span class="S10">.</span>x<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>g<span class="S10">.</span>setdefault<span class="S10">(</span>str<span class="S10">(</span>x<span class="S10">),</span>xc<span class="S10">[</span>i<span class="S10">])</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">for</span><span class="S0"> </span>i<span class="S10">,</span><span class="S0"> </span>u<span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>enumerate<span class="S10">(</span>V<span class="S10">.</span>u<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>g<span class="S10">.</span>setdefault<span class="S10">(</span>str<span class="S10">(</span>u<span class="S10">),</span>uc<span class="S10">[</span>i<span class="S10">])</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>g<br />
+<br />
+<span class="S5">def</span><span class="S0"> </span><span class="S9">_eval</span><span class="S10">(</span>f<span class="S10">,</span><span class="S0"> </span>t<span class="S10">,</span><span class="S0"> </span>xc<span class="S10">,</span><span class="S0"> </span>uc<span class="S10">,</span><span class="S0"> </span>V<span class="S10">,</span><span class="S0"> </span>g<span class="S10">=</span>None<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">if</span><span class="S0"> </span>g<span class="S0"> </span><span class="S10">==</span><span class="S0"> </span>None<span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>g<span class="S10">=</span>_eprep<span class="S10">(</span>t<span class="S10">,</span><span class="S0"> </span>xc<span class="S10">,</span><span class="S0"> </span>uc<span class="S10">,</span><span class="S0"> </span>V<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>rc<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>eval<span class="S10">(</span>f<span class="S10">,</span><span class="S0"> </span>g<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>rc<br />
+<br />
+<span class="S5">def</span><span class="S0"> </span><span class="S9">_rdiff</span><span class="S10">(</span>F<span class="S10">,</span><span class="S0"> </span>V<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">if</span><span class="S0"> </span>type<span class="S10">(</span>F<span class="S10">)</span><span class="S0"> </span><span class="S10">==</span><span class="S0"> </span>TupleType<span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>tuple<span class="S10">([</span>_rdiff<span class="S10">(</span>f<span class="S10">,</span><span class="S0"> </span>V<span class="S10">)</span><span class="S0"> </span><span class="S5">for</span><span class="S0"> </span>f<span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>F<span class="S10">])</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>tuple<span class="S10">([</span>diff<span class="S10">(</span>F<span class="S10">,</span>v<span class="S10">)</span><span class="S0"> </span><span class="S5">for</span><span class="S0"> </span>v<span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>V<span class="S10">])</span><br />
+<br />
+<span class="S5">def</span><span class="S0"> </span><span class="S9">_teval</span><span class="S10">(</span>d<span class="S10">,</span><span class="S0"> </span>T<span class="S10">,</span>X<span class="S10">,</span>U<span class="S10">,</span><span class="S0"> </span>V<span class="S10">):</span><span class="S0"> </span><span class="S1"># d is a code of function to be evaluated at all T time instance.</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>rc<span class="S10">=[]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">for</span><span class="S0"> </span>t<span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>T<span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>rc<span class="S10">.</span>append<span class="S10">(</span>_eval<span class="S10">(</span>d<span class="S10">,</span><span class="S0"> </span>t<span class="S10">,</span><span class="S0"> </span>X<span class="S10">[</span>t<span class="S10">],</span><span class="S0"> </span>U<span class="S10">[</span>t<span class="S10">],</span><span class="S0"> </span>V<span class="S10">))</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>array<span class="S10">(</span>rc<span class="S10">)</span><br />
+<br />
+<span class="S5">class</span><span class="S0"> </span><span class="S8">Helper</span><span class="S10">():</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">pass</span><br />
+<br />
+<span class="S5">class</span><span class="S0"> </span><span class="S8">ParOptModel</span><span class="S10">(</span>object<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S7">"""Parametric Optimised model class.</span><br />
+<span class="S7">&nbsp;&nbsp;&nbsp;&nbsp;See docs for individual methods on usage ways.</span><br />
+<span class="S7">&nbsp;&nbsp;&nbsp;&nbsp;"""</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">__init__</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>X0<span class="S10">,</span><span class="S0"> </span>N<span class="S10">,</span><span class="S0"> </span>M<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>N<span class="S10">=</span>N<span class="S0"> &nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1"># Dimention of x</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>M<span class="S10">=</span>M<span class="S0"> &nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1"># Dimention of u</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>X0<span class="S10">=</span>X0<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>v<span class="S10">=</span>Helper<span class="S10">()</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>v<span class="S10">.</span>t<span class="S10">=</span>Symbol<span class="S10">(</span><span class="S4">'t'</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>a<span class="S10">=[]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">for</span><span class="S0"> </span>i<span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>range<span class="S10">(</span>N<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>a<span class="S10">.</span>append<span class="S10">(</span>Symbol<span class="S10">(</span><span class="S4">'x%s'</span><span class="S0"> </span><span class="S10">%</span><span class="S0"> </span>i<span class="S10">))</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>v<span class="S10">.</span>x<span class="S10">=</span>tuple<span class="S10">(</span>a<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>a<span class="S10">=[]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">for</span><span class="S0"> </span>i<span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>range<span class="S10">(</span>M<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>a<span class="S10">.</span>append<span class="S10">(</span>Symbol<span class="S10">(</span><span class="S4">'u%s'</span><span class="S0"> </span><span class="S10">%</span><span class="S0"> </span>i<span class="S10">))</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>v<span class="S10">.</span>u<span class="S10">=</span>tuple<span class="S10">(</span>a<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>v<span class="S10">,</span><span class="S0"> </span>t<span class="S10">,</span><span class="S0"> </span>x<span class="S10">,</span><span class="S0"> </span>u<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>self<span class="S10">.</span>v<span class="S10">,</span><span class="S0"> </span>self<span class="S10">.</span>v<span class="S10">.</span>t<span class="S10">,</span><span class="S0"> </span>self<span class="S10">.</span>v<span class="S10">.</span>x<span class="S10">,</span><span class="S0"> </span>self<span class="S10">.</span>v<span class="S10">.</span>u<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>v<span class="S10">.</span>f<span class="S10">=</span>self<span class="S10">.</span>f<span class="S10">(</span>t<span class="S10">,</span><span class="S0"> </span>x<span class="S10">,</span><span class="S0"> </span>u<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>v<span class="S10">.</span>f0<span class="S10">=</span>self<span class="S10">.</span>f0<span class="S10">(</span>t<span class="S10">,</span><span class="S0"> </span>x<span class="S10">,</span><span class="S0"> </span>u<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>v<span class="S10">.</span>F<span class="S10">=</span>self<span class="S10">.</span>F<span class="S10">(</span>x<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>c<span class="S10">=</span>Helper<span class="S10">()</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>c<span class="S10">=</span>self<span class="S10">.</span>c<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>c<span class="S10">.</span>fn<span class="S10">={}</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>v<span class="S10">.</span>fn<span class="S10">={}</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>v<span class="S10">.</span>fn<span class="S10">[(</span>v<span class="S10">.</span>f<span class="S10">,)]=</span>v<span class="S10">.</span>f<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>v<span class="S10">.</span>fn<span class="S10">[(</span>v<span class="S10">.</span>f0<span class="S10">,)]=</span>v<span class="S10">.</span>f0<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>v<span class="S10">.</span>fn<span class="S10">[(</span>v<span class="S10">.</span>F<span class="S10">,)]=</span>v<span class="S10">.</span>F<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>__cache__<span class="S10">={}</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">I</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>X<span class="S10">,</span><span class="S0"> </span>U<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">_add</span><span class="S10">(</span>acc<span class="S10">,</span><span class="S0"> </span>t<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>acc<span class="S0"> </span><span class="S10">+</span><span class="S0"> </span>self<span class="S10">.</span>f0<span class="S10">(</span>t<span class="S10">,</span><span class="S0"> </span>X<span class="S10">[</span>t<span class="S10">],</span><span class="S0"> </span>U<span class="S10">[</span>t<span class="S10">])</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>reduce<span class="S10">(</span>_add<span class="S10">,</span><span class="S0"> </span>range<span class="S10">(</span>len<span class="S10">(</span>X<span class="S10">)-</span><span class="S2">1</span><span class="S10">),</span><span class="S0"> </span>self<span class="S10">.</span>F<span class="S10">(</span>X<span class="S10">[-</span><span class="S2">1</span><span class="S10">]))</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">F</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>x<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S7">"""x - ending state of a trajectory</span><br />
+<span class="S7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"""</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">raise</span><span class="S0"> </span>RuntimeError<span class="S10">(</span><span class="S3">"should be implemented by subclass"</span><span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">f</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>t<span class="S10">,</span><span class="S0"> </span>x0<span class="S10">,</span><span class="S0"> </span>U<span class="S10">,</span><span class="S0"> </span>dt<span class="S10">=</span><span class="S2">1</span><span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">raise</span><span class="S0"> </span>RuntimeError<span class="S10">(</span><span class="S3">"should be implemented by subclass"</span><span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">f0</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>t<span class="S10">,</span><span class="S0"> </span>x<span class="S10">,</span><span class="S0"> </span>u<span class="S10">,</span><span class="S0"> </span>dt<span class="S10">=</span><span class="S2">1</span><span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">raise</span><span class="S0"> </span>RuntimeError<span class="S10">(</span><span class="S3">"should be implemented by subclass"</span><span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">Psi</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>t<span class="S10">,</span><span class="S0"> </span>X<span class="S10">,</span><span class="S0"> </span>U<span class="S10">,</span><span class="S0"> </span>alpha<span class="S10">):</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>v<span class="S10">=</span>self<span class="S10">.</span>v<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>psie<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S10">-</span>self<span class="S10">.</span>fun<span class="S10">((</span>v<span class="S10">.</span>F<span class="S10">,</span>v<span class="S10">.</span>x<span class="S10">),</span><span class="S0"> </span>None<span class="S10">,</span><span class="S0"> </span>X<span class="S10">[-</span><span class="S2">1</span><span class="S10">],</span><span class="S0"> </span>None<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>psi<span class="S10">=[</span>psie<span class="S10">]</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1">#for the rest of the interval</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>X<span class="S10">=</span>X<span class="S10">[:-</span><span class="S2">1</span><span class="S10">]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>t<span class="S10">=</span>t<span class="S10">[:-</span><span class="S2">1</span><span class="S10">]</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>_f0_x<span class="S10">=</span>self<span class="S10">.</span>fun<span class="S10">((</span>v<span class="S10">.</span>f0<span class="S10">,</span>v<span class="S10">.</span>x<span class="S10">),</span><span class="S0"> </span>t<span class="S10">,</span><span class="S0"> </span>X<span class="S10">,</span><span class="S0"> </span>U<span class="S10">)</span><span class="S0"> </span><span class="S1"># last element is useless</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>_f_x<span class="S0"> </span><span class="S10">=</span>self<span class="S10">.</span>fun<span class="S10">((</span>v<span class="S10">.</span>f<span class="S10">,</span>v<span class="S10">.</span>x<span class="S10">),</span><span class="S0"> </span>t<span class="S10">,</span><span class="S0"> </span>X<span class="S10">,</span><span class="S0"> </span>U<span class="S10">)</span><span class="S0"> </span><span class="S1"># last element is useless</span><br />
+<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>j<span class="S10">=</span>len<span class="S10">(</span>t<span class="S10">)-</span><span class="S2">1</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>p<span class="S10">=</span>psie<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">while</span><span class="S0"> </span>j<span class="S10">&gt;=</span><span class="S2">1</span><span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>i<span class="S10">=</span>t<span class="S10">[</span>j<span class="S10">]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>pp<span class="S10">=</span>p<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>_f_x_i<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>_f_x<span class="S10">[</span>i<span class="S10">]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1">#_f0_x_t = transpose(_f0_x[i])</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>pn<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>dot<span class="S10">(</span>pp<span class="S10">,</span>_f_x_i<span class="S10">)</span><span class="S0"> </span><span class="S10">-</span><span class="S0"> </span>alpha<span class="S10">*</span>_f0_x<span class="S10">[</span>i<span class="S10">]</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1">#if j==1:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1"># &nbsp;&nbsp;&nbsp;print (_f_x_t, pp, _f0_x_t, "=&gt;", pn )</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1"># &nbsp;&nbsp;&nbsp;print (self.v[[0.4*x0], [0.4*x1]].f0_x)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>psi<span class="S10">.</span>append<span class="S10">(</span>pn<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>p<span class="S10">=</span>pn<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>j<span class="S10">-=</span><span class="S2">1</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1"># ----</span><br />
+<br />
+<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>psi<span class="S10">=</span>array<span class="S10">(</span>psi<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>psi<span class="S10">[::-</span><span class="S2">1</span><span class="S10">]</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">H_u</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>t<span class="S10">,</span><span class="S0"> </span>X<span class="S10">,</span><span class="S0"> </span>U<span class="S10">,</span><span class="S0"> </span>Psi<span class="S10">):</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>XX<span class="S10">=</span>X<span class="S10">[:-</span><span class="S2">1</span><span class="S10">]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>tt<span class="S10">=</span>t<span class="S10">[:-</span><span class="S2">1</span><span class="S10">]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>v<span class="S10">=</span>self<span class="S10">.</span>v<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>_f0_u<span class="S10">=</span>self<span class="S10">.</span>fun<span class="S10">((</span>v<span class="S10">.</span>f0<span class="S10">,</span>v<span class="S10">.</span>u<span class="S10">),</span><span class="S0"> </span>tt<span class="S10">,</span><span class="S0"> </span>XX<span class="S10">,</span><span class="S0"> </span>U<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>_f_u<span class="S0"> </span><span class="S10">=</span>self<span class="S10">.</span>fun<span class="S10">((</span>v<span class="S10">.</span>f<span class="S10">,</span>v<span class="S10">.</span>u<span class="S10">),</span><span class="S0"> </span>tt<span class="S10">,</span><span class="S0"> </span>XX<span class="S10">,</span><span class="S0"> </span>U<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>p<span class="S10">=</span>Psi<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">if</span><span class="S0"> </span>DEBUG<span class="S10">&gt;</span><span class="S2">10</span><span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span><span class="S3">"f_u:"</span><span class="S10">,</span><span class="S0"> </span>len<span class="S10">(</span>_f_u<span class="S10">))</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span><span class="S3">"psi:"</span><span class="S10">,</span><span class="S0"> </span>len<span class="S10">(</span>p<span class="S10">))</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span><span class="S3">"f0_u"</span><span class="S10">,</span><span class="S0"> </span>len<span class="S10">(</span>_f0_u<span class="S10">))</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>_s<span class="S10">=</span>array<span class="S10">([</span>dot<span class="S10">(</span>p<span class="S10">,</span>fu<span class="S10">)</span><span class="S0"> </span><span class="S5">for</span><span class="S0"> </span>p<span class="S10">,</span>fu<span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>zip<span class="S10">(</span>Psi<span class="S10">,</span>_f_u<span class="S10">)])</span><span class="S0"> </span><span class="S1"># Psi[i] is shifted left to 1 step.</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1">#_s1=dot(f_u, Psi)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1">#_s=dot(Psi,_f_u)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>_s<span class="S0"> </span><span class="S10">-</span><span class="S0"> </span>_f0_u<span class="S0"> </span><span class="S1"># FIXME Check dot operation.</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">start_control</span><span class="S10">(</span>self<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">raise</span><span class="S0"> </span>RuntimeError<span class="S10">(</span><span class="S3">"should be implemented by subclass"</span><span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1">#------------ These functions must be defined for Second Order Improvement Process -----</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">krot_d_dd</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>t<span class="S10">,</span><span class="S0"> </span>X<span class="S10">,</span><span class="S0"> </span>U<span class="S10">,</span><span class="S0"> </span>alpha<span class="S10">=</span><span class="S2">1.0</span><span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Psi<span class="S10">=</span>self<span class="S10">.</span>Psi<span class="S10">(</span>t<span class="S10">,</span><span class="S0"> </span>X<span class="S10">,</span><span class="S0"> </span>U<span class="S10">,</span><span class="S0"> </span>alpha<span class="S10">=</span>alpha<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>v<span class="S10">=</span>self<span class="S10">.</span>v<br />
+<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>sige<span class="S0"> &nbsp;</span><span class="S10">=</span><span class="S0"> </span><span class="S10">-</span>self<span class="S10">.</span>fun<span class="S10">((</span>v<span class="S10">.</span>F<span class="S10">,</span>v<span class="S10">.</span>x<span class="S10">,</span>v<span class="S10">.</span>x<span class="S10">),</span><span class="S0"> </span><span class="S2">0</span><span class="S10">,</span><span class="S0"> </span>X<span class="S10">[-</span><span class="S2">1</span><span class="S10">],</span><span class="S0"> </span><span class="S2">0</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Sig<span class="S10">=[</span>sige<span class="S10">]</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1">#for the rest of the interval</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>X<span class="S10">=</span>X<span class="S10">[:-</span><span class="S2">1</span><span class="S10">]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>t<span class="S10">=</span>t<span class="S10">[:-</span><span class="S2">1</span><span class="S10">]</span><br />
+<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>H_x_x<span class="S10">=</span>self<span class="S10">.</span>H<span class="S10">((</span>v<span class="S10">.</span>x<span class="S10">,</span>v<span class="S10">.</span>x<span class="S10">),</span><span class="S0"> </span>t<span class="S10">,</span><span class="S0"> </span>X<span class="S10">,</span>U<span class="S10">,</span><span class="S0"> </span>Psi<span class="S10">,</span><span class="S0"> </span>alpha<span class="S10">=</span>alpha<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>_f0_x<span class="S10">=</span>self<span class="S10">.</span>fun<span class="S10">((</span>v<span class="S10">.</span>f0<span class="S10">,</span><span class="S0"> </span>v<span class="S10">.</span>x<span class="S10">),</span><span class="S0"> </span>t<span class="S10">,</span>X<span class="S10">,</span>U<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>_f_x<span class="S0"> </span><span class="S10">=</span>self<span class="S10">.</span>fun<span class="S10">((</span>v<span class="S10">.</span>f<span class="S10">,</span><span class="S0"> </span>v<span class="S10">.</span>x<span class="S10">),</span><span class="S0"> </span>t<span class="S10">,</span><span class="S0"> </span>X<span class="S10">,</span><span class="S0"> </span>U<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>_f0_x_x<span class="S10">=</span>self<span class="S10">.</span>fun<span class="S10">((</span>v<span class="S10">.</span>f0<span class="S10">,</span>v<span class="S10">.</span>x<span class="S10">,</span>v<span class="S10">.</span>x<span class="S10">),</span><span class="S0"> </span>t<span class="S10">,</span><span class="S0"> </span>X<span class="S10">,</span><span class="S0"> </span>U<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>_f_x_x<span class="S10">=</span>self<span class="S10">.</span>fun<span class="S10">((</span>v<span class="S10">.</span>f<span class="S10">,</span>v<span class="S10">.</span>x<span class="S10">,</span>v<span class="S10">.</span>x<span class="S10">),</span><span class="S0"> </span>t<span class="S10">,</span><span class="S0"> </span>X<span class="S10">,</span><span class="S0"> </span>U<span class="S10">)</span><br />
+<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>j<span class="S10">=</span>len<span class="S10">(</span>t<span class="S10">)-</span><span class="S2">1</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>sp<span class="S10">=</span>sige<br />
+<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">while</span><span class="S0"> </span>j<span class="S10">&gt;=</span><span class="S2">1</span><span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>i<span class="S10">=</span>t<span class="S10">[</span>j<span class="S10">]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>_f_x_i<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>_f_x<span class="S10">[</span>i<span class="S10">]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>_f_x_t<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>transpose<span class="S10">(</span>_f_x_i<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>pn<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>Psi<span class="S10">[</span>i<span class="S10">]</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>H_x_x_i<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>H_x_x<span class="S10">[</span>i<span class="S10">]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>sn<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>dot<span class="S10">(</span>dot<span class="S10">(</span>sp<span class="S10">,</span>_f_x_i<span class="S10">),</span><span class="S0"> </span>_f_x_i<span class="S10">)</span><span class="S0"> </span><span class="S10">+</span><span class="S0"> </span>H_x_x_i<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Sig<span class="S10">.</span>append<span class="S10">(</span>sn<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>sp<span class="S10">=</span>sn<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>j<span class="S10">-=</span><span class="S2">1</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Sig<span class="S10">=</span>array<span class="S10">(</span>Sig<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>Psi<span class="S10">,</span><span class="S0"> </span>Sig<span class="S10">[::-</span><span class="S2">1</span><span class="S10">]</span><span class="S0"> </span><span class="S1"># Really it is dPsidalpha</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1"># Really it is dSigmadalpha</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">fun</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>vars<span class="S10">,</span><span class="S0"> </span>T<span class="S10">,</span><span class="S0"> </span>X<span class="S10">,</span><span class="S0"> </span>U<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>code<span class="S10">=</span>self<span class="S10">.</span>get_code_for<span class="S10">(</span>vars<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">if</span><span class="S0"> </span>vars<span class="S10">[</span><span class="S2">0</span><span class="S10">]==</span>self<span class="S10">.</span>v<span class="S10">.</span>F<span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>eval<span class="S10">(</span>code<span class="S10">,</span><span class="S0"> </span><span class="S10">{</span><span class="S4">'x'</span><span class="S10">:</span>X<span class="S10">,</span><span class="S0"> </span><span class="S4">'array'</span><span class="S10">:</span>array<span class="S10">})</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">else</span><span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>_teval<span class="S10">(</span>code<span class="S10">,</span><span class="S0"> </span>T<span class="S10">,</span><span class="S0"> </span>X<span class="S10">,</span><span class="S0"> </span>U<span class="S10">,</span><span class="S0"> </span>self<span class="S10">.</span>v<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">get_code_for</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>vars<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">if</span><span class="S0"> </span><span class="S5">not</span><span class="S0"> </span>vars<span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">raise</span><span class="S0"> </span>ValueError<span class="S10">(</span><span class="S3">"no variables"</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">try</span><span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>self<span class="S10">.</span>c<span class="S10">.</span>fn<span class="S10">[</span>vars<span class="S10">]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">except</span><span class="S0"> </span>KeyError<span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">pass</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">try</span><span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>c<span class="S10">=</span>self<span class="S10">.</span>c<span class="S10">.</span>fn<span class="S10">[</span>vars<span class="S10">]=</span>_vcomp<span class="S10">(</span>self<span class="S10">.</span>v<span class="S10">.</span>fn<span class="S10">[</span>vars<span class="S10">])</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>c<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">except</span><span class="S0"> </span>KeyError<span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">pass</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>vp<span class="S10">=</span>vars<span class="S10">[:-</span><span class="S2">1</span><span class="S10">]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>cp<span class="S10">=</span>self<span class="S10">.</span>get_code_for<span class="S10">(</span>vp<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>fp<span class="S10">=</span>self<span class="S10">.</span>v<span class="S10">.</span>fn<span class="S10">[</span>vp<span class="S10">]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>df<span class="S10">=</span>self<span class="S10">.</span>v<span class="S10">.</span>fn<span class="S10">[</span>vars<span class="S10">]=</span>_rdiff<span class="S10">(</span>fp<span class="S10">,</span><span class="S0"> </span>vars<span class="S10">[-</span><span class="S2">1</span><span class="S10">])</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>c<span class="S10">=</span>self<span class="S10">.</span>c<span class="S10">.</span>fn<span class="S10">[</span>vars<span class="S10">]=</span>_vcomp<span class="S10">(</span>df<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">if</span><span class="S0"> </span>DEBUG<span class="S10">&gt;</span><span class="S2">1</span><span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span><span class="S3">"A derivative needed for:\n\t"</span><span class="S10">,</span><span class="S0"> </span>vars<span class="S10">,</span><span class="S0"> </span><span class="S3">"\nand it is as follows:\n\t"</span><span class="S10">,</span><span class="S0"> </span>df<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>c<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">H</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>vars<span class="S10">,</span><span class="S0"> </span>T<span class="S10">,</span><span class="S0"> </span>X<span class="S10">,</span><span class="S0"> </span>U<span class="S10">,</span><span class="S0"> </span>Psi<span class="S10">,</span><span class="S0"> </span>alpha<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S2">1.0</span><span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1"># calculate H_v_v...(t.</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1"># print ("Evaluating H:", vars, len(T), len(X), len(U), len(Psi))</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">assert</span><span class="S0"> </span>len<span class="S10">(</span>vars<span class="S10">)&gt;</span><span class="S2">0</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">assert</span><span class="S0"> </span>len<span class="S10">(</span>T<span class="S10">)</span><span class="S0"> </span><span class="S10">==</span><span class="S0"> </span>len<span class="S10">(</span>X<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">assert</span><span class="S0"> </span>len<span class="S10">(</span>X<span class="S10">)==</span>len<span class="S10">(</span>U<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">assert</span><span class="S0"> </span>len<span class="S10">(</span>U<span class="S10">)==</span>len<span class="S10">(</span>Psi<span class="S10">)</span><br />
+<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>f<span class="S10">=</span>self<span class="S10">.</span>fun<span class="S10">((</span>self<span class="S10">.</span>v<span class="S10">.</span>f<span class="S10">,)+</span>vars<span class="S10">,</span><span class="S0"> </span>T<span class="S10">,</span><span class="S0"> </span>X<span class="S10">,</span><span class="S0"> </span>U<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>f0<span class="S10">=-</span>self<span class="S10">.</span>fun<span class="S10">((</span>self<span class="S10">.</span>v<span class="S10">.</span>f0<span class="S10">,)+</span>vars<span class="S10">,</span><span class="S0"> </span>T<span class="S10">,</span><span class="S0"> </span>X<span class="S10">,</span><span class="S0"> </span>U<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>H<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>alpha<span class="S0"> </span><span class="S10">*</span><span class="S0"> </span>f0<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">for</span><span class="S0"> </span>psi<span class="S10">,</span>_H<span class="S10">,</span>_f<span class="S10">,</span>i<span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>zip<span class="S10">(</span>Psi<span class="S10">,</span><span class="S0"> </span>H<span class="S10">,</span><span class="S0"> </span>f<span class="S10">,</span><span class="S0"> </span>range<span class="S10">(</span>len<span class="S10">(</span>H<span class="S10">))):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>_H<span class="S0"> </span><span class="S10">+=</span><span class="S0"> </span>dot<span class="S10">(</span>psi<span class="S10">,</span>_f<span class="S10">)</span><span class="S0"> </span><span class="S1"># !</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>H<span class="S10">[</span>i<span class="S10">]=</span>_H<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>H<br />
+<br />
+<span class="S5">class</span><span class="S0"> </span><span class="S8">ParOptProcess</span><span class="S10">(</span>object<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S7">"""This calss corresponds to a optimizational model.</span><br />
+<span class="S7">&nbsp;&nbsp;&nbsp;&nbsp;"""</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">__init__</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>model<span class="S10">,</span><span class="S0"> </span>alpha<span class="S10">=</span><span class="S2">1.0</span><span class="S10">,</span><span class="S0"> </span>beta<span class="S10">=</span><span class="S2">1.0</span><span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S7">"""</span><br />
+<span class="S7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"""</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>model<span class="S10">=</span>model<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>alpha<span class="S10">=</span>alpha<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>beta<span class="S10">=</span>beta<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">optimize</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>t<span class="S10">,</span><span class="S0"> </span>eps<span class="S10">=</span><span class="S2">0.001</span><span class="S10">,</span><span class="S0"> </span>iters<span class="S10">=</span><span class="S2">1000</span><span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Up<span class="S10">=</span>self<span class="S10">.</span>model<span class="S10">.</span>start_control<span class="S10">()</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Xp<span class="S10">=</span>self<span class="S10">.</span>trajectory<span class="S10">(</span>Up<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Ip<span class="S10">=</span>self<span class="S10">.</span>model<span class="S10">.</span>I<span class="S10">(</span>Xp<span class="S10">,</span>Up<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>it<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S2">1</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">while</span><span class="S0"> </span>True<span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>beta<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>self<span class="S10">.</span>beta<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Psi<span class="S10">=</span>self<span class="S10">.</span>model<span class="S10">.</span>Psi<span class="S10">(</span>t<span class="S10">,</span><span class="S0"> </span>Xp<span class="S10">,</span><span class="S0"> </span>Up<span class="S10">,</span><span class="S0"> </span>self<span class="S10">.</span>alpha<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>_H_u<span class="S10">=</span>self<span class="S10">.</span>model<span class="S10">.</span>H<span class="S10">((</span>self<span class="S10">.</span>model<span class="S10">.</span>v<span class="S10">.</span>u<span class="S10">,),</span><span class="S0"> </span>t<span class="S10">[:-</span><span class="S2">1</span><span class="S10">],</span><span class="S0"> </span>Xp<span class="S10">[:-</span><span class="S2">1</span><span class="S10">],</span><span class="S0"> </span>Up<span class="S10">,</span><span class="S0"> </span>Psi<span class="S10">,</span><span class="S0"> </span>alpha<span class="S10">=</span><span class="S2">1.0</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">while</span><span class="S0"> </span>True<span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span>it<span class="S10">,</span><span class="S0"> </span>beta<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>_dU<span class="S10">=</span>_H_u<span class="S10">*</span>beta<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Un<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>Up<span class="S0"> </span><span class="S10">+</span><span class="S0"> </span>_dU<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Xn<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>self<span class="S10">.</span>trajectory<span class="S10">(</span>Un<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>In<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>self<span class="S10">.</span>model<span class="S10">.</span>I<span class="S10">(</span>Xn<span class="S10">,</span><span class="S0"> </span>Un<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>dI<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>Ip<span class="S10">-</span>In<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">if</span><span class="S0"> </span>DEBUG<span class="S10">&gt;</span><span class="S2">5</span><span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span><span class="S3">"DI:"</span><span class="S10">,</span><span class="S0"> </span>dI<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">if</span><span class="S0"> </span>DEBUG<span class="S10">&gt;</span><span class="S2">6</span><span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span><span class="S3">"Xn:"</span><span class="S10">,</span><span class="S0"> </span>Xn<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span><span class="S3">"Un:"</span><span class="S10">,</span><span class="S0"> </span>Un<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">if</span><span class="S0"> </span>abs<span class="S10">(</span>dI<span class="S10">)&lt;</span>eps<span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>In<span class="S10">,</span><span class="S0"> </span>Xn<span class="S10">,</span><span class="S0"> </span>Un<span class="S10">,</span><span class="S0"> </span>it<span class="S10">,</span><span class="S0"> </span><span class="S3">"Opt"</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">if</span><span class="S0"> </span>iters<span class="S10">&lt;=</span><span class="S2">0</span><span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>In<span class="S10">,</span><span class="S0"> </span>Xn<span class="S10">,</span><span class="S0"> </span>Un<span class="S10">,</span><span class="S0"> </span>it<span class="S10">,</span><span class="S0"> </span><span class="S3">"Nonoptimal"</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>iters<span class="S10">-=</span><span class="S2">1</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>it<span class="S10">+=</span><span class="S2">1</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">if</span><span class="S0"> </span>In<span class="S10">&gt;=</span>Ip<span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>beta<span class="S10">/=</span><span class="S2">2</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">continue</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">else</span><span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Xp<span class="S10">,</span><span class="S0"> </span>Up<span class="S10">,</span><span class="S0"> </span>Ip<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>Xn<span class="S10">,</span><span class="S0"> </span>Un<span class="S10">,</span><span class="S0"> </span>In<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">break</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">raise</span><span class="S0"> </span>RuntimeError<span class="S10">(</span><span class="S3">"this should be not reached"</span><span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">trajectory</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>U<span class="S10">):</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>x0<span class="S10">=</span>self<span class="S10">.</span>model<span class="S10">.</span>X0<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>X<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S10">[</span>x0<span class="S10">]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">for</span><span class="S0"> </span>t<span class="S10">,</span><span class="S0"> </span>u<span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>enumerate<span class="S10">(</span>U<span class="S10">):</span><span class="S0"> </span><span class="S1"># (0, u0), (1, u1)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>xn<span class="S10">=</span>self<span class="S10">.</span>model<span class="S10">.</span>f<span class="S10">(</span>t<span class="S10">,</span><span class="S0"> </span>X<span class="S10">[</span>t<span class="S10">],</span><span class="S0"> </span>u<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>X<span class="S10">.</span>append<span class="S10">(</span>xn<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>array<span class="S10">(</span>X<span class="S10">)</span><br />
+<br />
+<span class="S5">class</span><span class="S0"> </span><span class="S8">SeconOrderParOptProcess</span><span class="S10">(</span>ParOptProcess<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S7">"""A second order parametric optimization process</span><br />
+<span class="S7">&nbsp;&nbsp;&nbsp;&nbsp;"""</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">__init__</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>model<span class="S10">,</span><span class="S0"> </span><span class="S10">**</span>kwargs<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>X0<span class="S10">=</span>array<span class="S10">([</span><span class="S2">0.0</span><span class="S10">,</span><span class="S0"> </span><span class="S2">0.0</span><span class="S10">])</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>t<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>arange<span class="S10">(</span><span class="S2">2</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>ParOptProcess<span class="S10">.</span>__init__<span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>model<span class="S10">,</span><span class="S0"> </span><span class="S10">**</span>kwargs<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">optimize</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>t<span class="S10">,</span><span class="S0"> </span>eps<span class="S10">=</span><span class="S2">0.001</span><span class="S10">,</span><span class="S0"> </span>iters<span class="S10">=</span><span class="S2">1000</span><span class="S10">,</span><span class="S0"> </span>alpha<span class="S10">=</span>None<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Up<span class="S10">=</span>self<span class="S10">.</span>model<span class="S10">.</span>start_control<span class="S10">()</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Xp<span class="S10">=</span>self<span class="S10">.</span>trajectory<span class="S10">(</span>Up<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Ip<span class="S10">=</span>self<span class="S10">.</span>model<span class="S10">.</span>I<span class="S10">(</span>Xp<span class="S10">,</span>Up<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>v<span class="S10">=</span>self<span class="S10">.</span>model<span class="S10">.</span>v<br />
+<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>it<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S2">1</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>tc<span class="S0"> </span><span class="S10">=</span>t<span class="S10">[:-</span><span class="S2">1</span><span class="S10">]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Xpc<span class="S10">=</span>Xp<span class="S10">[:-</span><span class="S2">1</span><span class="S10">]</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>E<span class="S10">=</span>numpy<span class="S10">.</span>identity<span class="S10">(</span>self<span class="S10">.</span>model<span class="S10">.</span>M<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">if</span><span class="S0"> </span>alpha<span class="S10">==</span>None<span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>_a<span class="S10">=</span>self<span class="S10">.</span>alpha<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">else</span><span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>_a<span class="S10">=</span>alpha<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">while</span><span class="S0"> </span>True<span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1"># Something done with alphas and</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Psi<span class="S10">,</span><span class="S0"> </span>Sigma<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>self<span class="S10">.</span>model<span class="S10">.</span>krot_d_dd<span class="S10">(</span>t<span class="S10">,</span><span class="S0"> </span>Xp<span class="S10">,</span><span class="S0"> </span>Up<span class="S10">)</span><br />
+<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>_f_u<span class="S10">=</span>self<span class="S10">.</span>model<span class="S10">.</span>fun<span class="S10">((</span>v<span class="S10">.</span>f<span class="S10">,</span>v<span class="S10">.</span>u<span class="S10">),</span><span class="S0"> </span>tc<span class="S10">,</span><span class="S0"> </span>Xpc<span class="S10">,</span><span class="S0"> </span>Up<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>_f_u_t<span class="S10">=</span>_f_u<span class="S10">.</span>transpose<span class="S10">(</span><span class="S2">0</span><span class="S10">,</span><span class="S2">2</span><span class="S10">,</span><span class="S2">1</span><span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>_f_x<span class="S10">=</span>self<span class="S10">.</span>model<span class="S10">.</span>fun<span class="S10">((</span>v<span class="S10">.</span>f<span class="S10">,</span>v<span class="S10">.</span>x<span class="S10">),</span><span class="S0"> </span>tc<span class="S10">,</span><span class="S0"> </span>Xpc<span class="S10">,</span><span class="S0"> </span>Up<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>_f_x_t<span class="S10">=</span>_f_x<span class="S10">.</span>transpose<span class="S10">(</span><span class="S2">0</span><span class="S10">,</span><span class="S2">2</span><span class="S10">,</span><span class="S2">1</span><span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>_f_u_u<span class="S10">=</span>self<span class="S10">.</span>model<span class="S10">.</span>fun<span class="S10">((</span>v<span class="S10">.</span>f<span class="S10">,</span>v<span class="S10">.</span>u<span class="S10">,</span>v<span class="S10">.</span>u<span class="S10">),</span><span class="S0"> </span>tc<span class="S10">,</span><span class="S0"> </span>Xpc<span class="S10">,</span><span class="S0"> </span>Up<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>alpha<span class="S10">=</span>_a<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">while</span><span class="S0"> </span>True<span class="S10">:</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1">#import pudb; pu.db</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>f_part<span class="S10">=</span>self<span class="S10">.</span>model<span class="S10">.</span>H<span class="S10">((</span>v<span class="S10">.</span>u<span class="S10">,</span>v<span class="S10">.</span>u<span class="S10">),</span><span class="S0"> </span>tc<span class="S10">,</span><span class="S0"> </span>Xpc<span class="S10">,</span><span class="S0"> </span>Up<span class="S10">,</span><span class="S0"> </span>Psi<span class="S10">,</span><span class="S0"> </span>alpha<span class="S10">=</span>alpha<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">for</span><span class="S0"> </span>h<span class="S10">,</span><span class="S0"> </span>fut<span class="S10">,</span><span class="S0"> </span>fu<span class="S10">,</span><span class="S0"> </span>sik<span class="S10">,</span><span class="S0"> </span>k<span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>zip<span class="S10">(</span>f_part<span class="S10">,</span><span class="S0"> </span>_f_u_t<span class="S10">,</span><span class="S0"> </span>_f_u<span class="S10">,</span><span class="S0"> </span>Sigma<span class="S10">,</span><span class="S0"> </span>range<span class="S10">(</span>len<span class="S10">(</span>f_part<span class="S10">))):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>h<span class="S10">+=</span>dot<span class="S10">(</span>dot<span class="S10">(</span>fut<span class="S10">,</span><span class="S0"> </span>alpha<span class="S10">*</span>sik<span class="S10">),</span>fu<span class="S10">)-</span>E<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>f_part<span class="S10">[</span>k<span class="S10">]=-</span>linalg<span class="S10">.</span>inv<span class="S10">(</span>h<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>s_part<span class="S10">=</span>self<span class="S10">.</span>model<span class="S10">.</span>H<span class="S10">((</span>v<span class="S10">.</span>u<span class="S10">,</span>v<span class="S10">.</span>x<span class="S10">),</span><span class="S0"> </span>tc<span class="S10">,</span><span class="S0"> </span>Xpc<span class="S10">,</span><span class="S0"> </span>Up<span class="S10">,</span><span class="S0"> </span>Psi<span class="S10">,</span><span class="S0"> </span>alpha<span class="S10">=</span>alpha<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">for</span><span class="S0"> </span>h<span class="S10">,</span><span class="S0"> </span>fxt<span class="S10">,</span><span class="S0"> </span>sik<span class="S10">,</span><span class="S0"> </span>fu<span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>zip<span class="S10">(</span>s_part<span class="S10">,</span><span class="S0"> </span>_f_x_t<span class="S10">,</span><span class="S0"> </span>Sigma<span class="S10">,</span><span class="S0"> </span>_f_u<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>s_part<span class="S10">[</span>k<span class="S10">]+=</span>dot<span class="S10">(</span>dot<span class="S10">(</span>fxt<span class="S10">,</span><span class="S0"> </span>alpha<span class="S10">*</span>sik<span class="S10">),</span>fu<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>H_u<span class="S10">=</span>H_u_a<span class="S10">=</span>self<span class="S10">.</span>model<span class="S10">.</span>H<span class="S10">((</span>v<span class="S10">.</span>u<span class="S10">,),</span><span class="S0"> </span>tc<span class="S10">,</span><span class="S0"> </span>Xpc<span class="S10">,</span>Up<span class="S10">,</span><span class="S0"> </span>Psi<span class="S10">,</span><span class="S0"> </span>alpha<span class="S10">=</span>alpha<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Un<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>numpy<span class="S10">.</span>copy<span class="S10">(</span>Up<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1">#dU = numpy.copy(Up)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Xn<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>numpy<span class="S10">.</span>copy<span class="S10">(</span>Xp<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1">#dX = numpy.copy(Xp)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Xn<span class="S10">[</span><span class="S2">0</span><span class="S10">]=</span>Xp<span class="S10">[</span><span class="S2">0</span><span class="S10">]</span><span class="S0"> </span><span class="S1"># In reality it is already copied.</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Xn_i<span class="S10">=</span>Xp<span class="S10">[</span><span class="S2">0</span><span class="S10">]</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">for</span><span class="S0"> </span>i<span class="S10">,</span><span class="S0"> </span>psi<span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>enumerate<span class="S10">(</span>Psi<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Xp_i<span class="S10">=</span>Xp<span class="S10">[</span>i<span class="S10">]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Up_i<span class="S10">=</span>Up<span class="S10">[</span>i<span class="S10">]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>H_u_i<span class="S10">=</span>H_u<span class="S10">[</span>i<span class="S10">]</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>dX_i<span class="S10">=</span>Xn_i<span class="S10">-</span>Xp_i<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1">#dU_i=dot((H_u_a[i]+dot(dX_i,s_part[i])),f_part[i])</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1">#dU_i=dot(H_u_a[i],f_part[i])</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>dU_i<span class="S10">=</span>H_u_a<span class="S10">[</span>i<span class="S10">]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Un_i<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>Up_i<span class="S0"> </span><span class="S10">+</span><span class="S0"> </span>dU_i<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Xnn_i<span class="S10">=</span>self<span class="S10">.</span>model<span class="S10">.</span>f<span class="S10">(</span>t<span class="S10">[</span>i<span class="S10">],</span><span class="S0"> </span>Xn_i<span class="S10">,</span><span class="S0"> </span>Un_i<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Un<span class="S10">[</span>i<span class="S10">]=</span>Un_i<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Xn<span class="S10">[</span>i<span class="S10">+</span><span class="S2">1</span><span class="S10">]=</span>Xnn_i<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Xn_i<span class="S10">=</span>Xnn_i<br />
+<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>In<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>self<span class="S10">.</span>model<span class="S10">.</span>I<span class="S10">(</span>Xn<span class="S10">,</span><span class="S0"> </span>Un<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>dI<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>Ip<span class="S10">-</span>In<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">if</span><span class="S0"> </span>DEBUG<span class="S10">&gt;=</span><span class="S2">0</span><span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span><span class="S3">"Ip:"</span><span class="S10">,</span><span class="S0"> </span>Ip<span class="S10">,</span><span class="S0"> </span><span class="S3">"In:"</span><span class="S10">,</span><span class="S0"> </span>In<span class="S10">,</span><span class="S0"> &nbsp;</span><span class="S3">"DI:"</span><span class="S10">,</span><span class="S0"> </span>dI<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">if</span><span class="S0"> </span>abs<span class="S10">(</span>dI<span class="S10">)&lt;</span>eps<span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>In<span class="S10">,</span><span class="S0"> </span>Xn<span class="S10">,</span><span class="S0"> </span>Un<span class="S10">,</span><span class="S0"> </span>it<span class="S10">,</span><span class="S0"> </span><span class="S3">"Opt"</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">if</span><span class="S0"> </span>iters<span class="S10">&lt;=</span><span class="S2">0</span><span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>In<span class="S10">,</span><span class="S0"> </span>Xn<span class="S10">,</span><span class="S0"> </span>Un<span class="S10">,</span><span class="S0"> </span>it<span class="S10">,</span><span class="S0"> </span><span class="S3">"Nonoptimal"</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>iters<span class="S10">-=</span><span class="S2">1</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>it<span class="S10">+=</span><span class="S2">1</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">if</span><span class="S0"> </span>In<span class="S10">&gt;</span>Ip<span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>alpha<span class="S10">*=</span><span class="S2">0.7</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">continue</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">else</span><span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Xp<span class="S10">,</span><span class="S0"> </span>Up<span class="S10">,</span><span class="S0"> </span>Ip<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>Xn<span class="S10">,</span><span class="S0"> </span>Un<span class="S10">,</span><span class="S0"> </span>In<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">break</span><br />
+<br />
+<span class="S1"># -------------------- tests -------------------------------------------------</span><br />
+<br />
+<span class="S5">class</span><span class="S0"> </span><span class="S8">LinModel1</span><span class="S10">(</span>ParOptModel<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S7">"""Possibly simple linear test model.</span><br />
+<span class="S7">&nbsp;&nbsp;&nbsp;&nbsp;"""</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">__init__</span><span class="S10">(</span>self<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>X0<span class="S10">=(</span><span class="S2">1.0</span><span class="S10">,)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>h<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>Ht<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1"># self.h = 0.001</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1"># self.h = 0.2</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>num<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>int<span class="S10">((</span><span class="S2">1.0</span><span class="S10">-</span><span class="S2">0.0</span><span class="S10">)</span><span class="S0"> </span><span class="S10">/</span><span class="S0"> </span>self<span class="S10">.</span>h<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>T<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>linspace<span class="S10">(</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>start<span class="S10">=</span><span class="S2">0.0</span><span class="S10">,</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>stop<span class="S10">=</span><span class="S2">1.0</span><span class="S10">,</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>num<span class="S10">=</span>self<span class="S10">.</span>num<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>t<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>arange<span class="S10">(</span>len<span class="S10">(</span>self<span class="S10">.</span>T<span class="S10">))</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>ParOptModel<span class="S10">.</span>__init__<span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>X0<span class="S10">=</span>X0<span class="S10">,</span><span class="S0"> </span>N<span class="S10">=</span><span class="S2">1</span><span class="S10">,</span><span class="S0"> </span>M<span class="S10">=</span><span class="S2">1</span><span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">start_control</span><span class="S10">(</span>self<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>U<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S10">[(</span><span class="S2">0.0</span><span class="S10">,)</span><span class="S0"> </span><span class="S5">for</span><span class="S0"> </span>t<span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>self<span class="S10">.</span>t<span class="S10">[:-</span><span class="S2">1</span><span class="S10">]]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>array<span class="S10">(</span>U<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">F</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>x<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S7">""" X and U are lists of vectors (arrays)</span><br />
+<span class="S7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"""</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span><span class="S2">0.0</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">f</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>t<span class="S10">,</span><span class="S0"> </span>x<span class="S10">,</span><span class="S0"> </span>u<span class="S10">,</span><span class="S0"> </span>dt<span class="S10">=</span><span class="S2">1</span><span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S7">""" X ia a vector of the previous state</span><br />
+<span class="S7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"""</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>x0<span class="S10">=</span>x<span class="S10">[</span><span class="S2">0</span><span class="S10">]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>u0<span class="S10">=</span>u<span class="S10">[</span><span class="S2">0</span><span class="S10">]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span><span class="S10">(</span>x0<span class="S10">+</span>self<span class="S10">.</span>h<span class="S10">*</span>u0<span class="S10">,)</span><br />
+<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">f0</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>t<span class="S10">,</span><span class="S0"> </span>x<span class="S10">,</span><span class="S0"> </span>u<span class="S10">,</span><span class="S0"> </span>dt<span class="S10">=</span><span class="S2">1</span><span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S7">""" X ia a vector of the previous state</span><br />
+<span class="S7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"""</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>x0<span class="S10">=</span>x<span class="S10">[</span><span class="S2">0</span><span class="S10">]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>u0<span class="S10">=</span>u<span class="S10">[</span><span class="S2">0</span><span class="S10">]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>self<span class="S10">.</span>h<span class="S0"> </span><span class="S10">*</span><span class="S0"> </span><span class="S10">(</span>x0<span class="S10">*</span>x0<span class="S10">+</span>u0<span class="S10">*</span>u0<span class="S10">)</span><br />
+<br />
+<br />
+<span class="S5">class</span><span class="S0"> </span><span class="S8">LinModel2d2du</span><span class="S10">(</span>ParOptModel<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S7">"""Possibly not a simple linear test model.</span><br />
+<span class="S7">&nbsp;&nbsp;&nbsp;&nbsp;"""</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">__init__</span><span class="S10">(</span>self<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>X0<span class="S10">=(</span><span class="S2">1.0</span><span class="S10">,</span><span class="S2">1.0</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>h<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>Ht<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>num<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>int<span class="S10">((</span><span class="S2">1.0</span><span class="S10">-</span><span class="S2">0.0</span><span class="S10">)</span><span class="S0"> </span><span class="S10">/</span><span class="S0"> </span>self<span class="S10">.</span>h<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>T<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>linspace<span class="S10">(</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>start<span class="S10">=</span><span class="S2">0.0</span><span class="S10">,</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>stop<span class="S10">=</span><span class="S2">1.0</span><span class="S10">,</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>num<span class="S10">=</span>self<span class="S10">.</span>num<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>t<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>arange<span class="S10">(</span>len<span class="S10">(</span>self<span class="S10">.</span>T<span class="S10">))</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>ParOptModel<span class="S10">.</span>__init__<span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>X0<span class="S10">=</span>X0<span class="S10">,</span><span class="S0"> </span>N<span class="S10">=</span><span class="S2">2</span><span class="S10">,</span><span class="S0"> </span>M<span class="S10">=</span><span class="S2">2</span><span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">start_control</span><span class="S10">(</span>self<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>U<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S10">[[</span><span class="S2">0.0</span><span class="S10">,</span><span class="S2">0.0</span><span class="S10">]</span><span class="S0"> </span><span class="S5">for</span><span class="S0"> </span>t<span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>self<span class="S10">.</span>t<span class="S10">[:-</span><span class="S2">1</span><span class="S10">]]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>array<span class="S10">(</span>U<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">F</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>x<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S7">""" X and U are lists of vectors (arrays)</span><br />
+<span class="S7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"""</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span><span class="S2">0.0</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">f</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>t<span class="S10">,</span><span class="S0"> </span>x<span class="S10">,</span><span class="S0"> </span>u<span class="S10">,</span><span class="S0"> </span>dt<span class="S10">=</span><span class="S2">1</span><span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S7">""" X ia a vector of the previous state</span><br />
+<span class="S7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"""</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S10">(</span>x0<span class="S10">,</span>x1<span class="S10">)=</span>x<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S10">(</span>u0<span class="S10">,</span>u1<span class="S10">)=</span>u<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span><span class="S10">(</span>x0<span class="S10">+</span>self<span class="S10">.</span>h<span class="S10">*</span>u0<span class="S10">,</span><span class="S0"> </span>x1<span class="S10">+</span>self<span class="S10">.</span>h<span class="S10">*</span>u1<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">f0</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>t<span class="S10">,</span><span class="S0"> </span>x<span class="S10">,</span><span class="S0"> </span>u<span class="S10">,</span><span class="S0"> </span>dt<span class="S10">=</span><span class="S2">1</span><span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S7">""" X ia a vector of the previous state</span><br />
+<span class="S7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"""</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S10">(</span>x0<span class="S10">,</span>x1<span class="S10">)=</span>x<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S10">(</span>u0<span class="S10">,</span>u1<span class="S10">)=</span>u<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>self<span class="S10">.</span>h<span class="S0"> </span><span class="S10">*</span><span class="S0"> </span><span class="S10">(</span>x0<span class="S10">*</span>x0<span class="S10">+</span>x1<span class="S10">*</span>x1<span class="S10">+</span>u0<span class="S10">*</span>u0<span class="S10">+</span>u1<span class="S10">*</span>u1<span class="S10">)</span><br />
+<br />
+<span class="S5">class</span><span class="S0"> </span><span class="S8">LinModel2d2du1</span><span class="S10">(</span>ParOptModel<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S7">"""Possibly not a simple linear test model.</span><br />
+<span class="S7">&nbsp;&nbsp;&nbsp;&nbsp;"""</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">__init__</span><span class="S10">(</span>self<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>X0<span class="S10">=</span>array<span class="S10">([[</span><span class="S2">1.0</span><span class="S10">],[</span><span class="S2">1.0</span><span class="S10">]])</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>h<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>Ht<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>num<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>int<span class="S10">((</span><span class="S2">1.0</span><span class="S10">-</span><span class="S2">0.0</span><span class="S10">)</span><span class="S0"> </span><span class="S10">/</span><span class="S0"> </span>self<span class="S10">.</span>h<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>T<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>linspace<span class="S10">(</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>start<span class="S10">=</span><span class="S2">0.0</span><span class="S10">,</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>stop<span class="S10">=</span><span class="S2">1.0</span><span class="S10">,</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>num<span class="S10">=</span>self<span class="S10">.</span>num<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>self<span class="S10">.</span>t<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>arange<span class="S10">(</span>len<span class="S10">(</span>self<span class="S10">.</span>T<span class="S10">))</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>ParOptModel<span class="S10">.</span>__init__<span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>X0<span class="S10">=</span>X0<span class="S10">,</span><span class="S0"> </span>N<span class="S10">=</span><span class="S2">2</span><span class="S10">,</span><span class="S0"> </span>M<span class="S10">=</span><span class="S2">2</span><span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">start_control</span><span class="S10">(</span>self<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>U<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S10">[</span>array<span class="S10">([[</span><span class="S2">0.0</span><span class="S10">],[</span><span class="S2">0.0</span><span class="S10">]])</span><span class="S0"> </span><span class="S5">for</span><span class="S0"> </span>t<span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>self<span class="S10">.</span>t<span class="S10">[:-</span><span class="S2">1</span><span class="S10">]]</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>array<span class="S10">(</span>U<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">F</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>x<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S7">""" X and U are lists of vectors (arrays)</span><br />
+<span class="S7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"""</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span><span class="S2">0.0</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">f</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>t<span class="S10">,</span><span class="S0"> </span>x<span class="S10">,</span><span class="S0"> </span>u<span class="S10">,</span><span class="S0"> </span>dt<span class="S10">=</span><span class="S2">1</span><span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S7">""" X ia a vector of the previous state</span><br />
+<span class="S7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"""</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S10">((</span>x0<span class="S10">,),(</span>x1<span class="S10">,))=</span>x<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S10">((</span>u0<span class="S10">,),(</span>u1<span class="S10">,))=</span>u<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span><span class="S10">((</span>x0<span class="S10">**</span><span class="S2">5</span><span class="S10">+</span>self<span class="S10">.</span>h<span class="S10">*</span>u0<span class="S10">,),(</span>x1<span class="S10">**</span><span class="S2">5</span><span class="S10">+</span>self<span class="S10">.</span>h<span class="S10">*</span>u1<span class="S10">,))</span><br />
+<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">def</span><span class="S0"> </span><span class="S9">f0</span><span class="S10">(</span>self<span class="S10">,</span><span class="S0"> </span>t<span class="S10">,</span><span class="S0"> </span>x<span class="S10">,</span><span class="S0"> </span>u<span class="S10">,</span><span class="S0"> </span>dt<span class="S10">=</span><span class="S2">1</span><span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S7">""" X ia a vector of the previous state</span><br />
+<span class="S7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"""</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S10">((</span>x0<span class="S10">,),(</span>x1<span class="S10">,))=</span>x<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S10">((</span>u0<span class="S10">,),(</span>u1<span class="S10">,))=</span>u<br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><span class="S0"> </span>self<span class="S10">.</span>h<span class="S0"> </span><span class="S10">*</span><span class="S0"> </span><span class="S10">(</span>x0<span class="S10">*</span>x0<span class="S10">+</span>x1<span class="S10">*</span>x1<span class="S10">+</span>u0<span class="S10">*</span>u0<span class="S10">+</span>u1<span class="S10">*</span>u1<span class="S10">)</span><br />
+<br />
+<span class="S5">def</span><span class="S0"> </span><span class="S9">gnuplot</span><span class="S10">(</span>fn<span class="S10">,</span><span class="S0"> </span><span class="S10">*</span>args<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S1"># args are I, X, U, it, _ (result: Opt, etc.)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">for</span><span class="S0"> </span>i<span class="S10">,</span><span class="S0"> </span><span class="S10">(</span>I<span class="S10">,</span><span class="S0"> </span>X<span class="S10">,</span><span class="S0"> </span>U<span class="S10">,</span><span class="S0"> </span>it<span class="S10">,</span><span class="S0"> </span>_<span class="S10">)</span><span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>enumerate<span class="S10">(</span>args<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>o<span class="S10">=</span>open<span class="S10">(</span>fn<span class="S10">+</span>str<span class="S10">(</span>i<span class="S10">)+</span><span class="S3">".dat"</span><span class="S10">,</span><span class="S0"> </span><span class="S3">"w"</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>lx<span class="S10">=</span>len<span class="S10">(</span>X<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">for</span><span class="S0"> </span>i<span class="S10">,</span>x<span class="S10">,</span>u<span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>zip<span class="S10">(</span>range<span class="S10">(</span>lx<span class="S10">-</span><span class="S2">1</span><span class="S10">),</span><span class="S0"> </span>X<span class="S10">[:-</span><span class="S2">1</span><span class="S10">],</span>U<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>t<span class="S10">=</span>i<span class="S10">/</span>lx<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>o<span class="S10">.</span>write<span class="S10">(</span>str<span class="S10">(</span>t<span class="S10">)+</span><span class="S3">"\t"</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>o<span class="S10">.</span>write<span class="S10">(</span><span class="S3">"\t"</span><span class="S10">.</span>join<span class="S10">([</span>str<span class="S10">(</span>a<span class="S10">)</span><span class="S0"> </span><span class="S5">for</span><span class="S0"> </span>a<span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>x<span class="S10">]))</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>o<span class="S10">.</span>write<span class="S10">(</span><span class="S3">"\t"</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>o<span class="S10">.</span>write<span class="S10">(</span><span class="S3">"\t"</span><span class="S10">.</span>join<span class="S10">([</span>str<span class="S10">(</span>a<span class="S10">)</span><span class="S0"> </span><span class="S5">for</span><span class="S0"> </span>a<span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>u<span class="S10">]))</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>o<span class="S10">.</span>write<span class="S10">(</span><span class="S3">"\n"</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>o<span class="S10">.</span>close<span class="S10">()</span><br />
+<br />
+<span class="S5">def</span><span class="S0"> </span><span class="S9">test2</span><span class="S10">(</span>so<span class="S10">=</span>True<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>m<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>LinModel1<span class="S10">()</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">if</span><span class="S0"> </span><span class="S5">not</span><span class="S0"> </span>so<span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>ip<span class="S10">=</span>ParOptProcess<span class="S10">(</span>m<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">else</span><span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>ip<span class="S10">=</span>SeconOrderParOptProcess<span class="S10">(</span>m<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>I<span class="S10">,</span><span class="S0"> </span>X<span class="S10">,</span><span class="S0"> </span>U<span class="S10">,</span><span class="S0"> </span>it<span class="S10">,</span><span class="S0"> </span>_<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>ip<span class="S10">.</span>optimize<span class="S10">(</span>m<span class="S10">.</span>t<span class="S10">,</span><span class="S0"> </span>eps<span class="S10">=</span><span class="S2">0.001</span><span class="S10">,</span><span class="S0"> </span>iters<span class="S10">=</span><span class="S2">2000</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span><span class="S3">""</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span><span class="S3">"X, &nbsp;&nbsp;&nbsp;&nbsp;U, &nbsp;&nbsp;"</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">for</span><span class="S0"> </span>x<span class="S10">,</span>u<span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>zip<span class="S10">(</span>X<span class="S10">,</span>U<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span>x<span class="S10">,</span>u<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span><span class="S3">"Result is:"</span><span class="S10">,</span><span class="S0"> </span>I<span class="S10">,</span><span class="S0"> </span><span class="S3">"in"</span><span class="S10">,</span><span class="S0"> </span>it<span class="S10">,</span><span class="S0"> </span><span class="S3">"iters"</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span>_<span class="S10">)</span><br />
+<br />
+<span class="S5">def</span><span class="S0"> </span><span class="S9">test2d</span><span class="S10">(</span>so<span class="S10">=</span>True<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>m<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>LinModel2d2du<span class="S10">()</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">if</span><span class="S0"> </span><span class="S5">not</span><span class="S0"> </span>so<span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>ip<span class="S10">=</span>ParOptProcess<span class="S10">(</span>m<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">else</span><span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>ip<span class="S10">=</span>SeconOrderParOptProcess<span class="S10">(</span>m<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>I<span class="S10">,</span><span class="S0"> </span>X<span class="S10">,</span><span class="S0"> </span>U<span class="S10">,</span><span class="S0"> </span>it<span class="S10">,</span><span class="S0"> </span>_<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>ip<span class="S10">.</span>optimize<span class="S10">(</span>m<span class="S10">.</span>t<span class="S10">,</span><span class="S0"> </span>eps<span class="S10">=</span><span class="S2">0.001</span><span class="S10">,</span><span class="S0"> </span>iters<span class="S10">=</span><span class="S2">200</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span><span class="S3">""</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span><span class="S3">"X, &nbsp;&nbsp;&nbsp;&nbsp;U, &nbsp;&nbsp;"</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">for</span><span class="S0"> </span>x<span class="S10">,</span>u<span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>zip<span class="S10">(</span>X<span class="S10">,</span>U<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span>x<span class="S10">,</span>u<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span><span class="S3">"Result is:"</span><span class="S10">,</span><span class="S0"> </span>I<span class="S10">,</span><span class="S0"> </span><span class="S3">"in"</span><span class="S10">,</span><span class="S0"> </span>it<span class="S10">,</span><span class="S0"> </span><span class="S3">"iters"</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span>_<span class="S10">)</span><br />
+<br />
+<span class="S5">def</span><span class="S0"> </span><span class="S9">test_with_plot</span><span class="S10">():</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>m<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>LinModel1<span class="S10">()</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>p1<span class="S10">=</span>ParOptProcess<span class="S10">(</span>m<span class="S10">,</span><span class="S0"> </span>beta<span class="S10">=</span><span class="S2">75.</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>p2<span class="S10">=</span>SeconOrderParOptProcess<span class="S10">(</span>m<span class="S10">,</span><span class="S0"> </span>alpha<span class="S10">=</span><span class="S2">0.001</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>iters<span class="S10">=</span><span class="S2">2000</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>eps<span class="S10">=</span><span class="S2">0.001</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span><span class="S3">"First process:"</span><span class="S10">,</span><span class="S0"> </span>end<span class="S10">=</span><span class="S4">''</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>r1<span class="S10">=</span>I1<span class="S10">,</span><span class="S0"> </span>X1<span class="S10">,</span><span class="S0"> </span>U1<span class="S10">,</span><span class="S0"> </span>it1<span class="S10">,</span><span class="S0"> </span>_1<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>p1<span class="S10">.</span>optimize<span class="S10">(</span>m<span class="S10">.</span>t<span class="S10">,</span><span class="S0"> </span>eps<span class="S10">=</span>eps<span class="S10">,</span><span class="S0"> </span>iters<span class="S10">=</span>iters<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span>I1<span class="S10">,</span><span class="S0"> </span><span class="S3">"iters:"</span><span class="S10">,</span><span class="S0"> </span>it1<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span><span class="S3">"Second process:"</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>r2<span class="S10">=</span>I2<span class="S10">,</span><span class="S0"> </span>X2<span class="S10">,</span><span class="S0"> </span>U2<span class="S10">,</span><span class="S0"> </span>it2<span class="S10">,</span><span class="S0"> </span>_2<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>p2<span class="S10">.</span>optimize<span class="S10">(</span>m<span class="S10">.</span>t<span class="S10">,</span><span class="S0"> </span>eps<span class="S10">=</span>eps<span class="S10">,</span><span class="S0"> </span>iters<span class="S10">=</span>iters<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span>I2<span class="S10">,</span><span class="S0"> </span><span class="S3">"iters:"</span><span class="S10">,</span><span class="S0"> </span>it2<span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>gnuplot<span class="S10">(</span><span class="S3">"test_with_plt"</span><span class="S10">,</span><span class="S0"> </span>r1<span class="S10">,</span>r2<span class="S10">)</span><br />
+<br />
+<span class="S5">def</span><span class="S0"> </span><span class="S9">test2d1</span><span class="S10">():</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>m<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>LinModel2d2du1<span class="S10">()</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">return</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>ip<span class="S10">=</span>ParOptProcess<span class="S10">(</span>m<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>I<span class="S10">,</span><span class="S0"> </span>X<span class="S10">,</span><span class="S0"> </span>U<span class="S10">,</span><span class="S0"> </span>it<span class="S10">,</span><span class="S0"> </span>_<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>ip<span class="S10">.</span>optimize<span class="S10">(</span>m<span class="S10">.</span>t<span class="S10">,</span><span class="S0"> </span>eps<span class="S10">=</span><span class="S2">0.001</span><span class="S10">,</span><span class="S0"> </span>iters<span class="S10">=</span><span class="S2">2000</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span><span class="S3">""</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span><span class="S3">"X, &nbsp;&nbsp;&nbsp;&nbsp;U, &nbsp;&nbsp;"</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">for</span><span class="S0"> </span>x<span class="S10">,</span>u<span class="S0"> </span><span class="S5">in</span><span class="S0"> </span>zip<span class="S10">(</span>X<span class="S10">,</span>U<span class="S10">):</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span>x<span class="S10">,</span>u<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span><span class="S3">"Result is:"</span><span class="S10">,</span><span class="S0"> </span>I<span class="S10">,</span><span class="S0"> </span><span class="S3">"in"</span><span class="S10">,</span><span class="S0"> </span>it<span class="S10">,</span><span class="S0"> </span><span class="S3">"iters"</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span>_<span class="S10">)</span><br />
+<br />
+<br />
+<span class="S5">if</span><span class="S0"> </span>__name__<span class="S10">==</span><span class="S3">"__main__"</span><span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">print</span><span class="S0"> </span><span class="S10">(</span><span class="S3">"ok"</span><span class="S10">)</span><br />
+<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>TEST<span class="S10">=</span><span class="S4">'test_with_plot'</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>LOG<span class="S10">=</span><span class="S4">'restats.log'</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">if</span><span class="S0"> </span>PROFILE<span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">import</span><span class="S0"> </span>cProfile<span class="S10">,</span><span class="S0"> </span>pstats<br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>cProfile<span class="S10">.</span>run<span class="S10">(</span>TEST<span class="S10">+</span><span class="S3">"()"</span><span class="S10">,</span><span class="S0"> </span>LOG<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>p<span class="S10">=</span>pstats<span class="S10">.</span>Stats<span class="S10">(</span>LOG<span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>p<span class="S10">.</span>strip_dirs<span class="S10">().</span>sort_stats<span class="S10">(</span><span class="S4">'time'</span><span class="S10">,</span><span class="S4">'cumulative'</span><span class="S10">).</span>print_stats<span class="S10">()</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">else</span><span class="S10">:</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>eval<span class="S10">(</span>TEST<span class="S10">+</span><span class="S3">"()"</span><span class="S10">)</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span>quit<span class="S10">()</span><br />
+<span class="S0"></span></span>
+</body>
+</html>
