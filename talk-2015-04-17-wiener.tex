@@ -1,0 +1,72 @@
+\documentclass[10pt]{beamer}
+\usepackage{amsmath,amssymb,longtable,hhline}
+\usepackage{mathrsfs}
+\usepackage{xcolor}
+
+\usetheme{Warsaw}
+\usecolortheme{crane}
+
+\usepackage{iftex,ifxetex}
+\ifPDFTeX
+  \usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+  \usepackage[russian]{babel}
+  \usepackage{lmodern}
+  \usefonttheme{serif}
+\else
+  \ifluatex
+    \usepackage{unicode-math}
+    \defaultfontfeatures{Ligatures=TeX,Numbers=OldStyle}
+    \setmathfont{Latin Modern Math}
+    \setsansfont{Linux Biolinum O}
+    \usefonttheme{professionalfonts}
+  \fi
+\fi
+
+\begin{document}
+\title{ПРИМЕНЕНИЕ КОМПЬЮТЕРНОЙ АЛГЕБРЫ\\
+В РЕАЛИЗАЦИИ АЛГОРИТМОВ УЛУЧШЕНИЯ}
+\author{Черкашин Е.А., Бадмацыренова С.Б.}
+\institute[ИДСТУ СО РАН, ИРНИТУ]{\normalsize  ИДСТУ СО РАН, ИРНИТУ}
+\date[2015]{<<Винеровские чтения --- 2015>>
+\\[0.3cm]
+16 -- 18 апреля 2015 г.,\\
+Иркутск
+}
+%\date{\today}
+\maketitle
+
+% ----------------------------------------------------------------
+\begin{frame}{\textbf{Постановка задачи} }
+\begin{block}{}
+  \begin{gather}
+x(t+1)=f(t,x(t),u(t)),\quad t \in T=\{t_0,t_0+1,...,t_1\},
+	\label{eq100} \\
+x(t_0)=x_0,\quad x(t)\in R^n,\; u(t) \in R^m,\quad t\in T,\label{eq100a} \\
+I(x,u)=F(x(t_1))+ \sum_{t_0}^{t_1-1}f^0(t,x(t),u(t)) \to \min.
+  \label{eq103}
+  \end{gather}
+\end{block}
+\begin{block}{Задача улучшения}
+  Пусть заданы управление $u^I(t)$ и соответствующее состояние $x^I(t)$. Требуется найти $x^{I\!I}(t),\; u^{I\!I}(t)$ такие, что
+\[
+I(x^{I\!I},u^{I\!I}) < I(x^I,u^I).
+\]
+ \end{block}
+\end{frame}
+% ---------------------------------------------------------
+\begin{frame}{}
+\begin{center}
+\Huge\textbf{Спасибо за внимание!}
+\end{center}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+\end{document}
+%
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
