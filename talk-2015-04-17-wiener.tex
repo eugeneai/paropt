@@ -102,8 +102,7 @@
 \maketitle
 
 % ----------------------------------------------------------------
-\begin{frame}[plain]{\textbf{Вектор-функция} }
-
+\begin{frame}{\textbf{Вектор-функция} }
 %\begin{block}{}
   \begin{columns}[t]
     \begin{column}{0.65\textwidth}
@@ -116,6 +115,7 @@
     \end{column}
     \begin{column}{0.35\textwidth}
       \begin{block}{Состояние, управление}%
+        \vspace{-1.5em}
         \begin{align*}
           &\vec{x}=\mathbf{x}=\langle x_1,x_2,\ldots,x_n\rangle,\\
           &n=9,\\
@@ -200,6 +200,198 @@ class LinModel1(Model):
         x0=x[0]; u0=u[0]
         return self.h * (x0*x0+u0*u0)
 \end{lstlisting}
+\end{frame}
+\begin{frame}[fragile]
+  \frametitle{Реализация алгоритма улучшения}
+\begin{lstlisting}
+class Process(VFCalc):
+    def __init__(self, model, alpha=1.0):
+        VFCalc.__init__(self, model.N, model.M)
+        t,x,u=self.v.t,self.v.x,self.v.u
+        self.model=model; self.alpha=alpha
+        self.v.f=model.f(t, x, u)
+        self.v.f0=model.f0(t, x, u)
+        self.v.F=model.F(x)
+
+    def trajectory(self, U):
+        x0=self.model.X0; X = [x0]
+        for t, u in enumerate(U): # (0, u0), (1, u1)
+            xn=self.model.f(t, X[t], u); X.append(xn)
+        return array(X)
+
+    def I(self, X, U):
+        def _a(acc, t):
+            return acc + self.model.f0(t, X[t], U[t])
+        return reduce(_a, range(len(X)-1), self.model.F(X[-1]))
+
+    def optimize(self, t, eps=0.001, iters=1000):
+        Up=self.model.U0
+        Xp=self.trajectory(Up)
+        Ip=self.I(Xp,Up); it = 1
+\end{lstlisting}
+\end{frame}
+\begin{frame}[fragile]
+  \frametitle{Реализация алгоритма улучшения (\texttt{optimize})}
+\begin{lstlisting}
+        while True:
+            beta = self.beta
+            Psi=self.Psi(t, Xp, Up, self.alpha)
+            _H_u=self.H((self.v.u,), t[:-1], Xp[:-1], Up, Psi)
+            while True:
+                _dU=_H_u*alpha
+                Un = Up + _dU
+                Xn = self.trajectory(Un)
+                In = self.I(Xn, Un)
+                dI = Ip-In
+                if abs(dI)<eps:
+                    return In, Xn, Un, it, "Opt"
+                if iters<=0:
+                    return In, Xn, Un, it, "Nonoptimal"
+                iters-=1; it+=1
+                if In>=Ip:
+                    alpha/=2
+                    continue
+                else:
+                    Xp, Up, Ip = Xn, Un, In
+                    break
+\end{lstlisting}
+\end{frame}
+\begin{frame}[fragile]
+  \frametitle{Реализация алгоритма улучшения (\texttt{psi, H})}
+\begin{lstlisting}
+    def Psi(self, t, X, U, alpha):
+        v=self.v
+        psie = -self.fun(v.F,(v.x,), t[-1], X[-1], U[-1])
+        psi=[psie]; X=X[:-1]; t=t[:-1]
+        _f0_x=self.fun(v.f0, (v.x,), t, X, U) # Vector context
+        _f_x =self.fun(v.f, (v.x,), t, X, U)  # Vector context
+        j=len(t)-1; p=psie
+        while j>=1:
+            i=t[j]; pp=p
+            pn = dot(pp, _f_x[i]) - alpha*_f0_x[i]
+            psi.append(pn); p=pn; j-=1
+        psi=array(psi)
+        return psi[::-1]
+
+    def H(self, vars, T, X, U, Psi, alpha = 1.0):
+        f=self.fun(self.v.f, vars, T, X, U)
+        f0=-self.fun(self.v.f0, vars, T, X, U)
+        H = alpha * f0
+        for psi,_H,_f,i in zip(Psi, H, f, range(len(H))):
+            _H += dot(psi,_f); H[i]=_H
+        return H
+\end{lstlisting}
+\end{frame}
+\begin{frame}[fragile]
+  \frametitle{Реализация алгоритма улучшения (\texttt{fun})}
+\begin{lstlisting}
+    def fun(self, f, vars, T, X, U):
+        code,df=self.code(f, *vars)
+        X=numpy.atleast_1d(X)
+        U=numpy.atleast_1d(U)
+        if X.ndim>1:
+            Xs=[X[:,i:i+1] for i in range(X.shape[1])]
+            Us=[U[:,i:i+1] for i in range(U.shape[1])]
+            m,args=True,(T,)+tuple(Xs+Us)
+        else:
+            m,args=False,(T,)+tuple(X)+tuple(U)
+        rc=code(*args)
+        rct=type(rc)
+        rc=numpy.atleast_1d(rc)
+        if type(T)==numpy.ndarray:
+            try:
+                if rct in [TupleType,ListType]:
+                    rc=rc.reshape(rc.shape[:-1])
+                    rc=rc.T
+                    return rc
+            except ValueError: pass
+            if T.shape[0]!=rc.shape[0]:
+                nrc=numpy.zeros((len(T),)+rc.shape,dtype=float)
+                nrc[:]=rc; rc=nrc
+        return rc
+\end{lstlisting}
+\end{frame}
+\begin{frame}[fragile]
+  \frametitle{Выполнение теста}
+\begin{columns}
+\begin{column}{0.43\columnwidth}
+\vspace{-3em}
+\includegraphics[width=1.2\textwidth]{1dplot}
+\vspace{1em}
+\texttt{I: 0.77666 iters: 47}
+\end{column}
+\begin{column}{0.57\columnwidth}
+\begin{lstlisting}
+def test_with_plot():
+    m = LinModel1()
+    p1=Process(m, beta=1.0)
+    iters=2000
+    eps=0.001
+    print ("First-order process:")
+    print ("-"*20)
+    r1=I1, X1, U1, it1, _1 =
+        p1.optimize(m.t, eps=eps,
+            iters=iters)
+    print (I1, "iters:", it1)
+    gnuplot("test_with_plt", r1)
+\end{lstlisting}
+\end{column}
+\end{columns}
+\end{frame}
+\begin{frame}
+  \frametitle{Дифференцирование вектор-функций}
+
+\end{frame}
+\begin{frame}[fragile]
+  \frametitle{Компьютерная алгебра: дифференцирование вектор-функций}
+\begin{lstlisting}
+class VFCalc(object):
+    def __init__(self, N,M):
+        self.N=N; self.M=M; self.v=Helper()
+        self.v.x=[Symbol('x'+str(i+1)) for i in range(self.N)]
+        self.v.u=[Symbol('u'+str(i+1)) for i in range(self.M)]
+        self.v.t=Symbol('t')
+
+    def diff1(self, f, var):
+        if type(f) in [TupleType,ListType]:
+            df=tuple([self.diff1(fi, var) for fi in f])
+        else:
+            df=tuple([diff(f, vi) for vi in var])
+        if len(df)==1: df=df[0]
+        return df
+
+    def diff(self, f, *vars):
+        cf=f
+        for v in vars:
+            cf=self.diff1(cf, v)
+        return cf
+\end{lstlisting}
+\end{frame}
+\begin{frame}[fragile]{Компьютерная алгебра: дополнительные функции}
+\begin{lstlisting}
+class VFCalc(object):
+    # . . . . . . . .
+    def subs(self, f, s):
+        if type(f) not in [TupleType,ListType]:
+            return f.subs(s) # common subs
+        return tuple([self.subs(fi,s) for fi in f])#local subs
+
+    def lambdify(self, f):
+        l=[self.v.t]
+        l.extend(self.v.x)
+        l.extend(self.v.u)
+        fl=lambdify(l, f, "numpy")
+        return fl
+
+    def code(self, f, *vars):
+        df=self.diff(f, *vars)
+        c=self.lambdify(df)
+        return c,df
+\end{lstlisting}
+\end{frame}
+\begin{frame}
+  \frametitle{Пример вычисления производных вектор-функций}
+
 \end{frame}
 
 %------------ Conclusion ----------------------------------------

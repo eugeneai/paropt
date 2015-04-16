@@ -17,8 +17,8 @@ ListType=type([])
 DEBUG = 20
 #DEBUG = 0
 PROFILE = False # True
-#Ht = 0.01
-Ht = 0.2
+Ht = 0.01
+#Ht = 0.2
 import time
 
 class Helper():
@@ -295,7 +295,7 @@ class Process(VFCalc):
         rc=code(*args)
         rct=type(rc)
 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         rc=numpy.atleast_1d(rc)
         if type(T)==numpy.ndarray:
             dm=False
@@ -580,7 +580,7 @@ def gnuplot(fn, *args):
             o.write("\t".join([str(a) for a in u]))
             o.write("\n")
         o.close()
-    os.system('gnuplot test_with_plt.p')
+    os.system('gnuplot test_with_plt1.p')
     os.system('evince my-plot.ps')
 
 def test2(so=True):
@@ -624,13 +624,15 @@ def test_with_plot():
     print ("-"*20)
     r1=I1, X1, U1, it1, _1 = p1.optimize(m.t, eps=eps, iters=iters)
     print (I1, "iters:", it1)
+    """
     print ("Second-order process:")
     print ("-"*20)
     r2=I2, X2, U2, it2, _2 = p2.optimize(m.t, eps=eps, iters=iters)
     print (I2, "iters:", it2)
+    """
 
-    gnuplot("test_with_plt", r1,r2)
-    #gnuplot("test_with_plt", r1)
+    #gnuplot("test_with_plt", r1,r2)
+    gnuplot("test_with_plt1", r1)
 
 def test2d1():
     m = LinModel2d2du1()
