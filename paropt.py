@@ -654,12 +654,12 @@ def test_VFCalc():
     y1=x1**2*u1+x2*u2**2
     y2=x1**2*x2**2*u1**2*u2**2
 
-    print ()
+    #print ()
     #print (d.diff1([y1,y2],[x1,x2]))
     #print (d.diff1([y1,y2],[u1,u2]))
-    #res=(d.diff([y1,y2], [x1,x2], [u1,u2]))
-    #pprint (res)
-
+    res=(d.diff([y1,y2], [x1,x2], [u1,u2]))
+    pprint (res)
+    return
     X1=ones(10)
     X2=X1
     X2+=1
@@ -685,8 +685,8 @@ def test_VFCalc():
 
 
 if __name__=="__main__":
-    #test_VFCalc()
-    #raise SystemExit(0)
+    test_VFCalc()
+    raise SystemExit(0)
 
     print ("ok")
 

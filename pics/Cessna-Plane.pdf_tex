@@ -51,13 +51,13 @@
   \begin{picture}(1,0.46817057)%
     \put(0,0){\includegraphics[width=\unitlength]{Cessna-Plane.pdf}}%
     \put(0.02010727,0.18364614){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{}}}%
-%    \put(0,0){\includegraphics[width=\unitlength,page=2]{Cessna-Plane.pdf}}%
-    \put(0.49483014,0.34859676){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\xyz}}}%
+    %\put(0,0){\includegraphics[width=\unitlength,page=2]{Cessna-Plane.pdf}}%
+    \put(0.35194862,0.34859676){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\xyz}}}%
     \put(0.49778434,0.0310192){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\yaw}}}%
     \put(0.12112262,0.10192023){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\roll}}}%
     \put(0.14180206,0.43426882){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\pitch}}}%
     \put(0.47267358,0.42245199){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\lift}}}%
-    \put(0.41506647,0.09601183){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\down}}}%
+    \put(0.38144729,0.09601183){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\down}}}%
     \put(0.01329395,0.18611522){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\thrust}}}%
     \put(0.91580501,0.35302806){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\drag}}}%
     \put(0.6706056,0.19350074){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\flaps}}}%
@@ -65,5 +65,6 @@
     \put(0.12703102,0.2703102){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\engine}}}%
     \put(0.87365574,0.41654357){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\rudder}}}%
     \put(0.90444605,0.27326441){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\elevator}}}%
+    %\put(0,0){\includegraphics[width=\unitlength,page=3]{Cessna-Plane.pdf}}%
   \end{picture}%
 \endgroup%

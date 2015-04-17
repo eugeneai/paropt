@@ -105,10 +105,10 @@
 \begin{frame}{\textbf{Вектор-функция} }
 %\begin{block}{}
   \begin{columns}[t]
-    \begin{column}{0.65\textwidth}
-      \def\xyz{$x_1,x_2,x_3$} \def\yaw{$x_6$} \def\pitch{$x_5$}
-      \def\roll{$x_4$} \def\lift{$x_9$} \def\down{$\quad\! x_7$}
-      \def\thrust{$u_1$} \def\rudder{$u_5$} \def\drag{$x_8$}
+    \begin{column}{0.65\textwidth}\footnotesize
+      \def\xyz{$x_1,x_2,x_3,\;x_4,x_5,x_6$} \def\yaw{$x_7,x_8$} \def\pitch{$x_9,x_{10}$}
+      \def\roll{$\!\!\!\!\!\!x_{11},x_{12}$} \def\lift{$x_{13}$} \def\down{$\!\!x_{14}$}
+      \def\thrust{$u_1$} \def\rudder{$u_5$} \def\drag{$x_{15}$}
       \def\flaps{$u_2$} \def\aeleron{$u_3$} \def\engine{}
       \def\elevator{$u_4$} \def\svgwidth{\columnwidth}
       \input{pics/Cessna-Plane.pdf_tex}
@@ -118,7 +118,7 @@
         \vspace{-1.5em}
         \begin{align*}
           &\vec{x}=\mathbf{x}=\langle x_1,x_2,\ldots,x_n\rangle,\\
-          &n=9,\\
+          &n=15,\\
           &\vec{u}=\mathbf{u}=\langle u_1,u_2,\ldots,u_m\rangle,\\
           &m=5,\\
           &\vec{f}=\mathbf{f}.
@@ -127,16 +127,16 @@
     \end{column}
   \end{columns}
 %\end{block}
-\begin{block}{Уравнение движения}
+\begin{block}{Уравнение движения (Задача Коши)}
   \begin{align*}
-&\mathbf{x}(t)=\mathbf{f}(t,\mathbf{x}(t),\mathbf{u}(t)),\quad t \in T=[t_0,t_1], \\
+&\dot{\mathbf{x}}=\frac{\mathbf{x}(t)}{dt}=\mathbf{f}(t,\mathbf{x}(t),\mathbf{u}(t)),\quad t \in T=[t_0,t_1], \\
 &\mathbf{x}(t_0)=\mathbf{x}_0,\quad \mathbf{x}(t)\in \mathbb{R}^n,\; \mathbf{u}(t) \in \mathbb{R}^m,\quad t\in T, \\
 &I(\mathbf{x},\mathbf{u})=\int\limits_{t_0}^{t_1}f^0(t,\mathbf{x}(t),\mathbf{u}(t)) \to \min.
   \end{align*}
 \end{block}
 \end{frame}
 \begin{frame}{\textbf{Постановка задачи} }
-\begin{block}{Уравнение движения (дискретный вариант)}
+\begin{block}{Дискретный вариант уравнения движения (Задача Коши)}
   \begin{align}
 &\mathbf{x}(t+1)=\mathbf{f}(t,\mathbf{x}(t),\mathbf{u}(t)),\quad t \in T=\{t_0,t_0+1,...,t_1\},
 	\label{eq100} \\
@@ -338,9 +338,62 @@ def test_with_plot():
 \end{column}
 \end{columns}
 \end{frame}
-\begin{frame}
+\begin{frame}[fragile,plain]
   \frametitle{Дифференцирование вектор-функций}
+  \begin{columns}[c]
+    \begin{column}{0.45\columnwidth}
+      \begin{block}{}
+        \begin{align*}
+          &\f=\langle f^1,f^2,\ldots,f^n\rangle\; (1\times n),\\
+          &\x=\langle x_1,x_2,\ldots,x_n\rangle\; (1\times n),\\
+          &\u=\langle u_1,u_2,\ldots,u_m\rangle\; (1\times m).\\
+        \end{align*}
+      \end{block}
+    \end{column}
+    \begin{column}{0.05\columnwidth}
+      $$\implies$$
+    \end{column}
+    \begin{column}{0.5\columnwidth}
+      \begin{block}{}
+\[\f_x =
+ \begin{pmatrix}
+  f^1_1 & f^2_1 & \cdots & f^n_1 \\
+  f^1_2 & f^2_2 & \cdots & f^n_2 \\
+  \vdots  & \vdots  & \ddots & \vdots  \\
+  f^1_n & f^2_n & \cdots & f^n_n
+ \end{pmatrix}\; (n\times n)\]
 
+Производная $\f_u$ имеет размерность $(m\times n)$,\goodbreak $\f_{x,x}$ --- $(n\times n\times n).$
+      \end{block}
+    \end{column}
+  \end{columns}
+  \begin{block}{Пример вычисления производной вектор-функции}
+    \begin{columns}[t]
+      \begin{column}{0.55\columnwidth}
+\vspace{-1em}
+\begin{lstlisting}
+  d=VFCalc(2,2)
+  x1,x2=Symbol('x1'),Symbol('x2')
+  u1,u2=Symbol('u1'),Symbol('u2')
+  y1=x1**2*u1+x2*u2**2
+  y2=x1**2*x2**2*u1**2*u2**2
+  res=(d.diff([y1,y2],
+      [x1,x2], [u1,u2]))
+  pprint (res)
+  return
+\end{lstlisting}
+      \end{column}
+      \begin{column}{0.45\columnwidth}
+\begin{lstlisting}
+(((2*x1, 0), (0, 2*u2)),
+ ((4*u1*u2**2*x1*x2**2,
+   4*u1**2*u2*x1*x2**2),
+  (4*u1*u2**2*x1**2*x2,
+   4*u1**2*u2*x1**2*x2)))
+\end{lstlisting}
+      \end{column}
+    \end{columns}
+  \end{block}
 \end{frame}
 \begin{frame}[fragile]
   \frametitle{Компьютерная алгебра: дифференцирование вектор-функций}
@@ -389,10 +442,10 @@ class VFCalc(object):
         return c,df
 \end{lstlisting}
 \end{frame}
-\begin{frame}
-  \frametitle{Пример вычисления производных вектор-функций}
+% \begin{frame}
+%   \frametitle{Пример вычисления производных вектор-функций}
 
-\end{frame}
+% \end{frame}
 
 %------------ Conclusion ----------------------------------------
 \begin{frame}{Заключение}

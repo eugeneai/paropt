@@ -375,8 +375,8 @@
     </filter>
   </defs>
   <sodipodi:namedview
-     inkscape:window-height="1024"
-     inkscape:window-width="1280"
+     inkscape:window-height="1001"
+     inkscape:window-width="1276"
      inkscape:pageshadow="2"
      inkscape:pageopacity="0.0"
      guidetolerance="10.0"
@@ -387,10 +387,10 @@
      pagecolor="#ffffff"
      id="base"
      inkscape:zoom="1.4225116"
-     inkscape:cx="242.31431"
-     inkscape:cy="228.60909"
+     inkscape:cx="198.49309"
+     inkscape:cy="116.13198"
      inkscape:window-x="0"
-     inkscape:window-y="0"
+     inkscape:window-y="19"
      inkscape:current-layer="svg1950"
      showgrid="false"
      inkscape:window-maximized="0"
@@ -554,7 +554,7 @@
             <dc:title>Open Clip Art Library</dc:title>
           </cc:Agent>
         </dc:publisher>
-        <dc:title></dc:title>
+        <dc:title />
         <dc:date>2007-11-16T15:25:57</dc:date>
         <dc:description>A Cessna airplane</dc:description>
         <dc:source>http://openclipart.org/detail/8620/cessna-plane-by-glombool</dc:source>
@@ -676,13 +676,13 @@
   <text
      xml:space="preserve"
      style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     x="235.49896"
+     x="167.49896"
      y="56.907425"
      id="text26511"
      sodipodi:linespacing="125%"><tspan
        sodipodi:role="line"
        id="tspan26513"
-       x="235.49896"
+       x="167.49896"
        y="56.907425">\xyz</tspan></text>
   <text
      xml:space="preserve"
@@ -731,13 +731,13 @@
   <text
      xml:space="preserve"
      style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     x="197.53793"
+     x="181.53793"
      y="177.11734"
      id="text26531"
      sodipodi:linespacing="125%"><tspan
        sodipodi:role="line"
        id="tspan26533"
-       x="197.53793"
+       x="181.53793"
        y="177.11734">\down</tspan></text>
   <text
      xml:space="preserve"
@@ -816,4 +816,12 @@
        id="tspan26561"
        x="430.44287"
        y="92.759506">\elevator</tspan></text>
+  <rect
+     style="opacity:0.68000004;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:2, 2;stroke-dashoffset:0;stroke-opacity:1"
+     id="rect3446"
+     width="26.01033"
+     height="20.386478"
+     x="199.64688"
+     y="42.84779"
+     ry="3.27019" />
 </svg>
