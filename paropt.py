@@ -685,8 +685,8 @@ def test_VFCalc():
 
 
 if __name__=="__main__":
-    test_VFCalc()
-    raise SystemExit(0)
+    #test_VFCalc()
+    #raise SystemExit(0)
 
     print ("ok")
 
