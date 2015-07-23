@@ -3,7 +3,7 @@
 
 set terminal postscript eps enhanced monochrome dashed lw 1 "Helvetica" 24
 set output "my-plot.ps"
-set termoption lw 4
+set termoption lw 2
 
 
 
